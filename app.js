@@ -8,6 +8,10 @@ const state = {
     sleeve: "child",
   },
 };
+const fixedViewport = {
+  width: 1280,
+  height: 800,
+};
 
 const palette = ["red", "blue", "yellow", "green"];
 const sleeveTypes = ["child", "parent", "grandparent"];
@@ -520,7 +524,7 @@ function openWorld(worldId) {
   showScreen("world");
   toggleInventory(false);
   closeModal.classList.add("hidden");
-  worldViewport.scrollLeft = Math.floor((2200 - window.innerWidth) / 2);
+  worldViewport.scrollLeft = Math.floor((2200 - worldViewport.clientWidth) / 2);
 }
 
 function closeWorld() {
@@ -540,6 +544,15 @@ function hideCloseModal() {
 function updateLandscapePrompt() {
   const isLandscape = window.innerWidth > window.innerHeight;
   rotatePrompt.classList.toggle("hidden", isLandscape);
+}
+
+function updateGameViewportScale() {
+  const scale = Math.min(
+    1,
+    window.innerWidth / fixedViewport.width,
+    window.innerHeight / fixedViewport.height
+  );
+  document.documentElement.style.setProperty("--game-scale", String(scale));
 }
 
 function zoneForPoint(x, y) {
@@ -701,7 +714,10 @@ function wireEvents() {
     playSfx("no");
     hideCloseModal();
   });
-  window.addEventListener("resize", updateLandscapePrompt);
+  window.addEventListener("resize", () => {
+    updateLandscapePrompt();
+    updateGameViewportScale();
+  });
 
   inventoryPanel.addEventListener("pointerdown", onInventoryPointerDown);
   inventoryPanel.addEventListener("pointermove", onInventoryPointerMove);
@@ -721,6 +737,7 @@ function init() {
   renderCup();
   wireEvents();
   updateLandscapePrompt();
+  updateGameViewportScale();
   showScreen("splash");
   loadTintAssets();
 }

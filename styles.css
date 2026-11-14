@@ -6,6 +6,9 @@
   --muted: #bfd0f4;
   --primary: #34a8ff;
   --danger: #ff5e7a;
+  --tablet-width: 1280;
+  --tablet-height: 800;
+  --game-scale: 1;
 }
 
 * {
@@ -23,6 +26,25 @@ body {
   color: var(--text);
   background: var(--bg);
   touch-action: manipulation;
+}
+
+.game-shell {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.game-viewport {
+  width: calc(var(--tablet-width) * 1px);
+  height: calc(var(--tablet-height) * 1px);
+  position: relative;
+  transform: scale(var(--game-scale));
+  transform-origin: center center;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
 }
 
 .app {
