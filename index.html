@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Olivia's World</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="app" class="app">
+      <section id="splashScreen" class="screen active">
+        <div class="splash-bg"></div>
+        <button id="playBtn" class="play-btn" type="button">Play Game</button>
+      </section>
+
+      <section id="worldSelectScreen" class="screen">
+        <div class="panel">
+          <h1>Choose a World</h1>
+          <div class="world-grid">
+            <button class="world-card" type="button" data-world="playground">
+              <span class="world-name">Playground</span>
+            </button>
+            <button class="world-card" type="button" data-world="olivia-room">
+              <span class="world-name">Olivia's Room</span>
+            </button>
+          </div>
+          <button id="backToSplashBtn" class="secondary-btn" type="button">Back</button>
+        </div>
+      </section>
+
+      <section id="worldScreen" class="screen">
+        <div class="world-topbar">
+          <button id="closeWorldBtn" class="icon-btn danger" type="button" aria-label="Close world">
+            ✕
+          </button>
+          <button
+            id="inventoryToggleBtn"
+            class="icon-btn"
+            type="button"
+            aria-label="Toggle inventory"
+            title="Inventory"
+          >
+            🎒
+          </button>
+        </div>
+
+        <div id="worldViewport" class="world-viewport">
+          <div id="worldCanvas" class="world-canvas">
+            <div id="worldBackground" class="world-bg"></div>
+            <div id="cupCharacter" class="cup-character">
+              <div id="dropZoneLid" class="drop-zone drop-lid" data-target="lid" aria-label="Lid drop zone"></div>
+              <canvas id="lidLayer" class="cup-lid" width="210" height="58"></canvas>
+              <div id="dropZoneCup" class="drop-zone drop-cup" data-target="cup" aria-label="Cup drop zone"></div>
+              <canvas id="cupLayer" class="cup-base" width="220" height="230"></canvas>
+              <div id="dropZoneSleeve" class="drop-zone drop-sleeve" data-target="sleeve" aria-label="Sleeve drop zone"></div>
+              <div id="sleeveLayer" class="cup-sleeve">child</div>
+              <div id="faceNote" class="face-note">😊</div>
+            </div>
+          </div>
+        </div>
+
+        <aside id="inventoryPanel" class="inventory-panel" aria-label="Inventory panel">
+          <h2>Inventory</h2>
+          <p class="hint">Drag an item onto the matching cup area.</p>
+
+          <div class="inventory-group">
+            <h3>Lid Colors</h3>
+            <div id="lidItems" class="items-row"></div>
+          </div>
+
+          <div class="inventory-group">
+            <h3>Cup Colors</h3>
+            <div id="cupItems" class="items-row"></div>
+          </div>
+
+          <div class="inventory-group">
+            <h3>Sleeves</h3>
+            <div id="sleeveItems" class="items-row"></div>
+          </div>
+
+          <div class="inventory-group">
+            <h3>Audio</h3>
+            <div class="slider-row">
+              <label class="slider-field" for="musicVolumeInput">
+                <span>Music Volume</span>
+                <span id="musicVolumeValue">70%</span>
+              </label>
+              <button id="musicMuteBtn" class="audio-mute-btn" type="button" aria-pressed="false">Mute Music</button>
+            </div>
+            <input id="musicVolumeInput" type="range" min="0" max="100" step="1" value="70" />
+
+            <div class="slider-row">
+              <label class="slider-field" for="sfxVolumeInput">
+                <span>SFX Volume</span>
+                <span id="sfxVolumeValue">75%</span>
+              </label>
+              <button id="sfxMuteBtn" class="audio-mute-btn" type="button" aria-pressed="false">Mute SFX</button>
+            </div>
+            <input id="sfxVolumeInput" type="range" min="0" max="100" step="1" value="75" />
+          </div>
+        </aside>
+      </section>
+    </div>
+
+    <div id="closeModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="closeModalTitle">
+      <div class="modal-card">
+        <h2 id="closeModalTitle">Close world?</h2>
+        <p>Are you sure you want to leave this world?</p>
+        <div class="modal-actions">
+          <button id="confirmCloseBtn" class="danger-btn" type="button">Yes</button>
+          <button id="cancelCloseBtn" class="secondary-btn" type="button">No</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="rotatePrompt" class="rotate-prompt hidden">
+      <div class="rotate-card">
+        <h2>Please rotate your tablet</h2>
+        <p>This game is designed for landscape mode.</p>
+      </div>
+    </div>
+
+    <div id="dragGhost" class="drag-ghost hidden"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
