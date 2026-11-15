@@ -280,7 +280,7 @@ body {
 
 .cup-character.is-selected .cup-base,
 .cup-character.is-selected .cup-lid {
-  border-color: transparent;
+  border-color: rgba(255, 255, 255, 0.95);
 }
 
 .cup-character.hidden-object {
@@ -323,7 +323,7 @@ body {
   left: 14px;
   top: 0;
   border-radius: 40px 40px 20px 20px;
-  border: none;
+  border: 4px solid rgba(255, 255, 255, 0.55);
   background: #ff3c3c;
   display: block;
   cursor: grab;
@@ -338,7 +338,7 @@ body {
   left: 20px;
   top: 88px;
   border-radius: 22px;
-  border: none;
+  border: 4px solid rgba(255, 255, 255, 0.45);
   background: #3e80ff;
   display: block;
 }
@@ -377,8 +377,7 @@ body {
   top: -18px;
   border: none;
   background: transparent;
-  pointer-events: auto;
-  cursor: grab;
+  pointer-events: none;
   touch-action: none;
   background-size: contain;
   background-repeat: no-repeat;
