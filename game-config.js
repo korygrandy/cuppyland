@@ -8,13 +8,20 @@
     worldX: 920,
     worldY: 430,
     lidDetached: false,
+    lidVisible: true,
     lidOffsetX: 17,
     lidOffsetY: 0,
     sleeveDetached: false,
+    sleeveVisible: true,
     sleeveOffsetX: 32,
     sleeveOffsetY: 160,
     faceOffsetX: 10,
     faceOffsetY: 18,
+    faceVisible: true,
+    hairstyleDetached: false,
+    hairstyleOffsetX: 17,
+    hairstyleOffsetY: -22,
+    hairstyleVisible: true,
   };
 
   const gameConfig = {

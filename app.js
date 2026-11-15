@@ -88,6 +88,14 @@ const sleeveDragState = {
   anchorX: 0,
   anchorY: 0,
 };
+const hairstyleDragState = {
+  active: false,
+  pointerId: null,
+  initialLeft: 17,
+  initialTop: -22,
+  anchorX: 0,
+  anchorY: 0,
+};
 const cupDragState = {
   active: false,
   pointerId: null,
@@ -243,6 +251,11 @@ function createCupElement(cupId, cupState) {
   template.querySelector(".cup-sleeve")?.addEventListener("pointerup", (event) => onSleevePointerUp(event, template));
   template.querySelector(".cup-sleeve")?.addEventListener("pointercancel", (event) => onSleevePointerUp(event, template));
 
+  template.querySelector(".cup-hairstyle")?.addEventListener("pointerdown", (event) => onHairstylePointerDown(event, template));
+  template.querySelector(".cup-hairstyle")?.addEventListener("pointermove", (event) => onHairstylePointerMove(event, template));
+  template.querySelector(".cup-hairstyle")?.addEventListener("pointerup", (event) => onHairstylePointerUp(event, template));
+  template.querySelector(".cup-hairstyle")?.addEventListener("pointercancel", (event) => onHairstylePointerUp(event, template));
+
   return template;
 }
 
@@ -315,8 +328,10 @@ function syncLidPosition(cupElement = cupCharacter) {
   lidLayerElement.style.left = `${left}px`;
   lidLayerElement.style.top = `${top}px`;
   if (hairstyleLayerElement) {
-    hairstyleLayerElement.style.left = `${left + 10}px`;
-    hairstyleLayerElement.style.top = `${top - 22}px`;
+    const hairLeft = cupState.hairstyleDetached ? cupState.hairstyleOffsetX : left + 10;
+    const hairTop = cupState.hairstyleDetached ? cupState.hairstyleOffsetY : top - 22;
+    hairstyleLayerElement.style.left = `${hairLeft}px`;
+    hairstyleLayerElement.style.top = `${hairTop}px`;
   }
 }
 
@@ -383,6 +398,16 @@ function renderCupInstance(cupState, cupElement = cupCharacter) {
   const hairstyleLayerElement = cupElement.querySelector(".cup-hairstyle") || hairstyleLayer;
   const faceLayerElement = cupElement.querySelector(".cup-face") || faceLayer;
 
+  const lidVisible = cupState.lidVisible !== false;
+  const sleeveVisible = cupState.sleeveVisible !== false;
+  const hairstyleVisible = cupState.hairstyleVisible !== false;
+  const faceVisible = cupState.faceVisible !== false;
+
+  lidLayerElement.style.display = lidVisible ? "block" : "none";
+  sleeveLayerElement.style.display = sleeveVisible ? "block" : "none";
+  hairstyleLayerElement.style.display = hairstyleVisible ? "block" : "none";
+  faceLayerElement.style.display = faceVisible ? "block" : "none";
+
   renderTintedPartForCanvas("lid", cupState.lidColor, lidLayerElement);
   renderTintedPartForCanvas("cup", cupState.cupColor, cupLayerElement);
 
@@ -393,11 +418,13 @@ function renderCupInstance(cupState, cupElement = cupCharacter) {
   const activeHairstyleAsset =
     window.CuppyLandGame.hairstyleAssetMap?.[cupState.hairstyle || "child"] || "./assets/hairstyle-grandpa.png";
 
-  drawTintedImage(sleeveLayerElement, activeSleeveAsset, "#d1b9ff");
-  sleeveLayerElement.style.width = "200px";
-  sleeveLayerElement.style.height = "110px";
+  if (sleeveVisible) {
+    drawTintedImage(sleeveLayerElement, activeSleeveAsset, "#d1b9ff");
+    sleeveLayerElement.style.width = "200px";
+    sleeveLayerElement.style.height = "110px";
+  }
 
-  if (hairstyleLayerElement) {
+  if (hairstyleVisible && hairstyleLayerElement) {
     hairstyleLayerElement.style.backgroundColor = "transparent";
     hairstyleLayerElement.style.backgroundImage = `url("${activeHairstyleAsset}")`;
     hairstyleLayerElement.style.backgroundSize = "contain";
@@ -406,7 +433,7 @@ function renderCupInstance(cupState, cupElement = cupCharacter) {
     hairstyleLayerElement.textContent = "";
   }
 
-  if (faceLayerElement) {
+  if (faceVisible && faceLayerElement) {
     faceLayerElement.style.backgroundColor = "transparent";
     faceLayerElement.style.backgroundImage = `url("${activeFaceAsset}")`;
     faceLayerElement.style.backgroundSize = "contain";
@@ -819,31 +846,75 @@ function isPointerOverTrashCan(x, y) {
   return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
 }
 
+function removeCupInstance(cupId) {
+  if (!state.activeWorld || !cupId) {
+    return;
+  }
+
+  const worldCups = getWorldCupList(state.activeWorld);
+  const cupIndex = worldCups.findIndex((cup) => cup.id === cupId);
+  if (cupIndex < 0) {
+    return;
+  }
+
+  worldCups.splice(cupIndex, 1);
+
+  if (!worldCups.length) {
+    state.activeCupId = null;
+    state.cup = cloneCupState();
+    renderWorldCups();
+    return;
+  }
+
+  const nextCup = worldCups[Math.min(cupIndex, worldCups.length - 1)];
+  state.activeCupId = nextCup.id;
+  state.cup = nextCup.state;
+  renderWorldCups();
+}
+
 function removeSelectedObject() {
   if (!trashState.target) {
     return;
   }
 
+  const selectedCup = getActiveCupInstance();
+
   if (trashState.target === "cup") {
-    cupCharacter.classList.add("hidden-object");
+    if (selectedCup) {
+      removeCupInstance(selectedCup.id);
+    } else {
+      cupCharacter.classList.add("hidden-object");
+    }
     return;
   }
 
   if (trashState.target === "lid") {
+    if (selectedCup) {
+      selectedCup.state.lidVisible = false;
+      selectedCup.state.hairstyleVisible = false;
+    }
     lidLayer.style.display = "none";
     hairstyleLayer.style.display = "none";
   }
 
   if (trashState.target === "sleeve") {
+    if (selectedCup) {
+      selectedCup.state.sleeveVisible = false;
+      selectedCup.state.faceVisible = false;
+    }
     sleeveLayer.style.display = "none";
     faceLayer.style.display = "none";
   }
 
   if (trashState.target === "hairstyle") {
+    if (selectedCup) {
+      selectedCup.state.hairstyleVisible = false;
+    }
     hairstyleLayer.style.display = "none";
   }
 
   hideTrashCan();
+  renderWorldCups();
 }
 
 function onCupPointerDown(event) {
@@ -876,10 +947,22 @@ function onCupPointerDown(event) {
   }
 }
 
+function isPointerOutsideWorldCanvas(x, y) {
+  const bounds = worldViewport.getBoundingClientRect();
+  return x < bounds.left - 12 || x > bounds.right + 12 || y < bounds.top - 12 || y > bounds.bottom + 12;
+}
+
 function onCupPointerMove(event) {
   const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
   const cupState = resolveCupStateForElement(cupElement);
   if (!cupDragState.active || event.pointerId !== cupDragState.pointerId || !worldCanvas || !cupElement) {
+    return;
+  }
+
+  if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
+    if (cupElement.dataset.cupId) {
+      removeCupInstance(cupElement.dataset.cupId);
+    }
     return;
   }
 
@@ -948,6 +1031,13 @@ function onLidPointerMove(event) {
     return;
   }
 
+  if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
+    cupState.lidVisible = false;
+    cupState.hairstyleVisible = false;
+    renderWorldCups();
+    return;
+  }
+
   const parentRect = cupElement.getBoundingClientRect();
   const localX = event.clientX - parentRect.left;
   const localY = event.clientY - parentRect.top;
@@ -1002,6 +1092,87 @@ function onLidPointerUp(event) {
   syncLidPosition(cupElement);
 }
 
+function hairstyleIsNearLid(cupElement = cupCharacter) {
+  const cupState = resolveCupStateForElement(cupElement);
+  const lidRect = (cupElement.querySelector(".cup-lid") || lidLayer).getBoundingClientRect();
+  const hairRect = (cupElement.querySelector(".cup-hairstyle") || hairstyleLayer).getBoundingClientRect();
+  const hairCenterX = hairRect.left + hairRect.width / 2;
+  const hairCenterY = hairRect.top + hairRect.height / 2;
+  const lidCenterX = lidRect.left + lidRect.width / 2;
+  const lidCenterY = lidRect.top + lidRect.height / 2;
+  const distance = Math.hypot(hairCenterX - lidCenterX, hairCenterY - lidCenterY);
+  return distance < 90 && cupState.hairstyleVisible !== false;
+}
+
+function onHairstylePointerDown(event) {
+  const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
+  const cupState = resolveCupStateForElement(cupElement);
+  if (state.currentScreen !== "world") {
+    return;
+  }
+
+  if (cupElement && cupElement.dataset.cupId) {
+    setActiveCupInstance(cupElement.dataset.cupId);
+  }
+
+  showTrashCan("hairstyle");
+  event.preventDefault();
+  event.stopPropagation();
+  const parentRect = cupElement.getBoundingClientRect();
+  hairstyleDragState.active = true;
+  hairstyleDragState.pointerId = event.pointerId;
+  hairstyleDragState.initialLeft = cupState.hairstyleDetached ? cupState.hairstyleOffsetX : 27;
+  hairstyleDragState.initialTop = cupState.hairstyleDetached ? cupState.hairstyleOffsetY : -22;
+  hairstyleDragState.anchorX = event.clientX - parentRect.left;
+  hairstyleDragState.anchorY = event.clientY - parentRect.top;
+  trySetPointerCapture(event.currentTarget, event.pointerId);
+}
+
+function onHairstylePointerMove(event) {
+  const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
+  const cupState = resolveCupStateForElement(cupElement);
+  if (!hairstyleDragState.active || event.pointerId !== hairstyleDragState.pointerId) {
+    return;
+  }
+
+  if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
+    cupState.hairstyleVisible = false;
+    renderWorldCups();
+    return;
+  }
+
+  const parentRect = cupElement.getBoundingClientRect();
+  const localX = event.clientX - parentRect.left;
+  const localY = event.clientY - parentRect.top;
+  const nextLeft = Math.max(-80, Math.min(220, hairstyleDragState.initialLeft + (localX - hairstyleDragState.anchorX)));
+  const nextTop = Math.max(-120, Math.min(160, hairstyleDragState.initialTop + (localY - hairstyleDragState.anchorY)));
+  cupState.hairstyleDetached = true;
+  cupState.hairstyleOffsetX = nextLeft;
+  cupState.hairstyleOffsetY = nextTop;
+  syncLidPosition(cupElement);
+}
+
+function onHairstylePointerUp(event) {
+  const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
+  const cupState = resolveCupStateForElement(cupElement);
+  if (!hairstyleDragState.active || event.pointerId !== hairstyleDragState.pointerId) {
+    return;
+  }
+
+  if (isPointerOverTrashCan(event.clientX, event.clientY)) {
+    removeSelectedObject();
+  } else if (hairstyleIsNearLid(cupElement)) {
+    cupState.hairstyleDetached = false;
+    cupState.hairstyleOffsetX = 17;
+    cupState.hairstyleOffsetY = -22;
+  }
+
+  trashCanBtn.classList.remove("highlight");
+  hairstyleDragState.active = false;
+  hairstyleDragState.pointerId = null;
+  syncLidPosition(cupElement);
+}
+
 function onSleevePointerDown(event) {
   const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
   const cupState = resolveCupStateForElement(cupElement);
@@ -1030,6 +1201,13 @@ function onSleevePointerMove(event) {
   const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
   const cupState = resolveCupStateForElement(cupElement);
   if (!sleeveDragState.active || event.pointerId !== sleeveDragState.pointerId) {
+    return;
+  }
+
+  if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
+    cupState.sleeveVisible = false;
+    cupState.faceVisible = false;
+    renderWorldCups();
     return;
   }
 
@@ -1184,6 +1362,11 @@ function wireEvents() {
   lidLayer.addEventListener("pointermove", onLidPointerMove);
   lidLayer.addEventListener("pointerup", onLidPointerUp);
   lidLayer.addEventListener("pointercancel", onLidPointerUp);
+
+  hairstyleLayer.addEventListener("pointerdown", onHairstylePointerDown);
+  hairstyleLayer.addEventListener("pointermove", onHairstylePointerMove);
+  hairstyleLayer.addEventListener("pointerup", onHairstylePointerUp);
+  hairstyleLayer.addEventListener("pointercancel", onHairstylePointerUp);
 
   sleeveLayer.addEventListener("pointerdown", onSleevePointerDown);
   sleeveLayer.addEventListener("pointermove", onSleevePointerMove);
