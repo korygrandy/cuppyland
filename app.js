@@ -136,6 +136,18 @@ const {
   isPointerOverTrashCan,
   isPointerOutsideWorldCanvas,
 } = interactionHelpers;
+const cupDragHelpers = window.CuppyLandCupDrag.createHelpers({
+  cupLayer,
+  lidLayer,
+  sleeveLayer,
+  hairstyleLayer,
+});
+const {
+  clampDetachedOffset,
+  isLidNearCup,
+  isSleeveNearCup,
+  isHairstyleNearLid,
+} = cupDragHelpers;
 
 function syncAudioForCurrentScreen() {
   if (window.CuppyLandAudio && typeof window.CuppyLandAudio.syncAudioForCurrentScreen === "function") {
@@ -873,38 +885,22 @@ function onLidPointerMove(event) {
   const parentRect = cupElement.getBoundingClientRect();
   const localX = event.clientX - parentRect.left;
   const localY = event.clientY - parentRect.top;
-  const nextLeft = Math.max(-60, Math.min(200, lidDragState.initialLeft + (localX - lidDragState.anchorX)));
-  const nextTop = Math.max(-80, Math.min(120, lidDragState.initialTop + (localY - lidDragState.anchorY)));
+  const { nextLeft, nextTop } = clampDetachedOffset({
+    initialLeft: lidDragState.initialLeft,
+    initialTop: lidDragState.initialTop,
+    localX,
+    localY,
+    anchorX: lidDragState.anchorX,
+    anchorY: lidDragState.anchorY,
+    minLeft: -60,
+    maxLeft: 200,
+    minTop: -80,
+    maxTop: 120,
+  });
   cupState.lidDetached = true;
   cupState.lidOffsetX = nextLeft;
   cupState.lidOffsetY = nextTop;
   syncLidPosition(cupElement);
-}
-
-function lidIsNearCup(cupElement = cupCharacter) {
-  const cupBaseElement = (cupElement && cupElement.querySelector(".cup-base")) || cupLayer;
-  const lidLayerElement = (cupElement && cupElement.querySelector(".cup-lid")) || lidLayer;
-  const cupRect = cupBaseElement.getBoundingClientRect();
-  const lidRect = lidLayerElement.getBoundingClientRect();
-  const lidCenterX = lidRect.left + lidRect.width / 2;
-  const lidCenterY = lidRect.top + lidRect.height / 2;
-  const cupCenterX = cupRect.left + cupRect.width / 2;
-  const cupCenterY = cupRect.top + cupRect.height / 2;
-  const distance = Math.hypot(lidCenterX - cupCenterX, lidCenterY - cupCenterY);
-  return distance < 110;
-}
-
-function sleeveIsNearCup(cupElement = cupCharacter) {
-  const cupBaseElement = (cupElement && cupElement.querySelector(".cup-base")) || cupLayer;
-  const sleeveLayerElement = (cupElement && cupElement.querySelector(".cup-sleeve")) || sleeveLayer;
-  const cupRect = cupBaseElement.getBoundingClientRect();
-  const sleeveRect = sleeveLayerElement.getBoundingClientRect();
-  const sleeveCenterX = sleeveRect.left + sleeveRect.width / 2;
-  const sleeveCenterY = sleeveRect.top + sleeveRect.height / 2;
-  const cupCenterX = cupRect.left + cupRect.width / 2;
-  const cupCenterY = cupRect.top + cupRect.height / 2;
-  const distance = Math.hypot(sleeveCenterX - cupCenterX, sleeveCenterY - cupCenterY);
-  return distance < 120;
 }
 
 function onLidPointerUp(event) {
@@ -916,7 +912,7 @@ function onLidPointerUp(event) {
 
   if (isPointerOverTrashCan(event.clientX, event.clientY)) {
     removeSelectedObject();
-  } else if (lidIsNearCup(cupElement)) {
+  } else if (isLidNearCup(cupElement)) {
     cupState.lidDetached = false;
     cupState.lidOffsetX = 17;
     cupState.lidOffsetY = 0;
@@ -926,18 +922,6 @@ function onLidPointerUp(event) {
   lidDragState.active = false;
   lidDragState.pointerId = null;
   syncLidPosition(cupElement);
-}
-
-function hairstyleIsNearLid(cupElement = cupCharacter) {
-  const cupState = resolveCupStateForElement(cupElement);
-  const lidRect = (cupElement.querySelector(".cup-lid") || lidLayer).getBoundingClientRect();
-  const hairRect = (cupElement.querySelector(".cup-hairstyle") || hairstyleLayer).getBoundingClientRect();
-  const hairCenterX = hairRect.left + hairRect.width / 2;
-  const hairCenterY = hairRect.top + hairRect.height / 2;
-  const lidCenterX = lidRect.left + lidRect.width / 2;
-  const lidCenterY = lidRect.top + lidRect.height / 2;
-  const distance = Math.hypot(hairCenterX - lidCenterX, hairCenterY - lidCenterY);
-  return distance < 90 && cupState.hairstyleVisible !== false;
 }
 
 function onHairstylePointerDown(event) {
@@ -985,8 +969,18 @@ function onHairstylePointerMove(event) {
   const movementDistance = Math.hypot(localX - hairstyleDragState.anchorX, localY - hairstyleDragState.anchorY);
   hairstyleDragState.moved = movementDistance > 8;
 
-  const nextLeft = Math.max(-80, Math.min(220, hairstyleDragState.initialLeft + (localX - hairstyleDragState.anchorX)));
-  const nextTop = Math.max(-120, Math.min(160, hairstyleDragState.initialTop + (localY - hairstyleDragState.anchorY)));
+  const { nextLeft, nextTop } = clampDetachedOffset({
+    initialLeft: hairstyleDragState.initialLeft,
+    initialTop: hairstyleDragState.initialTop,
+    localX,
+    localY,
+    anchorX: hairstyleDragState.anchorX,
+    anchorY: hairstyleDragState.anchorY,
+    minLeft: -80,
+    maxLeft: 220,
+    minTop: -120,
+    maxTop: 160,
+  });
   cupState.hairstyleDetached = true;
   cupState.hairstyleOffsetX = nextLeft;
   cupState.hairstyleOffsetY = nextTop;
@@ -1005,7 +999,7 @@ function onHairstylePointerUp(event) {
   } else if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
     cupState.hairstyleVisible = false;
     renderWorldCups();
-  } else if (hairstyleDragState.moved && !hairstyleIsNearLid(cupElement)) {
+  } else if (hairstyleDragState.moved && !isHairstyleNearLid(cupElement, cupState.hairstyleVisible)) {
     cupState.hairstyleDetached = true;
   } else {
     cupState.hairstyleDetached = false;
@@ -1062,8 +1056,18 @@ function onSleevePointerMove(event) {
   const parentRect = cupElement.getBoundingClientRect();
   const localX = event.clientX - parentRect.left;
   const localY = event.clientY - parentRect.top;
-  const nextLeft = Math.max(-60, Math.min(200, sleeveDragState.initialLeft + (localX - sleeveDragState.anchorX)));
-  const nextTop = Math.max(-20, Math.min(220, sleeveDragState.initialTop + (localY - sleeveDragState.anchorY)));
+  const { nextLeft, nextTop } = clampDetachedOffset({
+    initialLeft: sleeveDragState.initialLeft,
+    initialTop: sleeveDragState.initialTop,
+    localX,
+    localY,
+    anchorX: sleeveDragState.anchorX,
+    anchorY: sleeveDragState.anchorY,
+    minLeft: -60,
+    maxLeft: 200,
+    minTop: -20,
+    maxTop: 220,
+  });
   cupState.sleeveDetached = true;
   cupState.sleeveOffsetX = nextLeft;
   cupState.sleeveOffsetY = nextTop;
@@ -1080,7 +1084,7 @@ function onSleevePointerUp(event) {
 
   if (isPointerOverTrashCan(event.clientX, event.clientY)) {
     removeSelectedObject();
-  } else if (sleeveIsNearCup(cupElement)) {
+  } else if (isSleeveNearCup(cupElement)) {
     cupState.sleeveDetached = false;
     cupState.sleeveOffsetX = 32;
     cupState.sleeveOffsetY = 160;
