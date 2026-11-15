@@ -60,7 +60,8 @@
                     data-target="sleeve"
                     aria-label="Sleeve drop zone"
                   ></div>
-                  <div id="sleeveLayer" class="cup-sleeve">child</div>
+                  <canvas id="sleeveLayer" class="cup-sleeve" width="200" height="110" aria-label="Sleeve layer"></canvas>
+                  <div id="faceLayer" class="cup-face" aria-label="Face expression layer"></div>
                 </div>
               </div>
             </div>
@@ -82,6 +83,11 @@
               <div class="inventory-group">
                 <h3>Sleeves</h3>
                 <div id="sleeveItems" class="items-row"></div>
+              </div>
+
+              <div class="inventory-group">
+                <h3>Expressions</h3>
+                <div id="expressionItems" class="items-row"></div>
               </div>
 
               <div class="inventory-group">
