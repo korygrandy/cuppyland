@@ -25,6 +25,7 @@
   };
 
   const gameConfig = {
+    defaultCupState: JSON.parse(JSON.stringify(defaultCupState)),
     state: {
       currentScreen: "splash",
       activeWorld: null,
@@ -56,23 +57,35 @@
       parent: "./assets/sleeve-parent.png",
       grandparent: "./assets/sleeve-grandparent.png",
     },
-    expressionTypes: ["happy", "excited", "surprised"],
-    hairstyleTypes: ["child", "grandpa", "hat"],
+    expressionTypes: ["happy", "excited", "surprised", "shocked", "angry", "sad", "loved"],
+    hairstyleTypes: ["child", "grandpa", "hat", "headband", "bow"],
     faceAssetMap: {
       child: {
-        happy: "./assets/happy-facial-expression.png",
-        excited: "./assets/happy-facial-expression.png",
-        surprised: "./assets/happy-facial-expression.png",
+        happy: "./assets/expression-happy.svg",
+        excited: "./assets/expression-excited.svg",
+        surprised: "./assets/expression-surprised.svg",
+        shocked: "./assets/expression-shocked.svg",
+        angry: "./assets/expression-angry.svg",
+        sad: "./assets/expression-sad.svg",
+        loved: "./assets/expression-loved.svg",
       },
       parent: {
-        happy: "./assets/happy-facial-expression.png",
-        excited: "./assets/happy-facial-expression.png",
-        surprised: "./assets/happy-facial-expression.png",
+        happy: "./assets/expression-happy.svg",
+        excited: "./assets/expression-excited.svg",
+        surprised: "./assets/expression-surprised.svg",
+        shocked: "./assets/expression-shocked.svg",
+        angry: "./assets/expression-angry.svg",
+        sad: "./assets/expression-sad.svg",
+        loved: "./assets/expression-loved.svg",
       },
       grandparent: {
-        happy: "./assets/happy-facial-expression.png",
-        excited: "./assets/happy-facial-expression.png",
-        surprised: "./assets/happy-facial-expression.png",
+        happy: "./assets/expression-happy.svg",
+        excited: "./assets/expression-excited.svg",
+        surprised: "./assets/expression-surprised.svg",
+        shocked: "./assets/expression-shocked.svg",
+        angry: "./assets/expression-angry.svg",
+        sad: "./assets/expression-sad.svg",
+        loved: "./assets/expression-loved.svg",
       },
     },
     sleevePalette: {
@@ -96,6 +109,8 @@
       child: "./assets/hairstyle-child.svg",
       grandpa: "./assets/hairstyle-grandpa.png",
       hat: "./assets/hairstyle-hat.svg",
+      headband: "./assets/hairstyle-headband.svg",
+      bow: "./assets/hairstyle-bow.svg",
     },
     colorMap: {
       red: "#ff3c3c",

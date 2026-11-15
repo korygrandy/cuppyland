@@ -675,8 +675,10 @@ function addCupToWorld() {
 
   const worldCups = getWorldCupList(state.activeWorld);
   const nextId = `cup-${state.activeWorld}-${worldCups.length + 1}`;
-  const templateCupState = getTargetCupState();
-  const cupState = cloneCupState(templateCupState || worldCups[0]?.state || {});
+  const freshCupState = window.CuppyLandGame?.defaultCupState
+    ? cloneCupState(window.CuppyLandGame.defaultCupState)
+    : cloneCupState();
+  const cupState = freshCupState;
   const newCup = { id: nextId, state: cupState };
   newCup.state.worldX = 900 + (worldCups.length * 90);
   newCup.state.worldY = 430 + (worldCups.length % 2) * 30;
@@ -1255,7 +1257,6 @@ function onInventoryPointerDown(event) {
     return;
   }
 
-  event.preventDefault();
   dragState.active = true;
   dragState.type = target.dataset.itemType;
   dragState.value = target.dataset.value;
