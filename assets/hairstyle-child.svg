@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 130" role="img" aria-label="child hairstyle">
+  <defs>
+    <linearGradient id="hairGradient" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#4d2d73"/>
+      <stop offset="100%" stop-color="#1f1232"/>
+    </linearGradient>
+  </defs>
+  <path d="M18 78C18 45 43 19 80 12C88 10 96 10 104 12C120 16 133 23 146 31C162 42 177 50 190 52C203 54 210 64 210 79C210 93 201 102 190 109C178 117 160 122 140 122H86C63 122 39 112 29 99C23 92 18 86 18 78Z" fill="url(#hairGradient)"/>
+  <path d="M42 69C53 51 68 39 88 32C102 27 118 27 134 31C148 35 159 43 170 55C162 58 152 66 144 75C136 83 127 88 116 92C103 96 89 95 75 90C61 85 51 78 42 69Z" fill="#7d4cc7" opacity="0.8"/>
+  <path d="M68 74C76 66 90 60 106 61C120 62 134 68 145 78" fill="none" stroke="#f3d8ff" stroke-width="6" stroke-linecap="round" opacity="0.6"/>
+</svg>
