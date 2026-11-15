@@ -1,6 +1,6 @@
 (function () {
   const game = window.CuppyLandGame;
-  const { palette, sleeveTypes, colorMap, expressionTypes } = game;
+  const { palette, sleeveTypes, colorMap, expressionTypes, hairstyleTypes } = game;
 
   function createColorItem(type, colorName) {
     const item = document.createElement("button");
@@ -65,16 +65,34 @@
     return item;
   }
 
+  function createHairstyleItem(hairstyleName) {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "inventory-item hairstyle";
+    item.dataset.itemType = "hairstyle";
+    item.dataset.value = hairstyleName;
+    item.setAttribute("aria-label", `hairstyle ${hairstyleName}`);
+
+    const thumb = document.createElement("span");
+    thumb.className = "inventory-hairstyle-thumb";
+    thumb.style.backgroundImage = `url("${game.hairstyleAssetMap?.[hairstyleName] || './assets/hairstyle-child.svg'}")`;
+
+    item.appendChild(thumb);
+    return item;
+  }
+
   function buildInventoryItems() {
     const lidItems = document.getElementById("lidItems");
     const cupItems = document.getElementById("cupItems");
     const sleeveItems = document.getElementById("sleeveItems");
     const expressionItems = document.getElementById("expressionItems");
+    const hairstyleItems = document.getElementById("hairstyleItems");
 
     lidItems.innerHTML = "";
     cupItems.innerHTML = "";
     sleeveItems.innerHTML = "";
     expressionItems.innerHTML = "";
+    hairstyleItems.innerHTML = "";
 
     palette.forEach((colorName) => {
       lidItems.appendChild(createColorItem("lid", colorName));
@@ -88,7 +106,17 @@
     expressionTypes.forEach((expressionName) => {
       expressionItems.appendChild(createExpressionItem(expressionName));
     });
+
+    hairstyleTypes.forEach((hairstyleName) => {
+      hairstyleItems.appendChild(createHairstyleItem(hairstyleName));
+    });
   }
 
-  window.CuppyLandInventory = { createColorItem, createSleeveItem, createExpressionItem, buildInventoryItems };
+  window.CuppyLandInventory = {
+    createColorItem,
+    createSleeveItem,
+    createExpressionItem,
+    createHairstyleItem,
+    buildInventoryItems,
+  };
 })();

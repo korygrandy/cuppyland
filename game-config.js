@@ -9,6 +9,7 @@
         cupColor: "red",
         sleeve: "child",
         expression: "happy",
+        hairstyle: "child",
         lidDetached: false,
         lidOffsetX: 17,
         lidOffsetY: 0,
@@ -36,6 +37,7 @@
       grandparent: "./assets/sleeve-grandparent.png",
     },
     expressionTypes: ["happy", "excited", "surprised"],
+    hairstyleTypes: ["child", "grandpa", "hat"],
     faceAssetMap: {
       child: {
         happy: "./assets/happy-facial-expression.png",
@@ -69,6 +71,11 @@
         backgroundColor: "#f4ca21",
         borderColor: "rgba(111, 87, 147, 0.55)",
       },
+    },
+    hairstyleAssetMap: {
+      child: "./assets/hairstyle-child.svg",
+      grandpa: "./assets/hairstyle-grandpa.png",
+      hat: "./assets/hairstyle-hat.svg",
     },
     colorMap: {
       red: "#ff3c3c",

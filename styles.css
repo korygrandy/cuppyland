@@ -311,9 +311,25 @@ body {
   transform-origin: center center;
 }
 
-.cup-face {
+.cup-hairstyle {
   position: absolute;
   z-index: 4;
+  width: 220px;
+  height: 128px;
+  left: 17px;
+  top: -18px;
+  border: none;
+  background: transparent;
+  pointer-events: none;
+  touch-action: none;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.cup-face {
+  position: absolute;
+  z-index: 5;
   width: 120px;
   height: 90px;
   left: 40px;
@@ -475,7 +491,8 @@ body {
 }
 
 .inventory-item.sleeve,
-.inventory-item.expression {
+.inventory-item.expression,
+.inventory-item.hairstyle {
   background: rgba(255, 255, 255, 0.05);
   color: #eef7ff;
   text-transform: capitalize;
@@ -487,7 +504,8 @@ body {
 }
 
 .inventory-sleeve-thumb,
-.inventory-expression-thumb {
+.inventory-expression-thumb,
+.inventory-hairstyle-thumb {
   position: relative;
   width: 60px;
   height: 42px;
@@ -520,6 +538,14 @@ body {
   height: 44px;
   border-radius: 12px;
   background-size: cover;
+}
+
+.inventory-hairstyle-thumb {
+  width: 76px;
+  height: 52px;
+  background-size: contain;
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .inventory-expression-label {

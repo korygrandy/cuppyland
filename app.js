@@ -20,6 +20,7 @@ const cancelCloseBtn = document.getElementById("cancelCloseBtn");
 const rotatePrompt = document.getElementById("rotatePrompt");
 const lidLayer = document.getElementById("lidLayer");
 const cupLayer = document.getElementById("cupLayer");
+const hairstyleLayer = document.getElementById("hairstyleLayer");
 const sleeveLayer = document.getElementById("sleeveLayer");
 const faceLayer = document.getElementById("faceLayer");
 const lidItems = document.getElementById("lidItems");
@@ -110,6 +111,18 @@ function syncLidPosition() {
   const top = state.cup.lidDetached ? state.cup.lidOffsetY : 0;
   lidLayer.style.left = `${left}px`;
   lidLayer.style.top = `${top}px`;
+  syncHairstylePosition();
+}
+
+function syncHairstylePosition() {
+  if (!hairstyleLayer) {
+    return;
+  }
+
+  const left = state.cup.lidDetached ? state.cup.lidOffsetX : 17;
+  const top = state.cup.lidDetached ? state.cup.lidOffsetY : 0;
+  hairstyleLayer.style.left = `${left + 10}px`;
+  hairstyleLayer.style.top = `${top - 22}px`;
 }
 
 function syncSleevePosition() {
@@ -172,10 +185,21 @@ function renderCup() {
   const activeFaceAsset =
     window.CuppyLandGame.faceAssetMap?.[state.cup.sleeve]?.[state.cup.expression || "happy"] ||
     "./assets/mr-chocolate-milk-happy.jpg";
+  const activeHairstyleAsset =
+    window.CuppyLandGame.hairstyleAssetMap?.[state.cup.hairstyle || "child"] || "./assets/hairstyle-grandpa.png";
 
   drawTintedImage(sleeveLayer, activeSleeveAsset, "#d1b9ff");
   sleeveLayer.style.width = "200px";
   sleeveLayer.style.height = "110px";
+
+  if (hairstyleLayer) {
+    hairstyleLayer.style.backgroundColor = "transparent";
+    hairstyleLayer.style.backgroundImage = `url("${activeHairstyleAsset}")`;
+    hairstyleLayer.style.backgroundSize = "contain";
+    hairstyleLayer.style.backgroundPosition = "center";
+    hairstyleLayer.style.backgroundRepeat = "no-repeat";
+    hairstyleLayer.textContent = "";
+  }
 
   if (faceLayer) {
     faceLayer.style.backgroundColor = "transparent";
@@ -188,6 +212,7 @@ function renderCup() {
 
   syncLidPosition();
   syncSleevePosition();
+  syncHairstylePosition();
   syncFacePosition();
 }
 
@@ -308,7 +333,9 @@ function zoneForPoint(x, y) {
 }
 
 function applyDrop(itemType, value, targetZone) {
-  if (itemType !== targetZone) {
+  const isHairstyleDrop = itemType === "hairstyle" && (targetZone === "lid" || targetZone === "hairstyle");
+
+  if (itemType !== targetZone && !isHairstyleDrop) {
     return { valid: false, reason: "wrong-zone" };
   }
 
@@ -332,6 +359,11 @@ function applyDrop(itemType, value, targetZone) {
 
   if (itemType === "expression") {
     state.cup.expression = value;
+    return { valid: true };
+  }
+
+  if (itemType === "hairstyle") {
+    state.cup.hairstyle = value;
     return { valid: true };
   }
 
