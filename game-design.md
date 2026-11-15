@@ -7,6 +7,7 @@ Create a playful, tablet-friendly browser game for Olivia, inspired by Toca Boca
 - Target platform: modern web browser on tablet.
 - Orientation: **horizontal / landscape only**.
 - Input: **touch-first** (tap, drag, drop), mouse support optional for desktop testing.
+- Fixed gameplay viewport: **1280x800 virtual tablet canvas**, centered and scaled down on smaller windows.
 - Initial release: single-player, offline-friendly assets loaded locally.
 
 ## 3) Core User Flow (MVP)

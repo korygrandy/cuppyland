@@ -1,31 +1,4 @@
-const state = {
-  currentScreen: "splash",
-  activeWorld: null,
-  inventoryOpen: false,
-  cup: {
-    lidColor: "red",
-    cupColor: "blue",
-    sleeve: "child",
-  },
-};
-
-const palette = ["red", "blue", "yellow", "green"];
-const sleeveTypes = ["child", "parent", "grandparent"];
-const sleeveFaceMap = {
-  child: "😊",
-  parent: "😎",
-  grandparent: "🤗",
-};
-const colorMap = {
-  red: "#ff3c3c",
-  blue: "#3e80ff",
-  yellow: "#f3cf33",
-  green: "#37c86e",
-};
-const worldClasses = {
-  playground: "playground",
-  "olivia-room": "olivia-room",
-};
+const { state, fixedViewport, palette, sleeveTypes, sleeveFaceMap, sleeveAssetMap, sleevePalette, colorMap, worldClasses } = window.CuppyLandGame;
 
 const screenEls = {
   splash: document.getElementById("splashScreen"),
@@ -48,7 +21,6 @@ const rotatePrompt = document.getElementById("rotatePrompt");
 const lidLayer = document.getElementById("lidLayer");
 const cupLayer = document.getElementById("cupLayer");
 const sleeveLayer = document.getElementById("sleeveLayer");
-const faceNote = document.getElementById("faceNote");
 const lidItems = document.getElementById("lidItems");
 const cupItems = document.getElementById("cupItems");
 const sleeveItems = document.getElementById("sleeveItems");
@@ -62,17 +34,7 @@ const musicVolumeValue = document.getElementById("musicVolumeValue");
 const sfxVolumeValue = document.getElementById("sfxVolumeValue");
 const musicMuteBtn = document.getElementById("musicMuteBtn");
 const sfxMuteBtn = document.getElementById("sfxMuteBtn");
-const tintAssetConfig = {
-  lid: "./assets/lid-grayscale.png",
-  cup: "./assets/cup-grayscale.png",
-};
-const audioConfig = {
-  menu: "./assets/Kailua_Breeze.mp3",
-  worlds: {
-    playground: ["./assets/playground.mp3", "./assets/playgound.mp3"],
-    "olivia-room": "./assets/olivias-room.mp3",
-  },
-};
+const { tintAssetConfig, defaultSleeveAsset } = window.CuppyLandGame;
 
 function getCanvasContext(canvasElement, layerName) {
   const context = canvasElement.getContext("2d");
@@ -105,291 +67,26 @@ const dragState = {
   value: "",
   pointerId: null,
 };
-const audioState = {
-  unlocked: false,
-  activeTrack: null,
-  musicVolume: 0.7,
-  sfxVolume: 0.75,
-  previousMusicVolume: 0.7,
-  previousSfxVolume: 0.75,
+const lidDragState = {
+  active: false,
+  pointerId: null,
+  initialLeft: 17,
+  initialTop: 0,
+  anchorX: 0,
+  anchorY: 0,
 };
-let sfxAudioContext = null;
-const audioStorageKey = "oliviaworld-audio-settings-v1";
-
-const sfxProfiles = {
-  standard: [
-    { frequency: 720, duration: 0.04, gain: 0.055, type: "triangle", offset: 0 },
-    { frequency: 980, duration: 0.05, gain: 0.045, type: "sine", offset: 0.035 },
-  ],
-  close: [
-    { frequency: 320, duration: 0.06, gain: 0.06, type: "square", offset: 0 },
-    { frequency: 240, duration: 0.07, gain: 0.05, type: "triangle", offset: 0.045 },
-  ],
-  yes: [
-    { frequency: 640, duration: 0.045, gain: 0.05, type: "sine", offset: 0 },
-    { frequency: 920, duration: 0.07, gain: 0.055, type: "triangle", offset: 0.04 },
-  ],
-  no: [
-    { frequency: 520, duration: 0.05, gain: 0.05, type: "triangle", offset: 0 },
-    { frequency: 360, duration: 0.07, gain: 0.055, type: "square", offset: 0.04 },
-  ],
+const sleeveDragState = {
+  active: false,
+  pointerId: null,
+  initialLeft: 30,
+  initialTop: 164,
+  anchorX: 0,
+  anchorY: 0,
 };
-
-function getSfxAudioContext() {
-  if (!sfxAudioContext) {
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    if (!Ctx) {
-      return null;
-    }
-    sfxAudioContext = new Ctx();
-  }
-  return sfxAudioContext;
-}
-
-function playSfx(profileName) {
-  if (audioState.sfxVolume <= 0) {
-    return;
-  }
-  const context = getSfxAudioContext();
-  if (!context) {
-    return;
-  }
-
-  const profile = sfxProfiles[profileName] || sfxProfiles.standard;
-  const baseTime = context.currentTime;
-  profile.forEach((tone) => {
-    const oscillator = context.createOscillator();
-    const gainNode = context.createGain();
-    const startAt = baseTime + tone.offset;
-    const endAt = startAt + tone.duration;
-
-    oscillator.type = tone.type;
-    oscillator.frequency.setValueAtTime(tone.frequency, startAt);
-    const scaledGain = tone.gain * audioState.sfxVolume;
-    gainNode.gain.setValueAtTime(0.0001, startAt);
-    gainNode.gain.exponentialRampToValueAtTime(scaledGain, startAt + 0.01);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, endAt);
-
-    oscillator.connect(gainNode);
-    gainNode.connect(context.destination);
-    oscillator.start(startAt);
-    oscillator.stop(endAt + 0.01);
-  });
-}
-
-function createAudioPlayer(src) {
-  const sources = Array.isArray(src) ? src : [src];
-  const audio = new Audio(sources[0]);
-  audio.loop = true;
-  audio.preload = "auto";
-  if (sources.length > 1) {
-    let sourceIndex = 0;
-    audio.addEventListener("error", () => {
-      if (sourceIndex >= sources.length - 1) {
-        return;
-      }
-      sourceIndex += 1;
-      audio.src = sources[sourceIndex];
-      audio.load();
-      if (audioState.activeTrack) {
-        const playPromise = audio.play();
-        if (playPromise && typeof playPromise.catch === "function") {
-          playPromise.catch((error) => {
-            console.warn(`Unable to play fallback audio source "${sources[sourceIndex]}".`, error);
-          });
-        }
-      }
-    });
-  }
-  return audio;
-}
-
-const audioPlayers = {
-  menu: createAudioPlayer(audioConfig.menu),
-  worlds: {
-    playground: createAudioPlayer(audioConfig.worlds.playground),
-    "olivia-room": createAudioPlayer(audioConfig.worlds["olivia-room"]),
-  },
-};
-
-function getAllAudioPlayers() {
-  return [audioPlayers.menu, audioPlayers.worlds.playground, audioPlayers.worlds["olivia-room"]];
-}
-
-function applyMusicVolume() {
-  getAllAudioPlayers().forEach((player) => {
-    player.volume = audioState.musicVolume;
-  });
-}
-
-function updateAudioVolumeLabels() {
-  musicVolumeValue.textContent = `${Math.round(audioState.musicVolume * 100)}%`;
-  sfxVolumeValue.textContent = `${Math.round(audioState.sfxVolume * 100)}%`;
-  const musicMuted = audioState.musicVolume <= 0;
-  const sfxMuted = audioState.sfxVolume <= 0;
-  musicMuteBtn.textContent = musicMuted ? "Unmute Music" : "Mute Music";
-  sfxMuteBtn.textContent = sfxMuted ? "Unmute SFX" : "Mute SFX";
-  musicMuteBtn.setAttribute("aria-pressed", String(musicMuted));
-  sfxMuteBtn.setAttribute("aria-pressed", String(sfxMuted));
-}
-
-function clampVolume(value) {
-  return Math.min(1, Math.max(0, value));
-}
-
-function saveAudioSettings() {
-  const payload = {
-    musicVolume: audioState.musicVolume,
-    sfxVolume: audioState.sfxVolume,
-    previousMusicVolume: audioState.previousMusicVolume,
-    previousSfxVolume: audioState.previousSfxVolume,
-  };
-  try {
-    localStorage.setItem(audioStorageKey, JSON.stringify(payload));
-  } catch (error) {
-    console.warn("Unable to persist audio settings.", error);
-  }
-}
-
-function loadAudioSettings() {
-  try {
-    const raw = localStorage.getItem(audioStorageKey);
-    if (!raw) {
-      return;
-    }
-    const parsed = JSON.parse(raw);
-    if (typeof parsed.musicVolume === "number") {
-      audioState.musicVolume = clampVolume(parsed.musicVolume);
-    }
-    if (typeof parsed.sfxVolume === "number") {
-      audioState.sfxVolume = clampVolume(parsed.sfxVolume);
-    }
-    if (typeof parsed.previousMusicVolume === "number") {
-      audioState.previousMusicVolume = clampVolume(parsed.previousMusicVolume);
-    }
-    if (typeof parsed.previousSfxVolume === "number") {
-      audioState.previousSfxVolume = clampVolume(parsed.previousSfxVolume);
-    }
-  } catch (error) {
-    console.warn("Unable to load saved audio settings.", error);
-  }
-}
-
-function syncAudioControlsUi() {
-  musicVolumeInput.value = String(Math.round(audioState.musicVolume * 100));
-  sfxVolumeInput.value = String(Math.round(audioState.sfxVolume * 100));
-  updateAudioVolumeLabels();
-}
-
-function handleMusicVolumeChange(event) {
-  const volume = clampVolume(Number(event.target.value) / 100);
-  audioState.musicVolume = volume;
-  if (volume > 0) {
-    audioState.previousMusicVolume = volume;
-  }
-  applyMusicVolume();
-  if (audioState.unlocked && volume > 0) {
-    syncAudioForCurrentScreen();
-  }
-  updateAudioVolumeLabels();
-  saveAudioSettings();
-}
-
-function handleSfxVolumeChange(event) {
-  const volume = clampVolume(Number(event.target.value) / 100);
-  audioState.sfxVolume = volume;
-  if (volume > 0) {
-    audioState.previousSfxVolume = volume;
-  }
-  updateAudioVolumeLabels();
-  saveAudioSettings();
-  playSfx("standard");
-}
-
-function toggleMusicMute() {
-  if (audioState.musicVolume <= 0) {
-    audioState.musicVolume = audioState.previousMusicVolume > 0 ? audioState.previousMusicVolume : 0.7;
-  } else {
-    audioState.previousMusicVolume = audioState.musicVolume;
-    audioState.musicVolume = 0;
-  }
-  applyMusicVolume();
-  if (audioState.unlocked && audioState.musicVolume > 0) {
-    syncAudioForCurrentScreen();
-  }
-  syncAudioControlsUi();
-  saveAudioSettings();
-}
-
-function toggleSfxMute() {
-  if (audioState.sfxVolume <= 0) {
-    audioState.sfxVolume = audioState.previousSfxVolume > 0 ? audioState.previousSfxVolume : 0.75;
-    playSfx("standard");
-  } else {
-    audioState.previousSfxVolume = audioState.sfxVolume;
-    audioState.sfxVolume = 0;
-  }
-  syncAudioControlsUi();
-  saveAudioSettings();
-}
-
-function pauseAllAudio() {
-  getAllAudioPlayers().forEach((player) => {
-    player.pause();
-  });
-}
-
-function playAudioTrack(player, trackName) {
-  if (audioState.activeTrack === trackName && !player.paused) {
-    return;
-  }
-
-  pauseAllAudio();
-  audioState.activeTrack = trackName;
-  const playPromise = player.play();
-  if (playPromise && typeof playPromise.catch === "function") {
-    playPromise.catch((error) => {
-      console.warn(`Unable to play audio track "${trackName}".`, error);
-    });
-  }
-}
-
 function syncAudioForCurrentScreen() {
-  if (!audioState.unlocked) {
-    return;
+  if (window.CuppyLandAudio && typeof window.CuppyLandAudio.syncAudioForCurrentScreen === "function") {
+    window.CuppyLandAudio.syncAudioForCurrentScreen();
   }
-
-  if (state.currentScreen === "world") {
-    if (state.activeWorld && audioPlayers.worlds[state.activeWorld]) {
-      playAudioTrack(audioPlayers.worlds[state.activeWorld], state.activeWorld);
-      return;
-    }
-    pauseAllAudio();
-    audioState.activeTrack = null;
-    return;
-  }
-
-  if (state.currentScreen === "splash" || state.currentScreen === "worldSelect") {
-    playAudioTrack(audioPlayers.menu, "menu");
-    return;
-  }
-
-  pauseAllAudio();
-  audioState.activeTrack = null;
-}
-
-function unlockAudio() {
-  if (audioState.unlocked) {
-    return;
-  }
-  audioState.unlocked = true;
-  const context = getSfxAudioContext();
-  if (context && context.state === "suspended") {
-    context.resume().catch((error) => {
-      console.warn("Unable to resume button SFX audio context.", error);
-    });
-  }
-  syncAudioForCurrentScreen();
 }
 
 function showScreen(screen) {
@@ -407,11 +104,38 @@ function updateWorldBackground() {
   }
 }
 
+function syncLidPosition() {
+  const left = state.cup.lidDetached ? state.cup.lidOffsetX : 17;
+  const top = state.cup.lidDetached ? state.cup.lidOffsetY : 0;
+  lidLayer.style.left = `${left}px`;
+  lidLayer.style.top = `${top}px`;
+}
+
+function syncSleevePosition() {
+  const left = state.cup.sleeveDetached ? state.cup.sleeveOffsetX : 30;
+  const top = state.cup.sleeveDetached ? state.cup.sleeveOffsetY : 164;
+  sleeveLayer.style.left = `${left}px`;
+  sleeveLayer.style.top = `${top}px`;
+}
+
 function renderCup() {
   renderTintedPart("lid", state.cup.lidColor);
   renderTintedPart("cup", state.cup.cupColor);
-  sleeveLayer.textContent = state.cup.sleeve;
-  faceNote.textContent = sleeveFaceMap[state.cup.sleeve];
+
+  const sleeveStyle = sleevePalette[state.cup.sleeve] || sleevePalette.child;
+  const activeSleeveAsset = sleeveAssetMap[state.cup.sleeve] || defaultSleeveAsset;
+
+  sleeveLayer.style.backgroundColor = "transparent";
+  sleeveLayer.style.border = "none";
+  sleeveLayer.style.backgroundImage = `url("${activeSleeveAsset}")`;
+  sleeveLayer.style.backgroundSize = "100% 100%";
+  sleeveLayer.style.backgroundPosition = "center";
+  sleeveLayer.style.backgroundRepeat = "no-repeat";
+  sleeveLayer.style.color = "transparent";
+  sleeveLayer.textContent = "";
+
+  syncLidPosition();
+  syncSleevePosition();
 }
 
 function drawSolidColorLayer(layer, colorHex) {
@@ -473,40 +197,8 @@ async function loadTintAssets() {
   renderCup();
 }
 
-function createColorItem(type, colorName) {
-  const item = document.createElement("button");
-  item.type = "button";
-  item.className = "inventory-item";
-  item.dataset.itemType = type;
-  item.dataset.value = colorName;
-  item.textContent = colorName;
-  item.style.backgroundColor = colorMap[colorName];
-  item.style.color = colorName === "yellow" ? "#27324b" : "#ffffff";
-  return item;
-}
-
-function createSleeveItem(sleeve) {
-  const item = document.createElement("button");
-  item.type = "button";
-  item.className = "inventory-item sleeve";
-  item.dataset.itemType = "sleeve";
-  item.dataset.value = sleeve;
-  item.textContent = sleeve;
-  return item;
-}
-
 function buildInventoryItems() {
-  lidItems.innerHTML = "";
-  cupItems.innerHTML = "";
-  sleeveItems.innerHTML = "";
-
-  palette.forEach((colorName) => {
-    lidItems.appendChild(createColorItem("lid", colorName));
-    cupItems.appendChild(createColorItem("cup", colorName));
-  });
-  sleeveTypes.forEach((sleeve) => {
-    sleeveItems.appendChild(createSleeveItem(sleeve));
-  });
+  window.CuppyLandInventory.buildInventoryItems();
 }
 
 function toggleInventory(forceOpen) {
@@ -520,7 +212,7 @@ function openWorld(worldId) {
   showScreen("world");
   toggleInventory(false);
   closeModal.classList.add("hidden");
-  worldViewport.scrollLeft = Math.floor((2200 - window.innerWidth) / 2);
+  worldViewport.scrollLeft = Math.floor((2200 - worldViewport.clientWidth) / 2);
 }
 
 function closeWorld() {
@@ -540,6 +232,15 @@ function hideCloseModal() {
 function updateLandscapePrompt() {
   const isLandscape = window.innerWidth > window.innerHeight;
   rotatePrompt.classList.toggle("hidden", isLandscape);
+}
+
+function updateGameViewportScale() {
+  const scale = Math.min(
+    1,
+    window.innerWidth / fixedViewport.width,
+    window.innerHeight / fixedViewport.height
+  );
+  document.documentElement.style.setProperty("--game-scale", String(scale));
 }
 
 function zoneForPoint(x, y) {
@@ -577,6 +278,19 @@ function applyDrop(itemType, value, targetZone) {
   }
 
   return { valid: false, reason: "unknown-item" };
+}
+
+function applyInventorySelection(itemType, value) {
+  const result = applyDrop(itemType, value, itemType);
+  if (result.valid) {
+    renderCup();
+    return true;
+  }
+
+  if (result.reason === "duplicate-sleeve") {
+    showInvalidFeedback();
+  }
+  return false;
 }
 
 function setZoneHighlight(pointX, pointY) {
@@ -620,6 +334,124 @@ function showInvalidFeedback() {
   sleeveLayer.classList.add("invalid-shake");
 }
 
+function onLidPointerDown(event) {
+  if (state.currentScreen !== "world") {
+    return;
+  }
+
+  event.preventDefault();
+  const parentRect = document.getElementById("cupCharacter").getBoundingClientRect();
+  lidDragState.active = true;
+  lidDragState.pointerId = event.pointerId;
+  lidDragState.initialLeft = state.cup.lidDetached ? state.cup.lidOffsetX : 17;
+  lidDragState.initialTop = state.cup.lidDetached ? state.cup.lidOffsetY : 0;
+  lidDragState.anchorX = event.clientX - parentRect.left;
+  lidDragState.anchorY = event.clientY - parentRect.top;
+  lidLayer.setPointerCapture(event.pointerId);
+}
+
+function onLidPointerMove(event) {
+  if (!lidDragState.active || event.pointerId !== lidDragState.pointerId) {
+    return;
+  }
+
+  const parentRect = document.getElementById("cupCharacter").getBoundingClientRect();
+  const localX = event.clientX - parentRect.left;
+  const localY = event.clientY - parentRect.top;
+  const nextLeft = Math.max(-60, Math.min(200, lidDragState.initialLeft + (localX - lidDragState.anchorX)));
+  const nextTop = Math.max(-80, Math.min(120, lidDragState.initialTop + (localY - lidDragState.anchorY)));
+  state.cup.lidDetached = true;
+  state.cup.lidOffsetX = nextLeft;
+  state.cup.lidOffsetY = nextTop;
+  syncLidPosition();
+}
+
+function lidIsNearCup() {
+  const cupRect = cupLayer.getBoundingClientRect();
+  const lidRect = lidLayer.getBoundingClientRect();
+  const lidCenterX = lidRect.left + lidRect.width / 2;
+  const lidCenterY = lidRect.top + lidRect.height / 2;
+  const cupCenterX = cupRect.left + cupRect.width / 2;
+  const cupCenterY = cupRect.top + cupRect.height / 2;
+  const distance = Math.hypot(lidCenterX - cupCenterX, lidCenterY - cupCenterY);
+  return distance < 110;
+}
+
+function sleeveIsNearCup() {
+  const cupRect = cupLayer.getBoundingClientRect();
+  const sleeveRect = sleeveLayer.getBoundingClientRect();
+  const sleeveCenterX = sleeveRect.left + sleeveRect.width / 2;
+  const sleeveCenterY = sleeveRect.top + sleeveRect.height / 2;
+  const cupCenterX = cupRect.left + cupRect.width / 2;
+  const cupCenterY = cupRect.top + cupRect.height / 2;
+  const distance = Math.hypot(sleeveCenterX - cupCenterX, sleeveCenterY - cupCenterY);
+  return distance < 120;
+}
+
+function onLidPointerUp(event) {
+  if (!lidDragState.active || event.pointerId !== lidDragState.pointerId) {
+    return;
+  }
+
+  if (lidIsNearCup()) {
+    state.cup.lidDetached = false;
+    state.cup.lidOffsetX = 17;
+    state.cup.lidOffsetY = 0;
+  }
+
+  lidDragState.active = false;
+  lidDragState.pointerId = null;
+  syncLidPosition();
+}
+
+function onSleevePointerDown(event) {
+  if (state.currentScreen !== "world") {
+    return;
+  }
+
+  event.preventDefault();
+  const parentRect = document.getElementById("cupCharacter").getBoundingClientRect();
+  sleeveDragState.active = true;
+  sleeveDragState.pointerId = event.pointerId;
+  sleeveDragState.initialLeft = state.cup.sleeveDetached ? state.cup.sleeveOffsetX : 30;
+  sleeveDragState.initialTop = state.cup.sleeveDetached ? state.cup.sleeveOffsetY : 164;
+  sleeveDragState.anchorX = event.clientX - parentRect.left;
+  sleeveDragState.anchorY = event.clientY - parentRect.top;
+  sleeveLayer.setPointerCapture(event.pointerId);
+}
+
+function onSleevePointerMove(event) {
+  if (!sleeveDragState.active || event.pointerId !== sleeveDragState.pointerId) {
+    return;
+  }
+
+  const parentRect = document.getElementById("cupCharacter").getBoundingClientRect();
+  const localX = event.clientX - parentRect.left;
+  const localY = event.clientY - parentRect.top;
+  const nextLeft = Math.max(-60, Math.min(200, sleeveDragState.initialLeft + (localX - sleeveDragState.anchorX)));
+  const nextTop = Math.max(-20, Math.min(220, sleeveDragState.initialTop + (localY - sleeveDragState.anchorY)));
+  state.cup.sleeveDetached = true;
+  state.cup.sleeveOffsetX = nextLeft;
+  state.cup.sleeveOffsetY = nextTop;
+  syncSleevePosition();
+}
+
+function onSleevePointerUp(event) {
+  if (!sleeveDragState.active || event.pointerId !== sleeveDragState.pointerId) {
+    return;
+  }
+
+  if (sleeveIsNearCup()) {
+    state.cup.sleeveDetached = false;
+    state.cup.sleeveOffsetX = 30;
+    state.cup.sleeveOffsetY = 164;
+  }
+
+  sleeveDragState.active = false;
+  sleeveDragState.pointerId = null;
+  syncSleevePosition();
+}
+
 function onInventoryPointerDown(event) {
   const target = event.target.closest(".inventory-item");
   if (!target || state.currentScreen !== "world") {
@@ -634,6 +466,16 @@ function onInventoryPointerDown(event) {
   target.setPointerCapture(event.pointerId);
   showDragGhost(event.clientX, event.clientY, `${dragState.type}: ${dragState.value}`);
   setZoneHighlight(event.clientX, event.clientY);
+}
+
+function onInventoryClick(event) {
+  const target = event.target.closest(".inventory-item");
+  if (!target || state.currentScreen !== "world") {
+    return;
+  }
+
+  event.preventDefault();
+  applyInventorySelection(target.dataset.itemType, target.dataset.value);
 }
 
 function onInventoryPointerMove(event) {
@@ -667,60 +509,75 @@ function onInventoryPointerEnd(event) {
 }
 
 function wireEvents() {
-  document.addEventListener("pointerdown", unlockAudio, { once: true });
-  document.addEventListener("keydown", unlockAudio, { once: true });
+  document.addEventListener("pointerdown", () => window.CuppyLandAudio.unlockAudio(), { once: true });
+  document.addEventListener("keydown", () => window.CuppyLandAudio.unlockAudio(), { once: true });
 
   playBtn.addEventListener("click", () => {
-    playSfx("standard");
+    window.CuppyLandAudio.playSfx("standard");
     showScreen("worldSelect");
   });
   backToSplashBtn.addEventListener("click", () => {
-    playSfx("standard");
+    window.CuppyLandAudio.playSfx("standard");
     showScreen("splash");
   });
   worldButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      playSfx("standard");
+      window.CuppyLandAudio.playSfx("standard");
       openWorld(button.dataset.world);
     });
   });
   inventoryToggleBtn.addEventListener("click", () => {
-    playSfx("standard");
+    window.CuppyLandAudio.playSfx("standard");
     toggleInventory();
   });
   closeWorldBtn.addEventListener("click", () => {
-    playSfx("close");
+    window.CuppyLandAudio.playSfx("close");
     showCloseModal();
   });
   confirmCloseBtn.addEventListener("click", () => {
-    playSfx("yes");
+    window.CuppyLandAudio.playSfx("yes");
     hideCloseModal();
     closeWorld();
   });
   cancelCloseBtn.addEventListener("click", () => {
-    playSfx("no");
+    window.CuppyLandAudio.playSfx("no");
     hideCloseModal();
   });
-  window.addEventListener("resize", updateLandscapePrompt);
+  window.addEventListener("resize", () => {
+    updateLandscapePrompt();
+    updateGameViewportScale();
+  });
+
+  lidLayer.addEventListener("pointerdown", onLidPointerDown);
+  lidLayer.addEventListener("pointermove", onLidPointerMove);
+  lidLayer.addEventListener("pointerup", onLidPointerUp);
+  lidLayer.addEventListener("pointercancel", onLidPointerUp);
+
+  sleeveLayer.addEventListener("pointerdown", onSleevePointerDown);
+  sleeveLayer.addEventListener("pointermove", onSleevePointerMove);
+  sleeveLayer.addEventListener("pointerup", onSleevePointerUp);
+  sleeveLayer.addEventListener("pointercancel", onSleevePointerUp);
 
   inventoryPanel.addEventListener("pointerdown", onInventoryPointerDown);
+  inventoryPanel.addEventListener("click", onInventoryClick);
   inventoryPanel.addEventListener("pointermove", onInventoryPointerMove);
   inventoryPanel.addEventListener("pointerup", onInventoryPointerEnd);
   inventoryPanel.addEventListener("pointercancel", onInventoryPointerEnd);
-  musicVolumeInput.addEventListener("input", handleMusicVolumeChange);
-  sfxVolumeInput.addEventListener("input", handleSfxVolumeChange);
-  musicMuteBtn.addEventListener("click", toggleMusicMute);
-  sfxMuteBtn.addEventListener("click", toggleSfxMute);
+  musicVolumeInput.addEventListener("input", window.CuppyLandAudio.handleMusicVolumeChange);
+  sfxVolumeInput.addEventListener("input", window.CuppyLandAudio.handleSfxVolumeChange);
+  musicMuteBtn.addEventListener("click", window.CuppyLandAudio.toggleMusicMute);
+  sfxMuteBtn.addEventListener("click", window.CuppyLandAudio.toggleSfxMute);
 }
 
 function init() {
-  loadAudioSettings();
-  applyMusicVolume();
-  syncAudioControlsUi();
+  window.CuppyLandAudio.loadAudioSettings();
+  window.CuppyLandAudio.applyMusicVolume();
+  window.CuppyLandAudio.syncAudioControlsUi();
   buildInventoryItems();
   renderCup();
   wireEvents();
   updateLandscapePrompt();
+  updateGameViewportScale();
   showScreen("splash");
   loadTintAssets();
 }

@@ -6,6 +6,9 @@
   --muted: #bfd0f4;
   --primary: #34a8ff;
   --danger: #ff5e7a;
+  --tablet-width: 1280;
+  --tablet-height: 800;
+  --game-scale: 1;
 }
 
 * {
@@ -23,6 +26,26 @@ body {
   color: var(--text);
   background: var(--bg);
   touch-action: manipulation;
+}
+
+.game-shell {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.game-viewport {
+  width: min(100vw, 1280px);
+  height: auto;
+  aspect-ratio: 1280 / 800;
+  position: relative;
+  transform: none;
+  transform-origin: center center;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
 }
 
 .app {
@@ -236,18 +259,22 @@ body {
 
 .cup-lid {
   position: absolute;
-  width: 210px;
-  height: 58px;
-  left: 25px;
-  top: 40px;
+  z-index: 3;
+  width: 232px;
+  height: 149px;
+  left: 14px;
+  top: 0;
   border-radius: 40px 40px 20px 20px;
   border: 4px solid rgba(255, 255, 255, 0.55);
   background: #ff3c3c;
   display: block;
+  cursor: grab;
+  touch-action: none;
 }
 
 .cup-base {
   position: absolute;
+  z-index: 1;
   width: 220px;
   height: 230px;
   left: 20px;
@@ -267,9 +294,10 @@ body {
 
 .cup-sleeve {
   position: absolute;
-  width: 180px;
+  z-index: 2;
+  width: 200px;
   height: 110px;
-  left: 40px;
+  left: 30px;
   top: 164px;
   border-radius: 14px;
   background: rgba(255, 248, 160, 0.95);
@@ -280,21 +308,8 @@ body {
   justify-content: center;
   font-weight: 700;
   text-transform: capitalize;
-}
-
-.face-note {
-  position: absolute;
-  width: 68px;
-  height: 56px;
-  left: 96px;
-  top: 128px;
-  border-radius: 10px;
-  background: #fff8a5;
-  display: grid;
-  place-items: center;
-  color: #1f293b;
-  font-size: 1.6rem;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  cursor: grab;
+  touch-action: none;
 }
 
 .drop-zone {
@@ -309,10 +324,10 @@ body {
 }
 
 .drop-lid {
-  left: 25px;
-  top: 36px;
-  width: 210px;
-  height: 66px;
+  left: 14px;
+  top: 0;
+  width: 232px;
+  height: 150px;
 }
 
 .drop-cup {
@@ -323,9 +338,9 @@ body {
 }
 
 .drop-sleeve {
-  left: 40px;
+  left: 30px;
   top: 164px;
-  width: 180px;
+  width: 200px;
   height: 110px;
 }
 
@@ -416,6 +431,30 @@ body {
   font-weight: 700;
   user-select: none;
   touch-action: none;
+  padding: 0.35rem;
+}
+
+.inventory-item.color-swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.color-swatch-visual {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.08);
+}
+
+.color-swatch-label {
+  font-size: 0.68rem;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
 }
 
 .inventory-item.sleeve {
