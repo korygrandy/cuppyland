@@ -1,24 +1,45 @@
 (function () {
+  const defaultCupState = {
+    lidColor: "yellow",
+    cupColor: "red",
+    sleeve: "child",
+    expression: "happy",
+    hairstyle: "child",
+    worldX: 920,
+    worldY: 430,
+    lidDetached: false,
+    lidVisible: true,
+    lidOffsetX: 17,
+    lidOffsetY: 0,
+    sleeveDetached: false,
+    sleeveVisible: true,
+    sleeveOffsetX: 32,
+    sleeveOffsetY: 160,
+    faceOffsetX: 10,
+    faceOffsetY: 18,
+    faceVisible: true,
+    hairstyleDetached: false,
+    hairstyleOffsetX: 17,
+    hairstyleOffsetY: -22,
+    hairstyleVisible: true,
+  };
+
   const gameConfig = {
+    defaultCupState: JSON.parse(JSON.stringify(defaultCupState)),
     state: {
       currentScreen: "splash",
       activeWorld: null,
+      activeCupId: null,
       inventoryOpen: false,
-      cup: {
-        lidColor: "yellow",
-        cupColor: "red",
-        sleeve: "child",
-        expression: "happy",
-        hairstyle: "child",
-        lidDetached: false,
-        lidOffsetX: 17,
-        lidOffsetY: 0,
-        sleeveDetached: false,
-        sleeveOffsetX: 32,
-        sleeveOffsetY: 160,
-        faceOffsetX: 10,
-        faceOffsetY: 18,
+      worlds: {
+        playground: {
+          cups: [{ id: "cup-playground-1", state: JSON.parse(JSON.stringify(defaultCupState)) }],
+        },
+        "olivia-room": {
+          cups: [{ id: "cup-bedroom-1", state: JSON.parse(JSON.stringify(defaultCupState)) }],
+        },
       },
+      cup: JSON.parse(JSON.stringify(defaultCupState)),
     },
     fixedViewport: {
       width: 1280,

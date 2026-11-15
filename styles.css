@@ -255,7 +255,59 @@ body {
   width: 260px;
   height: 360px;
   left: 920px;
-  bottom: 90px;
+  top: 430px;
+  bottom: auto;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  transition: filter 120ms ease, transform 120ms ease;
+}
+
+.cup-character.is-selected {
+  filter: none;
+  transform: none;
+}
+
+.cup-character.is-selected::after {
+  content: none;
+  display: none;
+}
+
+.cup-character.is-selected .cup-base,
+.cup-character.is-selected .cup-lid {
+  border-color: transparent;
+}
+
+.cup-character.hidden-object {
+  display: none;
+}
+
+.trash-can {
+  position: absolute;
+  right: 26px;
+  bottom: 22px;
+  z-index: 40;
+  width: 62px;
+  height: 62px;
+  border-radius: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  background: rgba(23, 31, 52, 0.9);
+  color: white;
+  font-size: 2rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.24);
+}
+
+.trash-can.hidden {
+  display: none;
+}
+
+.trash-can.highlight {
+  border-color: rgba(255, 127, 127, 0.95);
+  background: rgba(145, 32, 48, 0.9);
+  transform: scale(1.05);
 }
 
 .cup-lid {
@@ -266,7 +318,7 @@ body {
   left: 14px;
   top: 0;
   border-radius: 40px 40px 20px 20px;
-  border: 4px solid rgba(255, 255, 255, 0.55);
+  border: none;
   background: #ff3c3c;
   display: block;
   cursor: grab;
@@ -281,7 +333,7 @@ body {
   left: 20px;
   top: 88px;
   border-radius: 22px;
-  border: 4px solid rgba(255, 255, 255, 0.45);
+  border: none;
   background: #3e80ff;
   display: block;
 }
@@ -320,8 +372,9 @@ body {
   top: -18px;
   border: none;
   background: transparent;
-  pointer-events: none;
+  cursor: grab;
   touch-action: none;
+  pointer-events: auto;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -492,7 +545,8 @@ body {
 
 .inventory-item.sleeve,
 .inventory-item.expression,
-.inventory-item.hairstyle {
+.inventory-item.hairstyle,
+.inventory-item.add-cup {
   background: rgba(255, 255, 255, 0.05);
   color: #eef7ff;
   text-transform: capitalize;
@@ -501,6 +555,13 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.2rem;
+}
+
+.inventory-item.add-cup {
+  min-width: 90px;
+  font-size: 1rem;
+  font-weight: 800;
+  background: linear-gradient(180deg, rgba(52, 168, 255, 0.4), rgba(116, 80, 255, 0.28));
 }
 
 .inventory-sleeve-thumb,
