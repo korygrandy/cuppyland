@@ -256,7 +256,9 @@ body {
   height: 360px;
   left: 920px;
   top: 430px;
+  z-index: 1;
   bottom: auto;
+  isolation: isolate;
   cursor: grab;
   touch-action: none;
   user-select: none;

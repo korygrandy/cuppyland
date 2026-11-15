@@ -7,6 +7,7 @@
     hairstyle: "child",
     worldX: 920,
     worldY: 430,
+    zIndex: 1,
     lidDetached: false,
     lidVisible: true,
     lidOffsetX: 17,

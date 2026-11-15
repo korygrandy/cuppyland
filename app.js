@@ -109,6 +109,7 @@ const trashState = {
   active: false,
   target: null,
 };
+let cupLayerOrderCounter = 1;
 function syncAudioForCurrentScreen() {
   if (window.CuppyLandAudio && typeof window.CuppyLandAudio.syncAudioForCurrentScreen === "function") {
     window.CuppyLandAudio.syncAudioForCurrentScreen();
@@ -124,6 +125,7 @@ function createDefaultCupState() {
     hairstyle: "child",
     worldX: 920,
     worldY: 430,
+    zIndex: 1,
     lidDetached: false,
     lidVisible: true,
     lidOffsetX: 17,
@@ -156,6 +158,29 @@ function getWorldCupList(worldId = state.activeWorld) {
     worldState.cups = [{ id: `cup-${worldId}-1`, state: cloneCupState(state.cup) }];
   }
   return worldState.cups;
+}
+
+function ensureCupLayerOrder(cupState, fallbackOrder = 1) {
+  if (!cupState || typeof cupState !== "object") {
+    return fallbackOrder;
+  }
+
+  if (!Number.isFinite(cupState.zIndex)) {
+    cupState.zIndex = fallbackOrder;
+  }
+  cupLayerOrderCounter = Math.max(cupLayerOrderCounter, cupState.zIndex);
+  return cupState.zIndex;
+}
+
+function bringCupElementToFront(cupElement) {
+  if (!cupElement) {
+    return;
+  }
+
+  const cupState = resolveCupStateForElement(cupElement);
+  cupLayerOrderCounter += 1;
+  cupState.zIndex = cupLayerOrderCounter;
+  cupElement.style.zIndex = String(cupState.zIndex);
 }
 
 function syncCupSelectionVisualState() {
@@ -228,6 +253,7 @@ function createCupElement(cupId, cupState) {
   template.classList.remove("hidden-object");
   template.style.left = `${cupState.worldX}px`;
   template.style.top = `${cupState.worldY}px`;
+  template.style.zIndex = String(ensureCupLayerOrder(cupState));
 
   template.querySelectorAll("[id]").forEach((node) => {
     const nextId = `${cupId}-${node.id}`;
@@ -295,12 +321,16 @@ function renderWorldCups() {
     return;
   }
 
-  worldCups.forEach((cupInfo) => {
+  worldCups.forEach((cupInfo, index) => ensureCupLayerOrder(cupInfo.state, index + 1));
+
+  [...worldCups]
+    .sort((a, b) => ensureCupLayerOrder(a.state) - ensureCupLayerOrder(b.state))
+    .forEach((cupInfo) => {
     const cupElement = createCupElement(cupInfo.id, cupInfo.state);
     cupElement.classList.toggle("is-selected", cupInfo.id === state.activeCupId);
     worldCanvas.appendChild(cupElement);
     renderCupInstance(cupInfo.state, cupElement);
-  });
+    });
 
   syncWorldCupSelection();
   syncCupSelectionVisualState();
@@ -704,6 +734,8 @@ function addCupToWorld() {
   const newCup = { id: nextId, state: cupState };
   newCup.state.worldX = 900 + (worldCups.length * 90);
   newCup.state.worldY = 430 + (worldCups.length % 2) * 30;
+  cupLayerOrderCounter += 1;
+  newCup.state.zIndex = cupLayerOrderCounter;
   worldCups.push(newCup);
   state.activeCupId = nextId;
   state.cup = newCup.state;
@@ -758,7 +790,17 @@ function applyDrop(itemType, value, targetZone, targetCupId = state.activeCupId)
   }
 
   if (itemType === "hairstyle") {
+    if (activeCupState.lidVisible === false) {
+      activeCupState.lidVisible = true;
+      activeCupState.lidDetached = false;
+      activeCupState.lidOffsetX = 17;
+      activeCupState.lidOffsetY = 0;
+    }
     activeCupState.hairstyle = value;
+    activeCupState.hairstyleVisible = true;
+    activeCupState.hairstyleDetached = false;
+    activeCupState.hairstyleOffsetX = 17;
+    activeCupState.hairstyleOffsetY = -22;
     return { valid: true };
   }
 
@@ -955,6 +997,7 @@ function onCupPointerDown(event) {
 
   if (cupElement && cupElement.dataset.cupId) {
     setActiveCupInstance(cupElement.dataset.cupId);
+    bringCupElementToFront(cupElement);
   }
 
   event.preventDefault();
@@ -1033,6 +1076,7 @@ function onLidPointerDown(event) {
 
   if (cupElement && cupElement.dataset.cupId) {
     setActiveCupInstance(cupElement.dataset.cupId);
+    bringCupElementToFront(cupElement);
   }
 
   showTrashCan("lid");
@@ -1141,6 +1185,7 @@ function onHairstylePointerDown(event) {
 
   if (cupElement && cupElement.dataset.cupId) {
     setActiveCupInstance(cupElement.dataset.cupId);
+    bringCupElementToFront(cupElement);
   }
 
   showTrashCan("hairstyle");
@@ -1220,6 +1265,7 @@ function onSleevePointerDown(event) {
 
   if (cupElement && cupElement.dataset.cupId) {
     setActiveCupInstance(cupElement.dataset.cupId);
+    bringCupElementToFront(cupElement);
   }
 
   showTrashCan("sleeve");
