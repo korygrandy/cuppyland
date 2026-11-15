@@ -121,6 +121,13 @@ function getWorldCupList(worldId = state.activeWorld) {
   return worldState.cups;
 }
 
+function syncCupSelectionVisualState() {
+  document.querySelectorAll(".cup-character[data-cup-id]").forEach((cupNode) => {
+    const isSelected = cupNode.dataset.cupId === state.activeCupId;
+    cupNode.classList.toggle("is-selected", isSelected);
+  });
+}
+
 function setActiveCupInstance(cupId) {
   if (!state.activeWorld) {
     return;
@@ -134,6 +141,7 @@ function setActiveCupInstance(cupId) {
 
   state.activeCupId = nextActiveCup.id;
   state.cup = nextActiveCup.state;
+  syncCupSelectionVisualState();
 }
 
 function getActiveCupInstance() {
@@ -251,11 +259,13 @@ function renderWorldCups() {
 
   worldCups.forEach((cupInfo) => {
     const cupElement = createCupElement(cupInfo.id, cupInfo.state);
+    cupElement.classList.toggle("is-selected", cupInfo.id === state.activeCupId);
     worldCanvas.appendChild(cupElement);
     renderCupInstance(cupInfo.state, cupElement);
   });
 
   syncWorldCupSelection();
+  syncCupSelectionVisualState();
 }
 
 function showScreen(screen) {
