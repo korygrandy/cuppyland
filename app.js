@@ -95,6 +95,7 @@ const hairstyleDragState = {
   initialTop: -22,
   anchorX: 0,
   anchorY: 0,
+  moved: false,
 };
 const cupDragState = {
   active: false,
@@ -114,8 +115,36 @@ function syncAudioForCurrentScreen() {
   }
 }
 
+function createDefaultCupState() {
+  const template = window.CuppyLandGame?.defaultCupState || {
+    lidColor: "yellow",
+    cupColor: "red",
+    sleeve: "child",
+    expression: "happy",
+    hairstyle: "child",
+    worldX: 920,
+    worldY: 430,
+    lidDetached: false,
+    lidVisible: true,
+    lidOffsetX: 17,
+    lidOffsetY: 0,
+    sleeveDetached: false,
+    sleeveVisible: true,
+    sleeveOffsetX: 32,
+    sleeveOffsetY: 160,
+    faceOffsetX: 10,
+    faceOffsetY: 18,
+    faceVisible: true,
+    hairstyleDetached: false,
+    hairstyleOffsetX: 17,
+    hairstyleOffsetY: -22,
+    hairstyleVisible: true,
+  };
+  return JSON.parse(JSON.stringify(template));
+}
+
 function cloneCupState(source = state.cup) {
-  return JSON.parse(JSON.stringify(source || {}));
+  return JSON.parse(JSON.stringify(source || createDefaultCupState()));
 }
 
 function getWorldCupList(worldId = state.activeWorld) {
@@ -260,11 +289,7 @@ function createCupElement(cupId, cupState) {
 }
 
 function renderWorldCups() {
-  document.querySelectorAll(".cup-character[data-cup-id]").forEach((node) => node.remove());
-  const defaultCup = document.getElementById("cupCharacter");
-  if (defaultCup && !defaultCup.dataset.cupId) {
-    defaultCup.remove();
-  }
+  worldCanvas.querySelectorAll(".cup-character").forEach((node) => node.remove());
   const worldCups = getWorldCupList(state.activeWorld);
   if (!worldCups.length) {
     return;
@@ -675,8 +700,7 @@ function addCupToWorld() {
 
   const worldCups = getWorldCupList(state.activeWorld);
   const nextId = `cup-${state.activeWorld}-${worldCups.length + 1}`;
-  const templateCupState = getTargetCupState();
-  const cupState = cloneCupState(templateCupState || worldCups[0]?.state || {});
+  const cupState = createDefaultCupState();
   const newCup = { id: nextId, state: cupState };
   newCup.state.worldX = 900 + (worldCups.length * 90);
   newCup.state.worldY = 430 + (worldCups.length % 2) * 30;
@@ -1049,9 +1073,11 @@ function onLidPointerMove(event) {
   syncLidPosition(cupElement);
 }
 
-function lidIsNearCup() {
-  const cupRect = cupLayer.getBoundingClientRect();
-  const lidRect = lidLayer.getBoundingClientRect();
+function lidIsNearCup(cupElement = cupCharacter) {
+  const cupBaseElement = (cupElement && cupElement.querySelector(".cup-base")) || cupLayer;
+  const lidLayerElement = (cupElement && cupElement.querySelector(".cup-lid")) || lidLayer;
+  const cupRect = cupBaseElement.getBoundingClientRect();
+  const lidRect = lidLayerElement.getBoundingClientRect();
   const lidCenterX = lidRect.left + lidRect.width / 2;
   const lidCenterY = lidRect.top + lidRect.height / 2;
   const cupCenterX = cupRect.left + cupRect.width / 2;
@@ -1060,9 +1086,11 @@ function lidIsNearCup() {
   return distance < 110;
 }
 
-function sleeveIsNearCup() {
-  const cupRect = cupLayer.getBoundingClientRect();
-  const sleeveRect = sleeveLayer.getBoundingClientRect();
+function sleeveIsNearCup(cupElement = cupCharacter) {
+  const cupBaseElement = (cupElement && cupElement.querySelector(".cup-base")) || cupLayer;
+  const sleeveLayerElement = (cupElement && cupElement.querySelector(".cup-sleeve")) || sleeveLayer;
+  const cupRect = cupBaseElement.getBoundingClientRect();
+  const sleeveRect = sleeveLayerElement.getBoundingClientRect();
   const sleeveCenterX = sleeveRect.left + sleeveRect.width / 2;
   const sleeveCenterY = sleeveRect.top + sleeveRect.height / 2;
   const cupCenterX = cupRect.left + cupRect.width / 2;
@@ -1080,7 +1108,7 @@ function onLidPointerUp(event) {
 
   if (isPointerOverTrashCan(event.clientX, event.clientY)) {
     removeSelectedObject();
-  } else if (lidIsNearCup()) {
+  } else if (lidIsNearCup(cupElement)) {
     cupState.lidDetached = false;
     cupState.lidOffsetX = 17;
     cupState.lidOffsetY = 0;
@@ -1121,6 +1149,7 @@ function onHairstylePointerDown(event) {
   const parentRect = cupElement.getBoundingClientRect();
   hairstyleDragState.active = true;
   hairstyleDragState.pointerId = event.pointerId;
+  hairstyleDragState.moved = false;
   hairstyleDragState.initialLeft = cupState.hairstyleDetached ? cupState.hairstyleOffsetX : 27;
   hairstyleDragState.initialTop = cupState.hairstyleDetached ? cupState.hairstyleOffsetY : -22;
   hairstyleDragState.anchorX = event.clientX - parentRect.left;
@@ -1144,6 +1173,9 @@ function onHairstylePointerMove(event) {
   const parentRect = cupElement.getBoundingClientRect();
   const localX = event.clientX - parentRect.left;
   const localY = event.clientY - parentRect.top;
+  const movementDistance = Math.hypot(localX - hairstyleDragState.anchorX, localY - hairstyleDragState.anchorY);
+  hairstyleDragState.moved = movementDistance > 8;
+
   const nextLeft = Math.max(-80, Math.min(220, hairstyleDragState.initialLeft + (localX - hairstyleDragState.anchorX)));
   const nextTop = Math.max(-120, Math.min(160, hairstyleDragState.initialTop + (localY - hairstyleDragState.anchorY)));
   cupState.hairstyleDetached = true;
@@ -1161,7 +1193,12 @@ function onHairstylePointerUp(event) {
 
   if (isPointerOverTrashCan(event.clientX, event.clientY)) {
     removeSelectedObject();
-  } else if (hairstyleIsNearLid(cupElement)) {
+  } else if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
+    cupState.hairstyleVisible = false;
+    renderWorldCups();
+  } else if (hairstyleDragState.moved && !hairstyleIsNearLid(cupElement)) {
+    cupState.hairstyleDetached = true;
+  } else {
     cupState.hairstyleDetached = false;
     cupState.hairstyleOffsetX = 17;
     cupState.hairstyleOffsetY = -22;
@@ -1170,6 +1207,7 @@ function onHairstylePointerUp(event) {
   trashCanBtn.classList.remove("highlight");
   hairstyleDragState.active = false;
   hairstyleDragState.pointerId = null;
+  hairstyleDragState.moved = false;
   syncLidPosition(cupElement);
 }
 
@@ -1232,7 +1270,7 @@ function onSleevePointerUp(event) {
 
   if (isPointerOverTrashCan(event.clientX, event.clientY)) {
     removeSelectedObject();
-  } else if (sleeveIsNearCup()) {
+  } else if (sleeveIsNearCup(cupElement)) {
     cupState.sleeveDetached = false;
     cupState.sleeveOffsetX = 32;
     cupState.sleeveOffsetY = 160;

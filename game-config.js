@@ -25,6 +25,7 @@
   };
 
   const gameConfig = {
+    defaultCupState: JSON.parse(JSON.stringify(defaultCupState)),
     state: {
       currentScreen: "splash",
       activeWorld: null,

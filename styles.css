@@ -264,23 +264,18 @@ body {
 }
 
 .cup-character.is-selected {
-  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.96)) drop-shadow(0 0 34px rgba(97, 182, 255, 0.8));
-  transform: translateY(-2px);
+  filter: none;
+  transform: none;
 }
 
 .cup-character.is-selected::after {
-  content: "";
-  position: absolute;
-  inset: -8px;
-  border: 3px solid rgba(255, 255, 255, 0.9);
-  border-radius: 22px;
-  box-shadow: 0 0 0 3px rgba(97, 182, 255, 0.5);
-  pointer-events: none;
+  content: none;
+  display: none;
 }
 
 .cup-character.is-selected .cup-base,
 .cup-character.is-selected .cup-lid {
-  border-color: rgba(255, 255, 255, 0.95);
+  border-color: transparent;
 }
 
 .cup-character.hidden-object {
@@ -323,7 +318,7 @@ body {
   left: 14px;
   top: 0;
   border-radius: 40px 40px 20px 20px;
-  border: 4px solid rgba(255, 255, 255, 0.55);
+  border: none;
   background: #ff3c3c;
   display: block;
   cursor: grab;
@@ -338,7 +333,7 @@ body {
   left: 20px;
   top: 88px;
   border-radius: 22px;
-  border: 4px solid rgba(255, 255, 255, 0.45);
+  border: none;
   background: #3e80ff;
   display: block;
 }
@@ -377,8 +372,9 @@ body {
   top: -18px;
   border: none;
   background: transparent;
-  pointer-events: none;
+  cursor: grab;
   touch-action: none;
+  pointer-events: auto;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
