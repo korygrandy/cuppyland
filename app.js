@@ -714,8 +714,8 @@ function applyDrop(itemType, value, targetZone, targetCupId = state.activeCupId)
   return { valid: false, reason: "unknown-item" };
 }
 
-function applyInventorySelection(itemType, value) {
-  const result = applyDrop(itemType, value, itemType);
+function applyInventorySelection(itemType, value, targetCupId = state.activeCupId) {
+  const result = applyDrop(itemType, value, itemType, targetCupId);
   if (result.valid) {
     renderWorldCups();
     return true;
@@ -1094,7 +1094,8 @@ function onInventoryClick(event) {
   }
 
   event.preventDefault();
-  applyInventorySelection(target.dataset.itemType, target.dataset.value);
+  const targetCupId = state.activeCupId || getActiveCupInstance()?.id || null;
+  applyInventorySelection(target.dataset.itemType, target.dataset.value, targetCupId);
 }
 
 function onInventoryPointerMove(event) {
