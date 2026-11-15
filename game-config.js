@@ -8,12 +8,15 @@
         lidColor: "yellow",
         cupColor: "red",
         sleeve: "child",
+        expression: "happy",
         lidDetached: false,
         lidOffsetX: 17,
         lidOffsetY: 0,
         sleeveDetached: false,
-        sleeveOffsetX: 30,
-        sleeveOffsetY: 164,
+        sleeveOffsetX: 32,
+        sleeveOffsetY: 160,
+        faceOffsetX: 10,
+        faceOffsetY: 18,
       },
     },
     fixedViewport: {
@@ -28,24 +31,42 @@
       grandparent: "🤗",
     },
     sleeveAssetMap: {
-      child: "./assets/sleeve-default.png",
-      parent: "./assets/sleeve-default.png",
-      grandparent: "./assets/sleeve-default.png",
+      child: "./assets/sleeve-child.png",
+      parent: "./assets/sleeve-parent.png",
+      grandparent: "./assets/sleeve-grandparent.png",
+    },
+    expressionTypes: ["happy", "excited", "surprised"],
+    faceAssetMap: {
+      child: {
+        happy: "./assets/happy-facial-expression.png",
+        excited: "./assets/happy-facial-expression.png",
+        surprised: "./assets/happy-facial-expression.png",
+      },
+      parent: {
+        happy: "./assets/happy-facial-expression.png",
+        excited: "./assets/happy-facial-expression.png",
+        surprised: "./assets/happy-facial-expression.png",
+      },
+      grandparent: {
+        happy: "./assets/happy-facial-expression.png",
+        excited: "./assets/happy-facial-expression.png",
+        surprised: "./assets/happy-facial-expression.png",
+      },
     },
     sleevePalette: {
       child: {
         label: "child",
-        backgroundColor: "#f9d7bd",
+        backgroundColor: "#ffd94d",
         borderColor: "rgba(96, 44, 62, 0.45)",
       },
       parent: {
         label: "parent",
-        backgroundColor: "#ffd7e5",
+        backgroundColor: "#f5d14a",
         borderColor: "rgba(115, 56, 93, 0.55)",
       },
       grandparent: {
         label: "grandparent",
-        backgroundColor: "#e9ddff",
+        backgroundColor: "#f4ca21",
         borderColor: "rgba(111, 87, 147, 0.55)",
       },
     },
@@ -63,7 +84,7 @@
       lid: "./assets/lid-grayscale.png",
       cup: "./assets/cup-grayscale.png",
     },
-    defaultSleeveAsset: "./assets/sleeve-default.png",
+    defaultSleeveAsset: "./assets/sleeve-child.png",
     audioConfig: {
       menu: "./assets/Kailua_Breeze.mp3",
       worlds: {

@@ -21,6 +21,7 @@ const rotatePrompt = document.getElementById("rotatePrompt");
 const lidLayer = document.getElementById("lidLayer");
 const cupLayer = document.getElementById("cupLayer");
 const sleeveLayer = document.getElementById("sleeveLayer");
+const faceLayer = document.getElementById("faceLayer");
 const lidItems = document.getElementById("lidItems");
 const cupItems = document.getElementById("cupItems");
 const sleeveItems = document.getElementById("sleeveItems");
@@ -112,10 +113,54 @@ function syncLidPosition() {
 }
 
 function syncSleevePosition() {
-  const left = state.cup.sleeveDetached ? state.cup.sleeveOffsetX : 30;
-  const top = state.cup.sleeveDetached ? state.cup.sleeveOffsetY : 164;
+  const left = state.cup.sleeveDetached ? state.cup.sleeveOffsetX : 32;
+  const top = state.cup.sleeveDetached ? state.cup.sleeveOffsetY : 160;
   sleeveLayer.style.left = `${left}px`;
   sleeveLayer.style.top = `${top}px`;
+}
+
+function syncFacePosition() {
+  if (!faceLayer) {
+    return;
+  }
+
+  const left = state.cup.sleeveDetached ? state.cup.sleeveOffsetX : 32;
+  const top = state.cup.sleeveDetached ? state.cup.sleeveOffsetY : 160;
+  const faceOffsetX = state.cup.faceOffsetX ?? 10;
+  const faceOffsetY = state.cup.faceOffsetY ?? 18;
+
+  const sleeveAnchorX = left + (sleeveLayer.offsetWidth || 200) * 0.5;
+  const sleeveAnchorY = top + (sleeveLayer.offsetHeight || 110) * 0.45;
+  const faceCenterX = (faceLayer.offsetWidth || 120) * 0.5;
+  const faceCenterY = (faceLayer.offsetHeight || 90) * 0.5;
+
+  faceLayer.style.left = `${sleeveAnchorX - faceCenterX + faceOffsetX}px`;
+  faceLayer.style.top = `${sleeveAnchorY - faceCenterY + faceOffsetY}px`;
+}
+
+function drawTintedImage(canvas, src, colorHex) {
+  const context = canvas.getContext("2d");
+  if (!context) {
+    return;
+  }
+
+  const image = new Image();
+  image.onload = () => {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = colorHex;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    context.save();
+    context.globalCompositeOperation = "multiply";
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    context.restore();
+
+    context.save();
+    context.globalCompositeOperation = "destination-in";
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    context.restore();
+  };
+  image.src = src;
 }
 
 function renderCup() {
@@ -124,18 +169,26 @@ function renderCup() {
 
   const sleeveStyle = sleevePalette[state.cup.sleeve] || sleevePalette.child;
   const activeSleeveAsset = sleeveAssetMap[state.cup.sleeve] || defaultSleeveAsset;
+  const activeFaceAsset =
+    window.CuppyLandGame.faceAssetMap?.[state.cup.sleeve]?.[state.cup.expression || "happy"] ||
+    "./assets/mr-chocolate-milk-happy.jpg";
 
-  sleeveLayer.style.backgroundColor = "transparent";
-  sleeveLayer.style.border = "none";
-  sleeveLayer.style.backgroundImage = `url("${activeSleeveAsset}")`;
-  sleeveLayer.style.backgroundSize = "100% 100%";
-  sleeveLayer.style.backgroundPosition = "center";
-  sleeveLayer.style.backgroundRepeat = "no-repeat";
-  sleeveLayer.style.color = "transparent";
-  sleeveLayer.textContent = "";
+  drawTintedImage(sleeveLayer, activeSleeveAsset, "#d1b9ff");
+  sleeveLayer.style.width = "200px";
+  sleeveLayer.style.height = "110px";
+
+  if (faceLayer) {
+    faceLayer.style.backgroundColor = "transparent";
+    faceLayer.style.backgroundImage = `url("${activeFaceAsset}")`;
+    faceLayer.style.backgroundSize = "contain";
+    faceLayer.style.backgroundPosition = "center";
+    faceLayer.style.backgroundRepeat = "no-repeat";
+    faceLayer.textContent = "";
+  }
 
   syncLidPosition();
   syncSleevePosition();
+  syncFacePosition();
 }
 
 function drawSolidColorLayer(layer, colorHex) {
@@ -277,6 +330,11 @@ function applyDrop(itemType, value, targetZone) {
     return { valid: true };
   }
 
+  if (itemType === "expression") {
+    state.cup.expression = value;
+    return { valid: true };
+  }
+
   return { valid: false, reason: "unknown-item" };
 }
 
@@ -413,8 +471,8 @@ function onSleevePointerDown(event) {
   const parentRect = document.getElementById("cupCharacter").getBoundingClientRect();
   sleeveDragState.active = true;
   sleeveDragState.pointerId = event.pointerId;
-  sleeveDragState.initialLeft = state.cup.sleeveDetached ? state.cup.sleeveOffsetX : 30;
-  sleeveDragState.initialTop = state.cup.sleeveDetached ? state.cup.sleeveOffsetY : 164;
+  sleeveDragState.initialLeft = state.cup.sleeveDetached ? state.cup.sleeveOffsetX : 32;
+  sleeveDragState.initialTop = state.cup.sleeveDetached ? state.cup.sleeveOffsetY : 160;
   sleeveDragState.anchorX = event.clientX - parentRect.left;
   sleeveDragState.anchorY = event.clientY - parentRect.top;
   sleeveLayer.setPointerCapture(event.pointerId);
@@ -434,6 +492,7 @@ function onSleevePointerMove(event) {
   state.cup.sleeveOffsetX = nextLeft;
   state.cup.sleeveOffsetY = nextTop;
   syncSleevePosition();
+  syncFacePosition();
 }
 
 function onSleevePointerUp(event) {
@@ -443,13 +502,14 @@ function onSleevePointerUp(event) {
 
   if (sleeveIsNearCup()) {
     state.cup.sleeveDetached = false;
-    state.cup.sleeveOffsetX = 30;
-    state.cup.sleeveOffsetY = 164;
+    state.cup.sleeveOffsetX = 32;
+    state.cup.sleeveOffsetY = 160;
   }
 
   sleeveDragState.active = false;
   sleeveDragState.pointerId = null;
   syncSleevePosition();
+  syncFacePosition();
 }
 
 function onInventoryPointerDown(event) {

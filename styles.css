@@ -9,6 +9,7 @@
   --tablet-width: 1280;
   --tablet-height: 800;
   --game-scale: 1;
+  --cup-layer-scale: 1.5;
 }
 
 * {
@@ -300,16 +301,32 @@ body {
   left: 30px;
   top: 164px;
   border-radius: 14px;
-  background: rgba(255, 248, 160, 0.95);
-  border: 3px dashed rgba(0, 0, 0, 0.25);
+  background: transparent;
+  border: 0;
   color: #2d3649;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  text-transform: capitalize;
+  display: block;
   cursor: grab;
   touch-action: none;
+  transform: scale(1);
+  transform-origin: center center;
+}
+
+.cup-face {
+  position: absolute;
+  z-index: 4;
+  width: 120px;
+  height: 90px;
+  left: 40px;
+  top: 175px;
+  border: none;
+  background: transparent;
+  pointer-events: none;
+  touch-action: none;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  transform: scale(0.8);
+  transform-origin: center center;
 }
 
 .drop-zone {
@@ -457,9 +474,57 @@ body {
   letter-spacing: 0.02em;
 }
 
-.inventory-item.sleeve {
-  background: #ffe79f;
-  color: #2d3649;
+.inventory-item.sleeve,
+.inventory-item.expression {
+  background: rgba(255, 255, 255, 0.05);
+  color: #eef7ff;
+  text-transform: capitalize;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+}
+
+.inventory-sleeve-thumb,
+.inventory-expression-thumb {
+  position: relative;
+  width: 60px;
+  height: 42px;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.08);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  overflow: hidden;
+}
+
+.inventory-sleeve-face,
+.inventory-expression-thumb {
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.inventory-sleeve-face {
+  left: 10px;
+  right: 10px;
+  top: 8px;
+  bottom: 8px;
+}
+
+.inventory-expression-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background-size: cover;
+}
+
+.inventory-expression-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
   text-transform: capitalize;
 }
 
