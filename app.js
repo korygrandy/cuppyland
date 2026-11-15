@@ -572,7 +572,65 @@ function updateGameViewportScale() {
   document.documentElement.style.setProperty("--game-scale", String(scale));
 }
 
+function getCupElementAtPoint(x, y) {
+  const hitElement = document.elementFromPoint(x, y);
+  if (!hitElement) {
+    return null;
+  }
+
+  const cupElement = hitElement.closest(".cup-character[data-cup-id]");
+  if (cupElement) {
+    return cupElement;
+  }
+
+  const parentCup = hitElement.closest(".cup-lid, .cup-base, .cup-sleeve, .cup-hairstyle, .cup-face");
+  return parentCup ? parentCup.closest(".cup-character[data-cup-id]") : null;
+}
+
+function getDropZoneForCup(cupElement, x, y) {
+  if (!cupElement) {
+    return null;
+  }
+
+  const zoneCandidates = Array.from(cupElement.querySelectorAll(".drop-zone"));
+  for (const zone of zoneCandidates) {
+    const rect = zone.getBoundingClientRect();
+    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+      return zone.dataset.target;
+    }
+  }
+
+  const hitElement = document.elementFromPoint(x, y);
+  if (!hitElement) {
+    return null;
+  }
+
+  if (hitElement.closest(".cup-lid")) {
+    return "lid";
+  }
+  if (hitElement.closest(".cup-base")) {
+    return "cup";
+  }
+  if (hitElement.closest(".cup-sleeve")) {
+    return "sleeve";
+  }
+  if (hitElement.closest(".cup-hairstyle")) {
+    return "hairstyle";
+  }
+
+  return null;
+}
+
 function zoneForPoint(x, y) {
+  const hoveredCup = getCupElementAtPoint(x, y);
+  if (hoveredCup) {
+    const zone = getDropZoneForCup(hoveredCup, x, y);
+    if (zone) {
+      setActiveCupInstance(hoveredCup.dataset.cupId);
+      return zone;
+    }
+  }
+
   const zones = [dropZoneLid, dropZoneCup, dropZoneSleeve];
   for (const zone of zones) {
     const rect = zone.getBoundingClientRect();
@@ -602,12 +660,23 @@ function addCupToWorld() {
   return true;
 }
 
-function applyDrop(itemType, value, targetZone) {
+function applyDrop(itemType, value, targetZone, targetCupId = state.activeCupId) {
   if (itemType === "cup-create") {
     return addCupToWorld() ? { valid: true } : { valid: false, reason: "no-world" };
   }
 
-  const activeCupState = getTargetCupState();
+  if (!state.activeWorld) {
+    return { valid: false, reason: "no-world" };
+  }
+
+  const worldCups = getWorldCupList(state.activeWorld);
+  const selectedCup = worldCups.find((cup) => cup.id === targetCupId) || getActiveCupInstance() || worldCups[0];
+  if (!selectedCup) {
+    return { valid: false, reason: "no-cup" };
+  }
+
+  setActiveCupInstance(selectedCup.id);
+  const activeCupState = selectedCup.state;
   const isHairstyleDrop = itemType === "hairstyle" && (targetZone === "lid" || targetZone === "hairstyle");
 
   if (itemType !== targetZone && !isHairstyleDrop) {
@@ -1041,8 +1110,10 @@ function onInventoryPointerEnd(event) {
     return;
   }
 
+  const hoveredCup = getCupElementAtPoint(event.clientX, event.clientY);
+  const targetCupId = hoveredCup?.dataset.cupId || state.activeCupId;
   const zone = zoneForPoint(event.clientX, event.clientY);
-  const result = zone ? applyDrop(dragState.type, dragState.value, zone) : { valid: false, reason: "no-zone" };
+  const result = zone ? applyDrop(dragState.type, dragState.value, zone, targetCupId) : { valid: false, reason: "no-zone" };
 
   if (result.valid) {
     renderWorldCups();
