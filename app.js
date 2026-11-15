@@ -18,6 +18,8 @@ const closeModal = document.getElementById("closeModal");
 const confirmCloseBtn = document.getElementById("confirmCloseBtn");
 const cancelCloseBtn = document.getElementById("cancelCloseBtn");
 const rotatePrompt = document.getElementById("rotatePrompt");
+const worldCanvas = document.getElementById("worldCanvas");
+const cupCharacter = document.getElementById("cupCharacter");
 const lidLayer = document.getElementById("lidLayer");
 const cupLayer = document.getElementById("cupLayer");
 const hairstyleLayer = document.getElementById("hairstyleLayer");
@@ -27,6 +29,7 @@ const lidItems = document.getElementById("lidItems");
 const cupItems = document.getElementById("cupItems");
 const sleeveItems = document.getElementById("sleeveItems");
 const dragGhost = document.getElementById("dragGhost");
+const trashCanBtn = document.getElementById("trashCanBtn");
 const dropZoneLid = document.getElementById("dropZoneLid");
 const dropZoneCup = document.getElementById("dropZoneCup");
 const dropZoneSleeve = document.getElementById("dropZoneSleeve");
@@ -85,10 +88,174 @@ const sleeveDragState = {
   anchorX: 0,
   anchorY: 0,
 };
+const cupDragState = {
+  active: false,
+  pointerId: null,
+  startClientX: 0,
+  startClientY: 0,
+  startWorldX: 0,
+  startWorldY: 0,
+};
+const trashState = {
+  active: false,
+  target: null,
+};
 function syncAudioForCurrentScreen() {
   if (window.CuppyLandAudio && typeof window.CuppyLandAudio.syncAudioForCurrentScreen === "function") {
     window.CuppyLandAudio.syncAudioForCurrentScreen();
   }
+}
+
+function cloneCupState(source = state.cup) {
+  return JSON.parse(JSON.stringify(source || {}));
+}
+
+function getWorldCupList(worldId = state.activeWorld) {
+  const worldState = state.worlds?.[worldId];
+  if (!worldState) {
+    return [];
+  }
+  if (!Array.isArray(worldState.cups)) {
+    worldState.cups = [{ id: `cup-${worldId}-1`, state: cloneCupState(state.cup) }];
+  }
+  return worldState.cups;
+}
+
+function setActiveCupInstance(cupId) {
+  if (!state.activeWorld) {
+    return;
+  }
+
+  const worldCups = getWorldCupList(state.activeWorld);
+  const nextActiveCup = worldCups.find((cup) => cup.id === cupId) || worldCups[0];
+  if (!nextActiveCup) {
+    return;
+  }
+
+  state.activeCupId = nextActiveCup.id;
+  state.cup = nextActiveCup.state;
+}
+
+function getActiveCupInstance() {
+  const cups = getWorldCupList(state.activeWorld);
+  const activeCup = cups.find((cup) => cup.id === state.activeCupId) || cups[0];
+  if (!activeCup) {
+    return null;
+  }
+  return activeCup;
+}
+
+function syncWorldCupSelection() {
+  const activeCup = getActiveCupInstance();
+  if (activeCup) {
+    state.activeCupId = activeCup.id;
+    state.cup = activeCup.state;
+  }
+}
+
+function getTargetCupState() {
+  if (!state.activeWorld) {
+    return state.cup;
+  }
+
+  const activeCup = getActiveCupInstance();
+  if (activeCup) {
+    state.activeCupId = activeCup.id;
+    state.cup = activeCup.state;
+    return activeCup.state;
+  }
+
+  const worldCups = getWorldCupList(state.activeWorld);
+  if (!worldCups.length) {
+    return state.cup;
+  }
+
+  const fallbackCup = worldCups[0];
+  state.activeCupId = fallbackCup.id;
+  state.cup = fallbackCup.state;
+  return fallbackCup.state;
+}
+
+function createCupElement(cupId, cupState) {
+  const template = cupCharacter.cloneNode(true);
+  template.dataset.cupId = cupId;
+  template.id = `cupCharacter-${cupId}`;
+  template.classList.remove("hidden-object");
+  template.style.left = `${cupState.worldX}px`;
+  template.style.top = `${cupState.worldY}px`;
+
+  template.querySelectorAll("[id]").forEach((node) => {
+    const nextId = `${cupId}-${node.id}`;
+    node.id = nextId;
+    node.dataset.cupId = cupId;
+  });
+
+  const cupNode = template.querySelector(".cup-base");
+  if (cupNode) {
+    cupNode.dataset.cupId = cupId;
+  }
+
+  const lidNode = template.querySelector(".cup-lid");
+  if (lidNode) {
+    lidNode.dataset.cupId = cupId;
+  }
+
+  const sleeveNode = template.querySelector(".cup-sleeve");
+  if (sleeveNode) {
+    sleeveNode.dataset.cupId = cupId;
+  }
+
+  const hairstyleNode = template.querySelector(".cup-hairstyle");
+  if (hairstyleNode) {
+    hairstyleNode.dataset.cupId = cupId;
+  }
+
+  const faceNode = template.querySelector(".cup-face");
+  if (faceNode) {
+    faceNode.dataset.cupId = cupId;
+  }
+
+  template.addEventListener("pointerdown", (event) => onCupPointerDown(event, template));
+  template.addEventListener("pointermove", (event) => onCupPointerMove(event, template));
+  template.addEventListener("pointerup", (event) => onCupPointerUp(event, template));
+  template.addEventListener("pointercancel", (event) => onCupPointerUp(event, template));
+
+  template.querySelector(".cup-base")?.addEventListener("pointerdown", (event) => onCupPointerDown(event, template));
+  template.querySelector(".cup-base")?.addEventListener("pointermove", (event) => onCupPointerMove(event, template));
+  template.querySelector(".cup-base")?.addEventListener("pointerup", (event) => onCupPointerUp(event, template));
+  template.querySelector(".cup-base")?.addEventListener("pointercancel", (event) => onCupPointerUp(event, template));
+
+  template.querySelector(".cup-lid")?.addEventListener("pointerdown", (event) => onLidPointerDown(event, template));
+  template.querySelector(".cup-lid")?.addEventListener("pointermove", (event) => onLidPointerMove(event, template));
+  template.querySelector(".cup-lid")?.addEventListener("pointerup", (event) => onLidPointerUp(event, template));
+  template.querySelector(".cup-lid")?.addEventListener("pointercancel", (event) => onLidPointerUp(event, template));
+
+  template.querySelector(".cup-sleeve")?.addEventListener("pointerdown", (event) => onSleevePointerDown(event, template));
+  template.querySelector(".cup-sleeve")?.addEventListener("pointermove", (event) => onSleevePointerMove(event, template));
+  template.querySelector(".cup-sleeve")?.addEventListener("pointerup", (event) => onSleevePointerUp(event, template));
+  template.querySelector(".cup-sleeve")?.addEventListener("pointercancel", (event) => onSleevePointerUp(event, template));
+
+  return template;
+}
+
+function renderWorldCups() {
+  document.querySelectorAll(".cup-character[data-cup-id]").forEach((node) => node.remove());
+  const defaultCup = document.getElementById("cupCharacter");
+  if (defaultCup && !defaultCup.dataset.cupId) {
+    defaultCup.remove();
+  }
+  const worldCups = getWorldCupList(state.activeWorld);
+  if (!worldCups.length) {
+    return;
+  }
+
+  worldCups.forEach((cupInfo) => {
+    const cupElement = createCupElement(cupInfo.id, cupInfo.state);
+    worldCanvas.appendChild(cupElement);
+    renderCupInstance(cupInfo.state, cupElement);
+  });
+
+  syncWorldCupSelection();
 }
 
 function showScreen(screen) {
@@ -106,49 +273,72 @@ function updateWorldBackground() {
   }
 }
 
-function syncLidPosition() {
-  const left = state.cup.lidDetached ? state.cup.lidOffsetX : 17;
-  const top = state.cup.lidDetached ? state.cup.lidOffsetY : 0;
-  lidLayer.style.left = `${left}px`;
-  lidLayer.style.top = `${top}px`;
-  syncHairstylePosition();
+function resolveCupStateForElement(cupElement) {
+  if (cupElement && cupElement.dataset && cupElement.dataset.cupId && state.activeWorld) {
+    const matchingCup = getWorldCupList(state.activeWorld).find((cup) => cup.id === cupElement.dataset.cupId);
+    if (matchingCup) {
+      return matchingCup.state;
+    }
+  }
+  return state.cup;
 }
 
-function syncHairstylePosition() {
-  if (!hairstyleLayer) {
+function syncCupWorldPosition(cupElement = cupCharacter) {
+  const cupState = resolveCupStateForElement(cupElement);
+  if (!cupElement) {
     return;
   }
 
-  const left = state.cup.lidDetached ? state.cup.lidOffsetX : 17;
-  const top = state.cup.lidDetached ? state.cup.lidOffsetY : 0;
-  hairstyleLayer.style.left = `${left + 10}px`;
-  hairstyleLayer.style.top = `${top - 22}px`;
+  const worldX = Number.isFinite(cupState.worldX) ? cupState.worldX : 920;
+  const worldY = Number.isFinite(cupState.worldY) ? cupState.worldY : 430;
+  cupElement.style.left = `${worldX}px`;
+  cupElement.style.top = `${worldY}px`;
+  cupElement.style.bottom = "auto";
 }
 
-function syncSleevePosition() {
-  const left = state.cup.sleeveDetached ? state.cup.sleeveOffsetX : 32;
-  const top = state.cup.sleeveDetached ? state.cup.sleeveOffsetY : 160;
-  sleeveLayer.style.left = `${left}px`;
-  sleeveLayer.style.top = `${top}px`;
+function syncLidPosition(cupElement = cupCharacter) {
+  const cupState = resolveCupStateForElement(cupElement);
+  const lidLayerElement = cupElement.querySelector(".cup-lid") || lidLayer;
+  const hairstyleLayerElement = cupElement.querySelector(".cup-hairstyle") || hairstyleLayer;
+  const left = cupState.lidDetached ? cupState.lidOffsetX : 17;
+  const top = cupState.lidDetached ? cupState.lidOffsetY : 0;
+  lidLayerElement.style.left = `${left}px`;
+  lidLayerElement.style.top = `${top}px`;
+  if (hairstyleLayerElement) {
+    hairstyleLayerElement.style.left = `${left + 10}px`;
+    hairstyleLayerElement.style.top = `${top - 22}px`;
+  }
 }
 
-function syncFacePosition() {
-  if (!faceLayer) {
+function syncSleevePosition(cupElement = cupCharacter) {
+  const cupState = resolveCupStateForElement(cupElement);
+  const sleeveLayerElement = cupElement.querySelector(".cup-sleeve") || sleeveLayer;
+  const left = cupState.sleeveDetached ? cupState.sleeveOffsetX : 32;
+  const top = cupState.sleeveDetached ? cupState.sleeveOffsetY : 160;
+  sleeveLayerElement.style.left = `${left}px`;
+  sleeveLayerElement.style.top = `${top}px`;
+}
+
+function syncFacePosition(cupElement = cupCharacter) {
+  const cupState = resolveCupStateForElement(cupElement);
+  const sleeveLayerElement = cupElement.querySelector(".cup-sleeve") || sleeveLayer;
+  const faceLayerElement = cupElement.querySelector(".cup-face") || faceLayer;
+  if (!faceLayerElement) {
     return;
   }
 
-  const left = state.cup.sleeveDetached ? state.cup.sleeveOffsetX : 32;
-  const top = state.cup.sleeveDetached ? state.cup.sleeveOffsetY : 160;
-  const faceOffsetX = state.cup.faceOffsetX ?? 10;
-  const faceOffsetY = state.cup.faceOffsetY ?? 18;
+  const left = cupState.sleeveDetached ? cupState.sleeveOffsetX : 32;
+  const top = cupState.sleeveDetached ? cupState.sleeveOffsetY : 160;
+  const faceOffsetX = cupState.faceOffsetX ?? 10;
+  const faceOffsetY = cupState.faceOffsetY ?? 18;
 
-  const sleeveAnchorX = left + (sleeveLayer.offsetWidth || 200) * 0.5;
-  const sleeveAnchorY = top + (sleeveLayer.offsetHeight || 110) * 0.45;
-  const faceCenterX = (faceLayer.offsetWidth || 120) * 0.5;
-  const faceCenterY = (faceLayer.offsetHeight || 90) * 0.5;
+  const sleeveAnchorX = left + (sleeveLayerElement.offsetWidth || 200) * 0.5;
+  const sleeveAnchorY = top + (sleeveLayerElement.offsetHeight || 110) * 0.45;
+  const faceCenterX = (faceLayerElement.offsetWidth || 120) * 0.5;
+  const faceCenterY = (faceLayerElement.offsetHeight || 90) * 0.5;
 
-  faceLayer.style.left = `${sleeveAnchorX - faceCenterX + faceOffsetX}px`;
-  faceLayer.style.top = `${sleeveAnchorY - faceCenterY + faceOffsetY}px`;
+  faceLayerElement.style.left = `${sleeveAnchorX - faceCenterX + faceOffsetX}px`;
+  faceLayerElement.style.top = `${sleeveAnchorY - faceCenterY + faceOffsetY}px`;
 }
 
 function drawTintedImage(canvas, src, colorHex) {
@@ -176,44 +366,53 @@ function drawTintedImage(canvas, src, colorHex) {
   image.src = src;
 }
 
-function renderCup() {
-  renderTintedPart("lid", state.cup.lidColor);
-  renderTintedPart("cup", state.cup.cupColor);
+function renderCupInstance(cupState, cupElement = cupCharacter) {
+  const lidLayerElement = cupElement.querySelector(".cup-lid") || lidLayer;
+  const cupLayerElement = cupElement.querySelector(".cup-base") || cupLayer;
+  const sleeveLayerElement = cupElement.querySelector(".cup-sleeve") || sleeveLayer;
+  const hairstyleLayerElement = cupElement.querySelector(".cup-hairstyle") || hairstyleLayer;
+  const faceLayerElement = cupElement.querySelector(".cup-face") || faceLayer;
 
-  const sleeveStyle = sleevePalette[state.cup.sleeve] || sleevePalette.child;
-  const activeSleeveAsset = sleeveAssetMap[state.cup.sleeve] || defaultSleeveAsset;
+  renderTintedPartForCanvas("lid", cupState.lidColor, lidLayerElement);
+  renderTintedPartForCanvas("cup", cupState.cupColor, cupLayerElement);
+
+  const activeSleeveAsset = sleeveAssetMap[cupState.sleeve] || defaultSleeveAsset;
   const activeFaceAsset =
-    window.CuppyLandGame.faceAssetMap?.[state.cup.sleeve]?.[state.cup.expression || "happy"] ||
+    window.CuppyLandGame.faceAssetMap?.[cupState.sleeve]?.[cupState.expression || "happy"] ||
     "./assets/mr-chocolate-milk-happy.jpg";
   const activeHairstyleAsset =
-    window.CuppyLandGame.hairstyleAssetMap?.[state.cup.hairstyle || "child"] || "./assets/hairstyle-grandpa.png";
+    window.CuppyLandGame.hairstyleAssetMap?.[cupState.hairstyle || "child"] || "./assets/hairstyle-grandpa.png";
 
-  drawTintedImage(sleeveLayer, activeSleeveAsset, "#d1b9ff");
-  sleeveLayer.style.width = "200px";
-  sleeveLayer.style.height = "110px";
+  drawTintedImage(sleeveLayerElement, activeSleeveAsset, "#d1b9ff");
+  sleeveLayerElement.style.width = "200px";
+  sleeveLayerElement.style.height = "110px";
 
-  if (hairstyleLayer) {
-    hairstyleLayer.style.backgroundColor = "transparent";
-    hairstyleLayer.style.backgroundImage = `url("${activeHairstyleAsset}")`;
-    hairstyleLayer.style.backgroundSize = "contain";
-    hairstyleLayer.style.backgroundPosition = "center";
-    hairstyleLayer.style.backgroundRepeat = "no-repeat";
-    hairstyleLayer.textContent = "";
+  if (hairstyleLayerElement) {
+    hairstyleLayerElement.style.backgroundColor = "transparent";
+    hairstyleLayerElement.style.backgroundImage = `url("${activeHairstyleAsset}")`;
+    hairstyleLayerElement.style.backgroundSize = "contain";
+    hairstyleLayerElement.style.backgroundPosition = "center";
+    hairstyleLayerElement.style.backgroundRepeat = "no-repeat";
+    hairstyleLayerElement.textContent = "";
   }
 
-  if (faceLayer) {
-    faceLayer.style.backgroundColor = "transparent";
-    faceLayer.style.backgroundImage = `url("${activeFaceAsset}")`;
-    faceLayer.style.backgroundSize = "contain";
-    faceLayer.style.backgroundPosition = "center";
-    faceLayer.style.backgroundRepeat = "no-repeat";
-    faceLayer.textContent = "";
+  if (faceLayerElement) {
+    faceLayerElement.style.backgroundColor = "transparent";
+    faceLayerElement.style.backgroundImage = `url("${activeFaceAsset}")`;
+    faceLayerElement.style.backgroundSize = "contain";
+    faceLayerElement.style.backgroundPosition = "center";
+    faceLayerElement.style.backgroundRepeat = "no-repeat";
+    faceLayerElement.textContent = "";
   }
 
-  syncLidPosition();
-  syncSleevePosition();
-  syncHairstylePosition();
-  syncFacePosition();
+  syncCupWorldPosition(cupElement);
+  syncLidPosition(cupElement);
+  syncSleevePosition(cupElement);
+  syncFacePosition(cupElement);
+}
+
+function renderCup() {
+  renderCupInstance(state.cup, cupCharacter);
 }
 
 function drawSolidColorLayer(layer, colorHex) {
@@ -244,6 +443,15 @@ function renderTintedPart(part, colorName) {
   const layer = tintedLayers[part];
   const colorHex = colorMap[colorName];
   drawTintedLayer(layer, colorHex);
+}
+
+function renderTintedPartForCanvas(part, colorName, targetCanvas) {
+  const colorHex = colorMap[colorName];
+  const asset = part === "lid" ? tintAssetConfig.lid : tintAssetConfig.cup;
+  if (!targetCanvas) {
+    return;
+  }
+  drawTintedImage(targetCanvas, asset, colorHex);
 }
 
 function loadImage(src) {
@@ -284,9 +492,41 @@ function toggleInventory(forceOpen) {
   inventoryPanel.classList.toggle("open", state.inventoryOpen);
 }
 
+function ensureWorldCupState(worldId) {
+  if (!state.worlds) {
+    state.worlds = {};
+  }
+
+  if (!state.worlds[worldId]) {
+    state.worlds[worldId] = {
+      cups: [
+        {
+          id: `cup-${worldId}-1`,
+          state: cloneCupState(state.cup || window.CuppyLandGame.state.worlds?.[worldId]?.cups?.[0]?.state || {}),
+        },
+      ],
+    };
+  }
+
+  if (!Array.isArray(state.worlds[worldId].cups)) {
+    state.worlds[worldId].cups = [
+      {
+        id: `cup-${worldId}-1`,
+        state: cloneCupState(state.worlds[worldId] || state.cup || {}),
+      },
+    ];
+  }
+
+  return state.worlds[worldId];
+}
+
 function openWorld(worldId) {
+  const worldState = ensureWorldCupState(worldId);
   state.activeWorld = worldId;
+  state.activeCupId = worldState.cups[0]?.id || null;
+  state.cup = worldState.cups[0]?.state || cloneCupState();
   updateWorldBackground();
+  renderWorldCups();
   showScreen("world");
   toggleInventory(false);
   closeModal.classList.add("hidden");
@@ -295,6 +535,7 @@ function openWorld(worldId) {
 
 function closeWorld() {
   state.activeWorld = null;
+  state.activeCupId = null;
   toggleInventory(false);
   showScreen("worldSelect");
 }
@@ -332,7 +573,31 @@ function zoneForPoint(x, y) {
   return null;
 }
 
+function addCupToWorld() {
+  if (!state.activeWorld) {
+    return false;
+  }
+
+  const worldCups = getWorldCupList(state.activeWorld);
+  const nextId = `cup-${state.activeWorld}-${worldCups.length + 1}`;
+  const templateCupState = getTargetCupState();
+  const cupState = cloneCupState(templateCupState || worldCups[0]?.state || {});
+  const newCup = { id: nextId, state: cupState };
+  newCup.state.worldX = 900 + (worldCups.length * 90);
+  newCup.state.worldY = 430 + (worldCups.length % 2) * 30;
+  worldCups.push(newCup);
+  state.activeCupId = nextId;
+  state.cup = newCup.state;
+  renderWorldCups();
+  return true;
+}
+
 function applyDrop(itemType, value, targetZone) {
+  if (itemType === "cup-create") {
+    return addCupToWorld() ? { valid: true } : { valid: false, reason: "no-world" };
+  }
+
+  const activeCupState = getTargetCupState();
   const isHairstyleDrop = itemType === "hairstyle" && (targetZone === "lid" || targetZone === "hairstyle");
 
   if (itemType !== targetZone && !isHairstyleDrop) {
@@ -340,30 +605,30 @@ function applyDrop(itemType, value, targetZone) {
   }
 
   if (itemType === "lid") {
-    state.cup.lidColor = value;
+    activeCupState.lidColor = value;
     return { valid: true };
   }
 
   if (itemType === "cup") {
-    state.cup.cupColor = value;
+    activeCupState.cupColor = value;
     return { valid: true };
   }
 
   if (itemType === "sleeve") {
-    if (state.cup.sleeve === value) {
+    if (activeCupState.sleeve === value) {
       return { valid: false, reason: "duplicate-sleeve" };
     }
-    state.cup.sleeve = value;
+    activeCupState.sleeve = value;
     return { valid: true };
   }
 
   if (itemType === "expression") {
-    state.cup.expression = value;
+    activeCupState.expression = value;
     return { valid: true };
   }
 
   if (itemType === "hairstyle") {
-    state.cup.hairstyle = value;
+    activeCupState.hairstyle = value;
     return { valid: true };
   }
 
@@ -373,7 +638,7 @@ function applyDrop(itemType, value, targetZone) {
 function applyInventorySelection(itemType, value) {
   const result = applyDrop(itemType, value, itemType);
   if (result.valid) {
-    renderCup();
+    renderWorldCups();
     return true;
   }
 
@@ -400,6 +665,25 @@ function clearZoneHighlights() {
   [dropZoneLid, dropZoneCup, dropZoneSleeve].forEach((zone) => zone.classList.remove("highlight"));
 }
 
+function safeClosest(target, selector) {
+  if (!target || typeof target.closest !== "function") {
+    return null;
+  }
+  return target.closest(selector);
+}
+
+function trySetPointerCapture(element, pointerId) {
+  if (!element || typeof pointerId !== "number") {
+    return;
+  }
+
+  try {
+    element.setPointerCapture(pointerId);
+  } catch (error) {
+    // Some synthetic or touch events can arrive without a valid active pointer capture.
+  }
+}
+
 function showDragGhost(pointerX, pointerY, label) {
   dragGhost.textContent = label;
   dragGhost.classList.remove("hidden");
@@ -424,36 +708,176 @@ function showInvalidFeedback() {
   sleeveLayer.classList.add("invalid-shake");
 }
 
+function showTrashCan(target) {
+  if (!trashCanBtn) {
+    return;
+  }
+
+  trashState.active = true;
+  trashState.target = target;
+  trashCanBtn.classList.remove("hidden");
+  trashCanBtn.setAttribute("data-target", target);
+}
+
+function hideTrashCan() {
+  if (!trashCanBtn) {
+    return;
+  }
+
+  trashState.active = false;
+  trashState.target = null;
+  trashCanBtn.classList.add("hidden");
+  trashCanBtn.removeAttribute("data-target");
+  trashCanBtn.classList.remove("highlight");
+}
+
+function isPointerOverTrashCan(x, y) {
+  if (!trashCanBtn || trashCanBtn.classList.contains("hidden")) {
+    return false;
+  }
+
+  const rect = trashCanBtn.getBoundingClientRect();
+  return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+}
+
+function removeSelectedObject() {
+  if (!trashState.target) {
+    return;
+  }
+
+  if (trashState.target === "cup") {
+    cupCharacter.classList.add("hidden-object");
+    return;
+  }
+
+  if (trashState.target === "lid") {
+    lidLayer.style.display = "none";
+    hairstyleLayer.style.display = "none";
+  }
+
+  if (trashState.target === "sleeve") {
+    sleeveLayer.style.display = "none";
+    faceLayer.style.display = "none";
+  }
+
+  if (trashState.target === "hairstyle") {
+    hairstyleLayer.style.display = "none";
+  }
+
+  hideTrashCan();
+}
+
+function onCupPointerDown(event) {
+  const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
+  const cupState = resolveCupStateForElement(cupElement);
+  if (state.currentScreen !== "world" || safeClosest(event.target, ".inventory-item")) {
+    return;
+  }
+
+  const interactiveChild = safeClosest(event.target, ".cup-lid, .cup-sleeve, .cup-hairstyle, .cup-face, .drop-zone");
+  if (interactiveChild) {
+    return;
+  }
+
+  if (cupElement && cupElement.dataset.cupId) {
+    setActiveCupInstance(cupElement.dataset.cupId);
+  }
+
+  event.preventDefault();
+  event.stopPropagation();
+  showTrashCan("cup");
+  cupDragState.active = true;
+  cupDragState.pointerId = event.pointerId;
+  cupDragState.startClientX = event.clientX;
+  cupDragState.startClientY = event.clientY;
+  cupDragState.startWorldX = Number.isFinite(cupState.worldX) ? cupState.worldX : 920;
+  cupDragState.startWorldY = Number.isFinite(cupState.worldY) ? cupState.worldY : 430;
+  if (cupElement) {
+    trySetPointerCapture(cupElement, event.pointerId);
+  }
+}
+
+function onCupPointerMove(event) {
+  const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
+  const cupState = resolveCupStateForElement(cupElement);
+  if (!cupDragState.active || event.pointerId !== cupDragState.pointerId || !worldCanvas || !cupElement) {
+    return;
+  }
+
+  const deltaX = event.clientX - cupDragState.startClientX;
+  const deltaY = event.clientY - cupDragState.startClientY;
+  const bounds = worldCanvas.getBoundingClientRect();
+  const maxX = Math.max(0, bounds.width - cupElement.offsetWidth);
+  const maxY = Math.max(0, bounds.height - cupElement.offsetHeight);
+  const nextX = Math.min(maxX, Math.max(0, cupDragState.startWorldX + deltaX));
+  const nextY = Math.min(maxY, Math.max(0, cupDragState.startWorldY + deltaY));
+  cupState.worldX = nextX;
+  cupState.worldY = nextY;
+  syncCupWorldPosition(cupElement);
+
+  if (trashState.active && isPointerOverTrashCan(event.clientX, event.clientY)) {
+    trashCanBtn.classList.add("highlight");
+  } else if (trashCanBtn) {
+    trashCanBtn.classList.remove("highlight");
+  }
+}
+
+function onCupPointerUp(event) {
+  if (!cupDragState.active || event.pointerId !== cupDragState.pointerId) {
+    return;
+  }
+
+  const pointerIsOverTrash = isPointerOverTrashCan(event.clientX, event.clientY);
+  if (pointerIsOverTrash) {
+    removeSelectedObject();
+  } else {
+    trashCanBtn.classList.remove("highlight");
+  }
+
+  cupDragState.active = false;
+  cupDragState.pointerId = null;
+}
+
 function onLidPointerDown(event) {
+  const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
+  const cupState = resolveCupStateForElement(cupElement);
   if (state.currentScreen !== "world") {
     return;
   }
 
+  if (cupElement && cupElement.dataset.cupId) {
+    setActiveCupInstance(cupElement.dataset.cupId);
+  }
+
+  showTrashCan("lid");
   event.preventDefault();
-  const parentRect = document.getElementById("cupCharacter").getBoundingClientRect();
+  event.stopPropagation();
+  const parentRect = cupElement.getBoundingClientRect();
   lidDragState.active = true;
   lidDragState.pointerId = event.pointerId;
-  lidDragState.initialLeft = state.cup.lidDetached ? state.cup.lidOffsetX : 17;
-  lidDragState.initialTop = state.cup.lidDetached ? state.cup.lidOffsetY : 0;
+  lidDragState.initialLeft = cupState.lidDetached ? cupState.lidOffsetX : 17;
+  lidDragState.initialTop = cupState.lidDetached ? cupState.lidOffsetY : 0;
   lidDragState.anchorX = event.clientX - parentRect.left;
   lidDragState.anchorY = event.clientY - parentRect.top;
-  lidLayer.setPointerCapture(event.pointerId);
+  trySetPointerCapture(event.currentTarget, event.pointerId);
 }
 
 function onLidPointerMove(event) {
+  const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
+  const cupState = resolveCupStateForElement(cupElement);
   if (!lidDragState.active || event.pointerId !== lidDragState.pointerId) {
     return;
   }
 
-  const parentRect = document.getElementById("cupCharacter").getBoundingClientRect();
+  const parentRect = cupElement.getBoundingClientRect();
   const localX = event.clientX - parentRect.left;
   const localY = event.clientY - parentRect.top;
   const nextLeft = Math.max(-60, Math.min(200, lidDragState.initialLeft + (localX - lidDragState.anchorX)));
   const nextTop = Math.max(-80, Math.min(120, lidDragState.initialTop + (localY - lidDragState.anchorY)));
-  state.cup.lidDetached = true;
-  state.cup.lidOffsetX = nextLeft;
-  state.cup.lidOffsetY = nextTop;
-  syncLidPosition();
+  cupState.lidDetached = true;
+  cupState.lidOffsetX = nextLeft;
+  cupState.lidOffsetY = nextTop;
+  syncLidPosition(cupElement);
 }
 
 function lidIsNearCup() {
@@ -479,69 +903,89 @@ function sleeveIsNearCup() {
 }
 
 function onLidPointerUp(event) {
+  const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
+  const cupState = resolveCupStateForElement(cupElement);
   if (!lidDragState.active || event.pointerId !== lidDragState.pointerId) {
     return;
   }
 
-  if (lidIsNearCup()) {
-    state.cup.lidDetached = false;
-    state.cup.lidOffsetX = 17;
-    state.cup.lidOffsetY = 0;
+  if (isPointerOverTrashCan(event.clientX, event.clientY)) {
+    removeSelectedObject();
+  } else if (lidIsNearCup()) {
+    cupState.lidDetached = false;
+    cupState.lidOffsetX = 17;
+    cupState.lidOffsetY = 0;
   }
 
+  trashCanBtn.classList.remove("highlight");
   lidDragState.active = false;
   lidDragState.pointerId = null;
-  syncLidPosition();
+  syncLidPosition(cupElement);
 }
 
 function onSleevePointerDown(event) {
+  const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
+  const cupState = resolveCupStateForElement(cupElement);
   if (state.currentScreen !== "world") {
     return;
   }
 
+  if (cupElement && cupElement.dataset.cupId) {
+    setActiveCupInstance(cupElement.dataset.cupId);
+  }
+
+  showTrashCan("sleeve");
   event.preventDefault();
-  const parentRect = document.getElementById("cupCharacter").getBoundingClientRect();
+  event.stopPropagation();
+  const parentRect = cupElement.getBoundingClientRect();
   sleeveDragState.active = true;
   sleeveDragState.pointerId = event.pointerId;
-  sleeveDragState.initialLeft = state.cup.sleeveDetached ? state.cup.sleeveOffsetX : 32;
-  sleeveDragState.initialTop = state.cup.sleeveDetached ? state.cup.sleeveOffsetY : 160;
+  sleeveDragState.initialLeft = cupState.sleeveDetached ? cupState.sleeveOffsetX : 32;
+  sleeveDragState.initialTop = cupState.sleeveDetached ? cupState.sleeveOffsetY : 160;
   sleeveDragState.anchorX = event.clientX - parentRect.left;
   sleeveDragState.anchorY = event.clientY - parentRect.top;
-  sleeveLayer.setPointerCapture(event.pointerId);
+  trySetPointerCapture(event.currentTarget, event.pointerId);
 }
 
 function onSleevePointerMove(event) {
+  const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
+  const cupState = resolveCupStateForElement(cupElement);
   if (!sleeveDragState.active || event.pointerId !== sleeveDragState.pointerId) {
     return;
   }
 
-  const parentRect = document.getElementById("cupCharacter").getBoundingClientRect();
+  const parentRect = cupElement.getBoundingClientRect();
   const localX = event.clientX - parentRect.left;
   const localY = event.clientY - parentRect.top;
   const nextLeft = Math.max(-60, Math.min(200, sleeveDragState.initialLeft + (localX - sleeveDragState.anchorX)));
   const nextTop = Math.max(-20, Math.min(220, sleeveDragState.initialTop + (localY - sleeveDragState.anchorY)));
-  state.cup.sleeveDetached = true;
-  state.cup.sleeveOffsetX = nextLeft;
-  state.cup.sleeveOffsetY = nextTop;
-  syncSleevePosition();
-  syncFacePosition();
+  cupState.sleeveDetached = true;
+  cupState.sleeveOffsetX = nextLeft;
+  cupState.sleeveOffsetY = nextTop;
+  syncSleevePosition(cupElement);
+  syncFacePosition(cupElement);
 }
 
 function onSleevePointerUp(event) {
+  const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
+  const cupState = resolveCupStateForElement(cupElement);
   if (!sleeveDragState.active || event.pointerId !== sleeveDragState.pointerId) {
     return;
   }
 
-  if (sleeveIsNearCup()) {
-    state.cup.sleeveDetached = false;
-    state.cup.sleeveOffsetX = 32;
-    state.cup.sleeveOffsetY = 160;
+  if (isPointerOverTrashCan(event.clientX, event.clientY)) {
+    removeSelectedObject();
+  } else if (sleeveIsNearCup()) {
+    cupState.sleeveDetached = false;
+    cupState.sleeveOffsetX = 32;
+    cupState.sleeveOffsetY = 160;
   }
 
+  trashCanBtn.classList.remove("highlight");
   sleeveDragState.active = false;
   sleeveDragState.pointerId = null;
-  syncSleevePosition();
-  syncFacePosition();
+  syncSleevePosition(cupElement);
+  syncFacePosition(cupElement);
 }
 
 function onInventoryPointerDown(event) {
@@ -550,12 +994,16 @@ function onInventoryPointerDown(event) {
     return;
   }
 
+  if (target.dataset.itemType === "cup-create") {
+    return;
+  }
+
   event.preventDefault();
   dragState.active = true;
   dragState.type = target.dataset.itemType;
   dragState.value = target.dataset.value;
   dragState.pointerId = event.pointerId;
-  target.setPointerCapture(event.pointerId);
+  trySetPointerCapture(target, event.pointerId);
   showDragGhost(event.clientX, event.clientY, `${dragState.type}: ${dragState.value}`);
   setZoneHighlight(event.clientX, event.clientY);
 }
@@ -587,7 +1035,7 @@ function onInventoryPointerEnd(event) {
   const result = zone ? applyDrop(dragState.type, dragState.value, zone) : { valid: false, reason: "no-zone" };
 
   if (result.valid) {
-    renderCup();
+    renderWorldCups();
   } else {
     showInvalidFeedback();
   }
@@ -640,6 +1088,16 @@ function wireEvents() {
     updateGameViewportScale();
   });
 
+  cupCharacter.addEventListener("pointerdown", onCupPointerDown);
+  cupCharacter.addEventListener("pointermove", onCupPointerMove);
+  cupCharacter.addEventListener("pointerup", onCupPointerUp);
+  cupCharacter.addEventListener("pointercancel", onCupPointerUp);
+
+  cupLayer.addEventListener("pointerdown", onCupPointerDown);
+  cupLayer.addEventListener("pointermove", onCupPointerMove);
+  cupLayer.addEventListener("pointerup", onCupPointerUp);
+  cupLayer.addEventListener("pointercancel", onCupPointerUp);
+
   lidLayer.addEventListener("pointerdown", onLidPointerDown);
   lidLayer.addEventListener("pointermove", onLidPointerMove);
   lidLayer.addEventListener("pointerup", onLidPointerUp);
@@ -659,6 +1117,19 @@ function wireEvents() {
   sfxVolumeInput.addEventListener("input", window.CuppyLandAudio.handleSfxVolumeChange);
   musicMuteBtn.addEventListener("click", window.CuppyLandAudio.toggleMusicMute);
   sfxMuteBtn.addEventListener("click", window.CuppyLandAudio.toggleSfxMute);
+  worldCanvas.addEventListener("pointerdown", (event) => {
+    if (
+      !safeClosest(event.target, "#trashCanBtn") &&
+      !safeClosest(event.target, ".cup-lid") &&
+      !safeClosest(event.target, ".cup-sleeve") &&
+      !safeClosest(event.target, ".cup-character")
+    ) {
+      hideTrashCan();
+    }
+  });
+  trashCanBtn.addEventListener("click", () => {
+    removeSelectedObject();
+  });
 }
 
 function init() {

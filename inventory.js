@@ -81,6 +81,17 @@
     return item;
   }
 
+  function createAddCupItem() {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "inventory-item add-cup";
+    item.dataset.itemType = "cup-create";
+    item.dataset.value = "new-cup";
+    item.setAttribute("aria-label", "Add a new cup");
+    item.textContent = "+ Cup";
+    return item;
+  }
+
   function buildInventoryItems() {
     const lidItems = document.getElementById("lidItems");
     const cupItems = document.getElementById("cupItems");
@@ -110,6 +121,14 @@
     hairstyleTypes.forEach((hairstyleName) => {
       hairstyleItems.appendChild(createHairstyleItem(hairstyleName));
     });
+
+    const addCupGroup = document.createElement("div");
+    addCupGroup.className = "inventory-group";
+    addCupGroup.innerHTML = "<h3>Cup Crew</h3><div class=\"items-row\"></div>";
+    addCupGroup.querySelector(".items-row").appendChild(createAddCupItem());
+    const inventoryPanel = document.getElementById("inventoryPanel");
+    const audioGroup = inventoryPanel.querySelectorAll(".inventory-group")[inventoryPanel.querySelectorAll(".inventory-group").length - 1];
+    inventoryPanel.insertBefore(addCupGroup, audioGroup);
   }
 
   window.CuppyLandInventory = {
@@ -117,6 +136,7 @@
     createSleeveItem,
     createExpressionItem,
     createHairstyleItem,
+    createAddCupItem,
     buildInventoryItems,
   };
 })();
