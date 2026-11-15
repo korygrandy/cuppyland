@@ -129,6 +129,10 @@ interface GameState {
 - Scene/state manager for screen transitions.
 - Touch input layer using Pointer Events.
 - Drag-drop system with explicit snap zones and validators.
+- Audio engine with bus routing:
+  - Master bus
+  - Music bus (looped background tracks, screen/world-aware transitions)
+  - SFX bus (UI and interaction feedback)
 - Render strategy:
   - DOM/CSS layered sprites for simplicity, or
   - single canvas with retained object model.

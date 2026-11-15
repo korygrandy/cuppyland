@@ -1,6 +1,12 @@
 (function () {
   const game = window.CuppyLandGame;
   const { audioConfig } = game;
+  const audioEngine = window.CuppyLandAudioEngine.createAudioEngine({
+    initialMusicVolume: 0.7,
+    initialSfxVolume: 0.75,
+    initialMasterVolume: 1,
+    transitions: audioConfig.transitions || {},
+  });
 
   const audioState = {
     unlocked: false,
@@ -11,8 +17,8 @@
     previousSfxVolume: 0.75,
   };
 
-  let sfxAudioContext = null;
   const audioStorageKey = "oliviaworld-audio-settings-v1";
+  const playerToTrackName = new WeakMap();
 
   const sfxProfiles = {
     standard: [
@@ -42,17 +48,6 @@
       musicMuteBtn: document.getElementById("musicMuteBtn"),
       sfxMuteBtn: document.getElementById("sfxMuteBtn"),
     };
-  }
-
-  function getSfxAudioContext() {
-    if (!sfxAudioContext) {
-      const Ctx = window.AudioContext || window.webkitAudioContext;
-      if (!Ctx) {
-        return null;
-      }
-      sfxAudioContext = new Ctx();
-    }
-    return sfxAudioContext;
   }
 
   function createAudioPlayer(src) {
@@ -91,15 +86,19 @@
       "olivia-room": createAudioPlayer(audioConfig.worlds["olivia-room"]),
     },
   };
+  audioEngine.registerMusicTrack("menu", audioPlayers.menu);
+  audioEngine.registerMusicTrack("playground", audioPlayers.worlds.playground);
+  audioEngine.registerMusicTrack("olivia-room", audioPlayers.worlds["olivia-room"]);
+  playerToTrackName.set(audioPlayers.menu, "menu");
+  playerToTrackName.set(audioPlayers.worlds.playground, "playground");
+  playerToTrackName.set(audioPlayers.worlds["olivia-room"], "olivia-room");
 
   function getAllAudioPlayers() {
     return [audioPlayers.menu, audioPlayers.worlds.playground, audioPlayers.worlds["olivia-room"]];
   }
 
   function applyMusicVolume() {
-    getAllAudioPlayers().forEach((player) => {
-      player.volume = audioState.musicVolume;
-    });
+    audioEngine.setMusicVolume(audioState.musicVolume);
   }
 
   function updateAudioVolumeLabels() {
@@ -185,6 +184,7 @@
     if (volume > 0) {
       audioState.previousSfxVolume = volume;
     }
+    audioEngine.setSfxVolume(audioState.sfxVolume);
     updateAudioVolumeLabels();
     saveAudioSettings();
     playSfx("standard");
@@ -213,61 +213,30 @@
       audioState.previousSfxVolume = audioState.sfxVolume;
       audioState.sfxVolume = 0;
     }
+    audioEngine.setSfxVolume(audioState.sfxVolume);
     syncAudioControlsUi();
     saveAudioSettings();
-  }
-
-  function pauseAllAudio() {
-    getAllAudioPlayers().forEach((player) => {
-      player.pause();
-    });
   }
 
   function playSfx(profileName) {
     if (audioState.sfxVolume <= 0) {
       return;
     }
-
-    const context = getSfxAudioContext();
-    if (!context) {
-      return;
-    }
-
     const profile = sfxProfiles[profileName] || sfxProfiles.standard;
-    const baseTime = context.currentTime;
-    profile.forEach((tone) => {
-      const oscillator = context.createOscillator();
-      const gainNode = context.createGain();
-      const startAt = baseTime + tone.offset;
-      const endAt = startAt + tone.duration;
-
-      oscillator.type = tone.type;
-      oscillator.frequency.setValueAtTime(tone.frequency, startAt);
-      const scaledGain = tone.gain * audioState.sfxVolume;
-      gainNode.gain.setValueAtTime(0.0001, startAt);
-      gainNode.gain.exponentialRampToValueAtTime(scaledGain, startAt + 0.01);
-      gainNode.gain.exponentialRampToValueAtTime(0.0001, endAt);
-
-      oscillator.connect(gainNode);
-      gainNode.connect(context.destination);
-      oscillator.start(startAt);
-      oscillator.stop(endAt + 0.01);
-    });
+    audioEngine.playSfx(profile);
   }
 
   function playAudioTrack(player, trackName) {
-    if (audioState.activeTrack === trackName && !player.paused) {
+    const resolvedTrack = trackName || playerToTrackName.get(player);
+    if (!resolvedTrack) {
       return;
     }
 
-    pauseAllAudio();
-    audioState.activeTrack = trackName;
-    const playPromise = player.play();
-    if (playPromise && typeof playPromise.catch === "function") {
-      playPromise.catch((error) => {
-        console.warn(`Unable to play audio track "${trackName}".`, error);
-      });
+    if (audioState.activeTrack === resolvedTrack && player && !player.paused) {
+      return;
     }
+    audioState.activeTrack = resolvedTrack;
+    audioEngine.playMusic(resolvedTrack);
   }
 
   function syncAudioForCurrentScreen() {
@@ -302,17 +271,23 @@
     }
 
     audioState.unlocked = true;
-    const context = getSfxAudioContext();
-    if (context && context.state === "suspended") {
-      context.resume().catch((error) => {
-        console.warn("Unable to resume button SFX audio context.", error);
-      });
-    }
+    audioEngine.unlock();
+    audioEngine.setMusicVolume(audioState.musicVolume);
+    audioEngine.setSfxVolume(audioState.sfxVolume);
     syncAudioForCurrentScreen();
   }
 
+  function pauseAllAudio() {
+    audioEngine.stopAllMusic();
+    audioState.activeTrack = null;
+  }
+
+  audioEngine.setMusicVolume(audioState.musicVolume);
+  audioEngine.setSfxVolume(audioState.sfxVolume);
+
   window.CuppyLandAudio = {
     audioState,
+    audioEngine,
     createAudioPlayer,
     getAllAudioPlayers,
     applyMusicVolume,

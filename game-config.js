@@ -119,6 +119,10 @@
         playground: ["./assets/playgound.mp3", "./assets/playground.mp3"],
         "olivia-room": "./assets/olivias-room.mp3",
       },
+      transitions: {
+        fadeOutMs: 220,
+        fadeInMs: 260,
+      },
     },
   };
 
