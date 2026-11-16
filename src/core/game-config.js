@@ -159,6 +159,13 @@
       playground: "playground",
       "olivia-room": "olivia-room",
     },
+    worldHeadlineConfig: {
+      durationMs: 3000,
+      fadeOutMs: 700,
+      assets: {
+        "olivia-room": "./assets/olivia-room-headline.png",
+      },
+    },
     tintAssetConfig: {
       lid: "./assets/lid-grayscale.png",
       cup: "./assets/cup-grayscale.png",

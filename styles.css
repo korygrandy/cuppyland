@@ -158,7 +158,7 @@ body {
 
 .world-card[data-world="olivia-room"] {
   background-image: linear-gradient(180deg, rgba(79, 12, 55, 0.02), rgba(79, 12, 55, 0.24)),
-    url("./assets/olivias-room-bg.jpg");
+    url("./assets/bg-olivia-room.jpg");
 }
 
 .world-name {
@@ -250,7 +250,31 @@ body {
 }
 
 .world-bg.olivia-room {
-  background-image: url("./assets/olivias-room-bg.jpg");
+  background-image: url("./assets/bg-olivia-room.jpg");
+}
+
+.world-headline-overlay {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(50vw, 640px);
+  height: min(40vh, 320px);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  z-index: 1205;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  transition: opacity 700ms ease;
+}
+
+.world-headline-overlay.visible {
+  opacity: 1;
+}
+
+.world-headline-overlay.fading {
+  opacity: 0;
 }
 
 .cup-character {

@@ -8,6 +8,7 @@ const {
   sleevePalette,
   colorMap,
   worldClasses,
+  worldHeadlineConfig,
   gameplayConfig,
   defaultCupState,
   chocolateMilkSequence,
@@ -26,6 +27,7 @@ const closeWorldBtn = document.getElementById("closeWorldBtn");
 const inventoryToggleBtn = document.getElementById("inventoryToggleBtn");
 const inventoryPanel = document.getElementById("inventoryPanel");
 const worldBackground = document.getElementById("worldBackground");
+const worldHeadlineOverlay = document.getElementById("worldHeadlineOverlay");
 const worldViewport = document.getElementById("worldViewport");
 const closeModal = document.getElementById("closeModal");
 const confirmCloseBtn = document.getElementById("confirmCloseBtn");
@@ -108,6 +110,8 @@ const chocolateMilkDragFillState = {
   frame: 2,
   overlay: null,
 };
+let worldHeadlineFadeTimerId = null;
+let worldHeadlineHideTimerId = null;
 const cupStateStore = window.CuppyLandCupState.createStore({
   gameConfig: window.CuppyLandGame,
   state,
@@ -499,6 +503,51 @@ function stopAllChocolateMilkSequences() {
   Array.from(chocolateMilkRuntime.keys()).forEach((friendId) => stopChocolateMilkSequence(friendId));
 }
 
+function clearWorldHeadlineTimers() {
+  if (worldHeadlineFadeTimerId) {
+    clearTimeout(worldHeadlineFadeTimerId);
+    worldHeadlineFadeTimerId = null;
+  }
+  if (worldHeadlineHideTimerId) {
+    clearTimeout(worldHeadlineHideTimerId);
+    worldHeadlineHideTimerId = null;
+  }
+}
+
+function hideWorldHeadlineOverlay() {
+  if (!worldHeadlineOverlay) {
+    return;
+  }
+  clearWorldHeadlineTimers();
+  worldHeadlineOverlay.classList.remove("visible", "fading");
+  worldHeadlineOverlay.style.backgroundImage = "";
+}
+
+function showWorldHeadlineOverlay(worldId) {
+  if (!worldHeadlineOverlay) {
+    return;
+  }
+
+  hideWorldHeadlineOverlay();
+  const headlineAsset = worldHeadlineConfig?.assets?.[worldId] || "";
+  if (!headlineAsset) {
+    return;
+  }
+
+  const displayMs = worldHeadlineConfig?.durationMs ?? 3000;
+  const fadeMs = worldHeadlineConfig?.fadeOutMs ?? 700;
+  worldHeadlineOverlay.style.transitionDuration = `${fadeMs}ms`;
+  worldHeadlineOverlay.style.backgroundImage = `url("${headlineAsset}")`;
+  worldHeadlineOverlay.classList.add("visible");
+  worldHeadlineHideTimerId = setTimeout(() => {
+    worldHeadlineOverlay.classList.add("fading");
+    worldHeadlineOverlay.classList.remove("visible");
+    worldHeadlineFadeTimerId = setTimeout(() => {
+      hideWorldHeadlineOverlay();
+    }, fadeMs);
+  }, displayMs);
+}
+
 function ensureCupLayerOrder(cupState, fallbackOrder = 1) {
   return cupStateStore.ensureCupLayerOrder(cupState, fallbackOrder);
 }
@@ -631,6 +680,20 @@ function removeFriendInstance(friendId) {
   renderWorldCups();
 }
 
+function setFriendDragVisual(friendElement, friendState, isDragging) {
+  if (!friendElement || !friendState || friendState.type !== "chocolate-milk") {
+    return;
+  }
+
+  const friendArt = friendElement.querySelector(".friend-character-art");
+  if (!friendArt) {
+    return;
+  }
+
+  friendArt.style.transform = isDragging ? "rotate(-45deg)" : "";
+  friendArt.style.transformOrigin = isDragging ? "center center" : "";
+}
+
 function onFriendPointerDown(event) {
   if (state.currentScreen !== "world") {
     return;
@@ -658,6 +721,7 @@ function onFriendPointerDown(event) {
     friendState.sequenceCompleted = false;
     stopChocolateMilkSequence(friendState.id);
   }
+  setFriendDragVisual(friendElement, friendState, true);
   trySetPointerCapture(friendElement, event.pointerId);
 }
 
@@ -694,6 +758,10 @@ function onFriendPointerUp(event) {
   if (!friendDragState.active || event.pointerId !== friendDragState.pointerId) {
     return;
   }
+
+  const friendElement = event.currentTarget.closest(".friend-character");
+  const friendState = resolveFriendStateForElement(friendElement);
+  setFriendDragVisual(friendElement, friendState, false);
 
   if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
     removeFriendInstance(friendDragState.friendId);
@@ -978,12 +1046,14 @@ function ensureWorldCupState(worldId) {
 
 function openWorld(worldId) {
   screenWorldController.openWorld(worldId);
+  showWorldHeadlineOverlay(worldId);
   if (worldId === "olivia-room") {
     window.CuppyLandAudio?.playSfxClip?.("myNameIsOlivia");
   }
 }
 
 function closeWorld() {
+  hideWorldHeadlineOverlay();
   clearChocolateMilkDragFillPreview();
   stopAllChocolateMilkSequences();
   screenWorldController.closeWorld();
