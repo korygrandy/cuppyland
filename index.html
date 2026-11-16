@@ -18,7 +18,34 @@
 
           <section id="worldSelectScreen" class="screen">
             <div class="panel">
-              <h1>Choose a World</h1>
+              <div class="world-select-header">
+                <h1>Choose a World</h1>
+                <details class="inventory-settings world-select-settings" id="inventorySettings">
+                  <summary class="inventory-settings-trigger" aria-label="Open settings" title="Settings">
+                    ⚙
+                  </summary>
+                  <div class="inventory-settings-menu">
+                    <h3>Audio</h3>
+                    <div class="slider-row">
+                      <label class="slider-field" for="musicVolumeInput">
+                        <span>Music Volume</span>
+                        <span id="musicVolumeValue">70%</span>
+                      </label>
+                      <button id="musicMuteBtn" class="audio-mute-btn" type="button" aria-pressed="false">Mute Music</button>
+                    </div>
+                    <input id="musicVolumeInput" type="range" min="0" max="100" step="1" value="70" />
+
+                    <div class="slider-row">
+                      <label class="slider-field" for="sfxVolumeInput">
+                        <span>SFX Volume</span>
+                        <span id="sfxVolumeValue">75%</span>
+                      </label>
+                      <button id="sfxMuteBtn" class="audio-mute-btn" type="button" aria-pressed="false">Mute SFX</button>
+                    </div>
+                    <input id="sfxVolumeInput" type="range" min="0" max="100" step="1" value="75" />
+                  </div>
+                </details>
+              </div>
               <div class="world-grid">
                 <button class="world-card" type="button" data-world="playground">
                   <span class="world-name">Playground</span>
@@ -72,17 +99,18 @@
             </div>
 
             <aside id="inventoryPanel" class="inventory-panel" aria-label="Inventory panel">
-              <h2>Inventory</h2>
+              <div class="inventory-header-row">
+                <h2>Inventory</h2>
+              </div>
               <p class="hint">Drag an item onto the matching cup area.</p>
 
               <div class="inventory-group">
-                <h3>Lid Colors</h3>
-                <div id="lidItems" class="items-row"></div>
-              </div>
-
-              <div class="inventory-group">
-                <h3>Cup Colors</h3>
-                <div id="cupItems" class="items-row"></div>
+                <h3>Colors</h3>
+                <div id="colorTargetToggle" class="color-target-toggle" role="group" aria-label="Color target">
+                  <button type="button" class="color-target-btn is-active" data-target="lid">Lid</button>
+                  <button type="button" class="color-target-btn" data-target="cup">Cup</button>
+                </div>
+                <div id="colorItems" class="items-row"></div>
               </div>
 
               <div class="inventory-group">
@@ -101,24 +129,8 @@
               </div>
 
               <div class="inventory-group">
-                <h3>Audio</h3>
-                <div class="slider-row">
-                  <label class="slider-field" for="musicVolumeInput">
-                    <span>Music Volume</span>
-                    <span id="musicVolumeValue">70%</span>
-                  </label>
-                  <button id="musicMuteBtn" class="audio-mute-btn" type="button" aria-pressed="false">Mute Music</button>
-                </div>
-                <input id="musicVolumeInput" type="range" min="0" max="100" step="1" value="70" />
-
-                <div class="slider-row">
-                  <label class="slider-field" for="sfxVolumeInput">
-                    <span>SFX Volume</span>
-                    <span id="sfxVolumeValue">75%</span>
-                  </label>
-                  <button id="sfxMuteBtn" class="audio-mute-btn" type="button" aria-pressed="false">Mute SFX</button>
-                </div>
-                <input id="sfxVolumeInput" type="range" min="0" max="100" step="1" value="75" />
+                <h3>Friends</h3>
+                <div id="friendsItems" class="items-row"></div>
               </div>
             </aside>
           </section>

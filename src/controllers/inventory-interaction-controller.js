@@ -15,6 +15,8 @@
       renderWorldCups,
       getActiveCupId,
       getActiveCupInstance,
+      getDefaultFriendDropPoint,
+      getWorldDropPoint,
     } = options;
 
     function showDragGhost(pointerX, pointerY, label) {
@@ -48,6 +50,9 @@
       dragState.type = target.dataset.itemType;
       dragState.value = target.dataset.value;
       dragState.pointerId = event.pointerId;
+      dragState.moved = false;
+      dragState.startX = event.clientX;
+      dragState.startY = event.clientY;
       trySetPointerCapture(target, event.pointerId);
       showDragGhost(event.clientX, event.clientY, `${dragState.type}: ${dragState.value}`);
       setZoneHighlight(event.clientX, event.clientY);
@@ -59,9 +64,15 @@
         return;
       }
 
+      if (dragState.suppressClick) {
+        dragState.suppressClick = false;
+        return;
+      }
+
       event.preventDefault();
       const targetCupId = getActiveCupId() || getActiveCupInstance()?.id || null;
-      applyInventorySelection(target.dataset.itemType, target.dataset.value, targetCupId);
+      const dropPoint = target.dataset.itemType === "friend" ? getDefaultFriendDropPoint() : null;
+      applyInventorySelection(target.dataset.itemType, target.dataset.value, targetCupId, dropPoint);
     }
 
     function onPointerMove(event) {
@@ -69,6 +80,11 @@
         return;
       }
 
+      const deltaX = Math.abs(event.clientX - (dragState.startX || event.clientX));
+      const deltaY = Math.abs(event.clientY - (dragState.startY || event.clientY));
+      if (deltaX > 4 || deltaY > 4) {
+        dragState.moved = true;
+      }
       moveDragGhost(event.clientX, event.clientY);
       setZoneHighlight(event.clientX, event.clientY);
     }
@@ -81,18 +97,24 @@
       const hoveredCup = getCupElementAtPoint(event.clientX, event.clientY);
       const targetCupId = hoveredCup?.dataset.cupId || getActiveCupId();
       const zone = zoneForPoint(event.clientX, event.clientY);
-      const result = zone ? applyDrop(dragState.type, dragState.value, zone, targetCupId) : { valid: false, reason: "no-zone" };
+      const isFriendDrop = dragState.type === "friend";
+      const dropPoint = isFriendDrop ? getWorldDropPoint(event.clientX, event.clientY) : null;
+      const result = isFriendDrop
+        ? applyDrop(dragState.type, dragState.value, "friend", targetCupId, dropPoint)
+        : (zone ? applyDrop(dragState.type, dragState.value, zone, targetCupId) : { valid: false, reason: "no-zone" });
 
       if (result.valid) {
         renderWorldCups();
-      } else {
+      } else if (!isFriendDrop) {
         showInvalidFeedback();
       }
 
+      dragState.suppressClick = isFriendDrop || dragState.moved;
       dragState.active = false;
       dragState.type = "";
       dragState.value = "";
       dragState.pointerId = null;
+      dragState.moved = false;
       hideDragGhost();
       clearZoneHighlights();
     }

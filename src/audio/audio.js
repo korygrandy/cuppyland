@@ -19,6 +19,7 @@
 
   const audioStorageKey = "oliviaworld-audio-settings-v1";
   const playerToTrackName = new WeakMap();
+  const sfxClipPlayers = {};
 
   const sfxProfiles = {
     standard: [
@@ -79,6 +80,13 @@
     return audio;
   }
 
+  function createSfxClipPlayer(src) {
+    const audio = new Audio(src);
+    audio.loop = false;
+    audio.preload = "auto";
+    return audio;
+  }
+
   const audioPlayers = {
     menu: createAudioPlayer(audioConfig.menu),
     worlds: {
@@ -86,6 +94,11 @@
       "olivia-room": createAudioPlayer(audioConfig.worlds["olivia-room"]),
     },
   };
+  Object.entries(audioConfig.sfxClips || {}).forEach(([clipName, clipSrc]) => {
+    if (typeof clipSrc === "string" && clipSrc.length > 0) {
+      sfxClipPlayers[clipName] = createSfxClipPlayer(clipSrc);
+    }
+  });
   audioEngine.registerMusicTrack("menu", audioPlayers.menu);
   audioEngine.registerMusicTrack("playground", audioPlayers.worlds.playground);
   audioEngine.registerMusicTrack("olivia-room", audioPlayers.worlds["olivia-room"]);
@@ -226,6 +239,26 @@
     audioEngine.playSfx(profile);
   }
 
+  function playSfxClip(clipName) {
+    if (audioState.sfxVolume <= 0) {
+      return;
+    }
+
+    const clip = sfxClipPlayers[clipName];
+    if (!clip) {
+      return;
+    }
+
+    clip.volume = audioState.sfxVolume;
+    clip.currentTime = 0;
+    const playPromise = clip.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch((error) => {
+        console.warn(`Unable to play sfx clip "${clipName}".`, error);
+      });
+    }
+  }
+
   function playAudioTrack(player, trackName) {
     const resolvedTrack = trackName || playerToTrackName.get(player);
     if (!resolvedTrack) {
@@ -282,6 +315,17 @@
     audioState.activeTrack = null;
   }
 
+  function handleAppVisibilityChange() {
+    if (document.hidden) {
+      pauseAllAudio();
+      return;
+    }
+
+    if (audioState.unlocked && audioState.musicVolume > 0) {
+      syncAudioForCurrentScreen();
+    }
+  }
+
   audioEngine.setMusicVolume(audioState.musicVolume);
   audioEngine.setSfxVolume(audioState.sfxVolume);
 
@@ -300,7 +344,9 @@
     toggleMusicMute,
     toggleSfxMute,
     playSfx,
+    playSfxClip,
     pauseAllAudio,
+    handleAppVisibilityChange,
     playAudioTrack,
     unlockAudio,
     syncAudioForCurrentScreen,

@@ -170,6 +170,7 @@ interface GameState {
 
 ### Inventory + Drag/Drop
 - [x] Build inventory panel UI with categories (lid color, cup color, sleeve type).
+- [x] Add Friends inventory items that spawn world objects on click or drag-drop.
 - [x] Implement drag source behaviors for touch devices.
 - [x] Implement snap targets on cup object (lid/base/sleeve zones).
 - [x] Implement drop validation rules.

@@ -25,8 +25,6 @@ const cupLayer = document.getElementById("cupLayer");
 const hairstyleLayer = document.getElementById("hairstyleLayer");
 const sleeveLayer = document.getElementById("sleeveLayer");
 const faceLayer = document.getElementById("faceLayer");
-const lidItems = document.getElementById("lidItems");
-const cupItems = document.getElementById("cupItems");
 const sleeveItems = document.getElementById("sleeveItems");
 const dragGhost = document.getElementById("dragGhost");
 const trashCanBtn = document.getElementById("trashCanBtn");
@@ -79,6 +77,13 @@ const cupDragState = {
   startClientY: 0,
   startWorldX: 0,
   startWorldY: 0,
+};
+const friendDragState = {
+  active: false,
+  pointerId: null,
+  friendId: null,
+  pointerOffsetX: 0,
+  pointerOffsetY: 0,
 };
 const trashState = {
   active: false,
@@ -171,6 +176,8 @@ const inventoryInteractionController = window.CuppyLandInventoryInteraction.crea
   renderWorldCups,
   getActiveCupId: () => state.activeCupId,
   getActiveCupInstance,
+  getDefaultFriendDropPoint,
+  getWorldDropPoint,
 });
 
 function syncAudioForCurrentScreen() {
@@ -189,6 +196,16 @@ function cloneCupState(source = state.cup) {
 
 function getWorldCupList(worldId = state.activeWorld) {
   return cupStateStore.getWorldCupList(worldId);
+}
+
+function getWorldFriendList(worldId = state.activeWorld) {
+  if (!worldId || !state.worlds?.[worldId]) {
+    return [];
+  }
+  if (!Array.isArray(state.worlds[worldId].friends)) {
+    state.worlds[worldId].friends = [];
+  }
+  return state.worlds[worldId].friends;
 }
 
 function ensureCupLayerOrder(cupState, fallbackOrder = 1) {
@@ -231,6 +248,135 @@ function syncWorldCupSelection() {
 
 function getTargetCupState() {
   return cupStateStore.getTargetCupState();
+}
+
+function getElementDragScale(element) {
+  if (!element) {
+    return 1;
+  }
+
+  const rect = element.getBoundingClientRect();
+  const baseWidth = element.offsetWidth || rect.width || 1;
+  const derivedScale = rect.width / baseWidth;
+  if (!Number.isFinite(derivedScale) || derivedScale <= 0) {
+    return 1;
+  }
+  return derivedScale;
+}
+
+function getWorldPointFromClient(clientX, clientY) {
+  const bounds = worldCanvas.getBoundingClientRect();
+  const widthScale = bounds.width > 0 ? worldCanvas.offsetWidth / bounds.width : 1;
+  const heightScale = bounds.height > 0 ? worldCanvas.offsetHeight / bounds.height : 1;
+  return {
+    worldX: (clientX - bounds.left) * widthScale,
+    worldY: (clientY - bounds.top) * heightScale,
+  };
+}
+
+function getWorldDropPoint(clientX, clientY) {
+  const { worldX, worldY } = getWorldPointFromClient(clientX, clientY);
+
+  return {
+    worldX: Math.max(0, Math.min(worldCanvas.offsetWidth - 132, worldX - 66)),
+    worldY: Math.max(0, Math.min(worldCanvas.offsetHeight - 132, worldY - 66)),
+  };
+}
+
+function getDefaultFriendDropPoint() {
+  const centerClientX = worldViewport.getBoundingClientRect().left + worldViewport.clientWidth / 2;
+  const centerClientY = worldViewport.getBoundingClientRect().top + worldViewport.clientHeight / 2;
+  return getWorldDropPoint(centerClientX, centerClientY);
+}
+
+function resolveFriendStateForElement(friendElement) {
+  const friendId = friendElement?.dataset?.friendId;
+  if (!friendId) {
+    return null;
+  }
+  const worldFriends = getWorldFriendList(state.activeWorld);
+  return worldFriends.find((friend) => friend.id === friendId) || null;
+}
+
+function removeFriendInstance(friendId) {
+  if (!state.activeWorld || !friendId) {
+    return;
+  }
+  const worldFriends = getWorldFriendList(state.activeWorld);
+  const friendIndex = worldFriends.findIndex((friend) => friend.id === friendId);
+  if (friendIndex < 0) {
+    return;
+  }
+  worldFriends.splice(friendIndex, 1);
+  renderWorldCups();
+}
+
+function onFriendPointerDown(event) {
+  if (state.currentScreen !== "world") {
+    return;
+  }
+
+  const friendElement = event.currentTarget.closest(".friend-character");
+  const friendState = resolveFriendStateForElement(friendElement);
+  if (!friendElement || !friendState) {
+    return;
+  }
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  const pointerScale = getElementDragScale(friendElement);
+  const localPointerX = (event.clientX - friendElement.getBoundingClientRect().left) / pointerScale;
+  const localPointerY = (event.clientY - friendElement.getBoundingClientRect().top) / pointerScale;
+  friendDragState.active = true;
+  friendDragState.pointerId = event.pointerId;
+  friendDragState.friendId = friendState.id;
+  friendDragState.pointerOffsetX = localPointerX;
+  friendDragState.pointerOffsetY = localPointerY;
+  trySetPointerCapture(friendElement, event.pointerId);
+}
+
+function onFriendPointerMove(event) {
+  if (!friendDragState.active || event.pointerId !== friendDragState.pointerId) {
+    return;
+  }
+
+  if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
+    const friendId = friendDragState.friendId;
+    friendDragState.active = false;
+    friendDragState.pointerId = null;
+    friendDragState.friendId = null;
+    removeFriendInstance(friendId);
+    return;
+  }
+
+  const friendElement = event.currentTarget.closest(".friend-character");
+  const friendState = resolveFriendStateForElement(friendElement);
+  if (!friendElement || !friendState) {
+    return;
+  }
+
+  const { worldX, worldY } = getWorldPointFromClient(event.clientX, event.clientY);
+  const nextX = worldX - friendDragState.pointerOffsetX;
+  const nextY = worldY - friendDragState.pointerOffsetY;
+  friendState.worldX = Math.max(0, Math.min(worldCanvas.offsetWidth - friendElement.offsetWidth, nextX));
+  friendState.worldY = Math.max(0, Math.min(worldCanvas.offsetHeight - friendElement.offsetHeight, nextY));
+  friendElement.style.left = `${friendState.worldX}px`;
+  friendElement.style.top = `${friendState.worldY}px`;
+}
+
+function onFriendPointerUp(event) {
+  if (!friendDragState.active || event.pointerId !== friendDragState.pointerId) {
+    return;
+  }
+
+  if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
+    removeFriendInstance(friendDragState.friendId);
+  }
+
+  friendDragState.active = false;
+  friendDragState.pointerId = null;
+  friendDragState.friendId = null;
 }
 
 function createCupElement(cupId, cupState) {
@@ -301,26 +447,58 @@ function createCupElement(cupId, cupState) {
   return template;
 }
 
-function renderWorldCups() {
-  worldCanvas.querySelectorAll(".cup-character").forEach((node) => node.remove());
-  const worldCups = getWorldCupList(state.activeWorld);
-  if (!worldCups.length) {
+function createFriendElement(friendState) {
+  const friendElement = document.createElement("div");
+  friendElement.className = "friend-character";
+  friendElement.dataset.friendId = friendState.id;
+  friendElement.style.left = `${friendState.worldX || 0}px`;
+  friendElement.style.top = `${friendState.worldY || 0}px`;
+  friendElement.style.zIndex = String(Number.isFinite(friendState.zIndex) ? friendState.zIndex : 90);
+
+  const art = document.createElement("span");
+  art.className = "friend-character-art";
+  art.style.backgroundImage = `url("${window.CuppyLandGame.friendAssetMap?.[friendState.type] || ""}")`;
+  friendElement.appendChild(art);
+  friendElement.addEventListener("pointerdown", onFriendPointerDown);
+  friendElement.addEventListener("pointermove", onFriendPointerMove);
+  friendElement.addEventListener("pointerup", onFriendPointerUp);
+  friendElement.addEventListener("pointercancel", onFriendPointerUp);
+  return friendElement;
+}
+
+function renderWorldFriends() {
+  worldCanvas.querySelectorAll(".friend-character").forEach((node) => node.remove());
+  const worldFriends = getWorldFriendList(state.activeWorld);
+  if (!worldFriends.length) {
     return;
   }
 
-  worldCups.forEach((cupInfo, index) => ensureCupLayerOrder(cupInfo.state, index + 1));
-
-  [...worldCups]
-    .sort((a, b) => ensureCupLayerOrder(a.state) - ensureCupLayerOrder(b.state))
-    .forEach((cupInfo) => {
-    const cupElement = createCupElement(cupInfo.id, cupInfo.state);
-    cupElement.classList.toggle("is-selected", cupInfo.id === state.activeCupId);
-    worldCanvas.appendChild(cupElement);
-    renderCupInstance(cupInfo.state, cupElement);
+  [...worldFriends]
+    .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
+    .forEach((friendState) => {
+      worldCanvas.appendChild(createFriendElement(friendState));
     });
+}
 
-  syncWorldCupSelection();
-  syncCupSelectionVisualState();
+function renderWorldCups() {
+  worldCanvas.querySelectorAll(".cup-character").forEach((node) => node.remove());
+  const worldCups = getWorldCupList(state.activeWorld);
+  if (worldCups.length) {
+    worldCups.forEach((cupInfo, index) => ensureCupLayerOrder(cupInfo.state, index + 1));
+
+    [...worldCups]
+      .sort((a, b) => ensureCupLayerOrder(a.state) - ensureCupLayerOrder(b.state))
+      .forEach((cupInfo) => {
+      const cupElement = createCupElement(cupInfo.id, cupInfo.state);
+      cupElement.classList.toggle("is-selected", cupInfo.id === state.activeCupId);
+      worldCanvas.appendChild(cupElement);
+      renderCupInstance(cupInfo.state, cupElement);
+      });
+
+    syncWorldCupSelection();
+    syncCupSelectionVisualState();
+  }
+  renderWorldFriends();
 }
 
 const screenWorldController = window.CuppyLandScreenWorldController.createController({
@@ -472,6 +650,9 @@ function ensureWorldCupState(worldId) {
 
 function openWorld(worldId) {
   screenWorldController.openWorld(worldId);
+  if (worldId === "olivia-room") {
+    window.CuppyLandAudio?.playSfxClip?.("myNameIsOlivia");
+  }
 }
 
 function closeWorld() {
@@ -505,6 +686,7 @@ const gameRulesController = window.CuppyLandGameRulesController.createController
   cupLayer,
   cupStateStore,
   getWorldCupList,
+  getWorldFriendList,
   getActiveCupInstance,
   setActiveCupInstance,
   renderWorldCups,
@@ -516,12 +698,12 @@ function addCupToWorld() {
   return gameRulesController.addCupToWorld();
 }
 
-function applyDrop(itemType, value, targetZone, targetCupId = state.activeCupId) {
-  return gameRulesController.applyDrop(itemType, value, targetZone, targetCupId);
+function applyDrop(itemType, value, targetZone, targetCupId = state.activeCupId, dropPoint = null) {
+  return gameRulesController.applyDrop(itemType, value, targetZone, targetCupId, dropPoint);
 }
 
-function applyInventorySelection(itemType, value, targetCupId = state.activeCupId) {
-  return gameRulesController.applyInventorySelection(itemType, value, targetCupId);
+function applyInventorySelection(itemType, value, targetCupId = state.activeCupId, dropPoint = null) {
+  return gameRulesController.applyInventorySelection(itemType, value, targetCupId, dropPoint);
 }
 
 function showInvalidFeedback() {
