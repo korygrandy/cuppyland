@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Olivia\'s World</string>
+    <string name="title_activity_main">Olivia\'s World</string>
+    <string name="package_name">com.oliviaworld.game</string>
+    <string name="custom_url_scheme">com.oliviaworld.game</string>
+</resources>
