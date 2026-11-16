@@ -243,7 +243,6 @@
     if (audioState.sfxVolume <= 0) {
       return;
     }
-
     const clip = sfxClipPlayers[clipName];
     if (!clip) {
       return;
@@ -257,6 +256,41 @@
         console.warn(`Unable to play sfx clip "${clipName}".`, error);
       });
     }
+  }
+
+  function playLoopingSfxClip(clipName) {
+    if (audioState.sfxVolume <= 0) {
+      return;
+    }
+
+    const clip = sfxClipPlayers[clipName];
+    if (!clip) {
+      return;
+    }
+
+    clip.loop = true;
+    clip.volume = audioState.sfxVolume;
+    if (!clip.paused) {
+      return;
+    }
+
+    const playPromise = clip.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch((error) => {
+        console.warn(`Unable to play looping sfx clip "${clipName}".`, error);
+      });
+    }
+  }
+
+  function stopSfxClip(clipName) {
+    const clip = sfxClipPlayers[clipName];
+    if (!clip) {
+      return;
+    }
+
+    clip.pause();
+    clip.currentTime = 0;
+    clip.loop = false;
   }
 
   function playAudioTrack(player, trackName) {
@@ -345,6 +379,8 @@
     toggleSfxMute,
     playSfx,
     playSfxClip,
+    playLoopingSfxClip,
+    stopSfxClip,
     pauseAllAudio,
     handleAppVisibilityChange,
     playAudioTrack,

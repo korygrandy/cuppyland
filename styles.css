@@ -161,6 +161,21 @@ body {
     url("./assets/bg-olivia-room.jpg");
 }
 
+.world-card-headline {
+  position: absolute;
+  left: 50%;
+  top: 16%;
+  width: min(80%, 280px);
+  height: min(36%, 140px);
+  transform: translateX(-50%);
+  background-image: url("./assets/olivia-room-headline.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  pointer-events: none;
+  z-index: 1;
+}
+
 .world-name {
   position: absolute;
   left: 0.8rem;
