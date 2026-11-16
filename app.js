@@ -1,4 +1,4 @@
-const { state, fixedViewport, palette, sleeveTypes, sleeveFaceMap, sleeveAssetMap, sleevePalette, colorMap, worldClasses } = window.CuppyLandGame;
+const { state, fixedViewport, palette, sleeveTypes, sleeveFaceMap, sleeveAssetMap, sleevePalette, colorMap, worldClasses, gameplayConfig, defaultCupState } = window.CuppyLandGame;
 
 const screenEls = {
   splash: document.getElementById("splashScreen"),
@@ -92,6 +92,7 @@ const interactionHelpers = window.CuppyLandInteraction.createHelpers({
   documentRef: document,
   worldViewport,
   trashCanBtn,
+  gameplayConfig,
   dropZones: [dropZoneLid, dropZoneCup, dropZoneSleeve],
   onHoveredCup: (cupId) => {
     if (cupId) {
@@ -116,6 +117,7 @@ const cupDragHelpers = window.CuppyLandCupDrag.createHelpers({
   lidLayer,
   sleeveLayer,
   hairstyleLayer,
+  gameplayConfig,
 });
 const {
   clampDetachedOffset,
@@ -151,6 +153,8 @@ const cupPointerController = window.CuppyLandCupPointerController.createControll
   isLidNearCup,
   isSleeveNearCup,
   isHairstyleNearLid,
+  gameplayConfig,
+  defaultCupState,
 });
 const inventoryInteractionController = window.CuppyLandInventoryInteraction.createController({
   state,
@@ -269,30 +273,30 @@ function createCupElement(cupId, cupState) {
     faceNode.dataset.cupId = cupId;
   }
 
-  template.addEventListener("pointerdown", (event) => onCupPointerDown(event, template));
-  template.addEventListener("pointermove", (event) => onCupPointerMove(event, template));
-  template.addEventListener("pointerup", (event) => onCupPointerUp(event, template));
-  template.addEventListener("pointercancel", (event) => onCupPointerUp(event, template));
+  template.addEventListener("pointerdown", cupPointerController.onCupPointerDown);
+  template.addEventListener("pointermove", cupPointerController.onCupPointerMove);
+  template.addEventListener("pointerup", cupPointerController.onCupPointerUp);
+  template.addEventListener("pointercancel", cupPointerController.onCupPointerUp);
 
-  template.querySelector(".cup-base")?.addEventListener("pointerdown", (event) => onCupPointerDown(event, template));
-  template.querySelector(".cup-base")?.addEventListener("pointermove", (event) => onCupPointerMove(event, template));
-  template.querySelector(".cup-base")?.addEventListener("pointerup", (event) => onCupPointerUp(event, template));
-  template.querySelector(".cup-base")?.addEventListener("pointercancel", (event) => onCupPointerUp(event, template));
+  template.querySelector(".cup-base")?.addEventListener("pointerdown", cupPointerController.onCupPointerDown);
+  template.querySelector(".cup-base")?.addEventListener("pointermove", cupPointerController.onCupPointerMove);
+  template.querySelector(".cup-base")?.addEventListener("pointerup", cupPointerController.onCupPointerUp);
+  template.querySelector(".cup-base")?.addEventListener("pointercancel", cupPointerController.onCupPointerUp);
 
-  template.querySelector(".cup-lid")?.addEventListener("pointerdown", (event) => onLidPointerDown(event, template));
-  template.querySelector(".cup-lid")?.addEventListener("pointermove", (event) => onLidPointerMove(event, template));
-  template.querySelector(".cup-lid")?.addEventListener("pointerup", (event) => onLidPointerUp(event, template));
-  template.querySelector(".cup-lid")?.addEventListener("pointercancel", (event) => onLidPointerUp(event, template));
+  template.querySelector(".cup-lid")?.addEventListener("pointerdown", cupPointerController.onLidPointerDown);
+  template.querySelector(".cup-lid")?.addEventListener("pointermove", cupPointerController.onLidPointerMove);
+  template.querySelector(".cup-lid")?.addEventListener("pointerup", cupPointerController.onLidPointerUp);
+  template.querySelector(".cup-lid")?.addEventListener("pointercancel", cupPointerController.onLidPointerUp);
 
-  template.querySelector(".cup-sleeve")?.addEventListener("pointerdown", (event) => onSleevePointerDown(event, template));
-  template.querySelector(".cup-sleeve")?.addEventListener("pointermove", (event) => onSleevePointerMove(event, template));
-  template.querySelector(".cup-sleeve")?.addEventListener("pointerup", (event) => onSleevePointerUp(event, template));
-  template.querySelector(".cup-sleeve")?.addEventListener("pointercancel", (event) => onSleevePointerUp(event, template));
+  template.querySelector(".cup-sleeve")?.addEventListener("pointerdown", cupPointerController.onSleevePointerDown);
+  template.querySelector(".cup-sleeve")?.addEventListener("pointermove", cupPointerController.onSleevePointerMove);
+  template.querySelector(".cup-sleeve")?.addEventListener("pointerup", cupPointerController.onSleevePointerUp);
+  template.querySelector(".cup-sleeve")?.addEventListener("pointercancel", cupPointerController.onSleevePointerUp);
 
-  template.querySelector(".cup-hairstyle")?.addEventListener("pointerdown", (event) => onHairstylePointerDown(event, template));
-  template.querySelector(".cup-hairstyle")?.addEventListener("pointermove", (event) => onHairstylePointerMove(event, template));
-  template.querySelector(".cup-hairstyle")?.addEventListener("pointerup", (event) => onHairstylePointerUp(event, template));
-  template.querySelector(".cup-hairstyle")?.addEventListener("pointercancel", (event) => onHairstylePointerUp(event, template));
+  template.querySelector(".cup-hairstyle")?.addEventListener("pointerdown", cupPointerController.onHairstylePointerDown);
+  template.querySelector(".cup-hairstyle")?.addEventListener("pointermove", cupPointerController.onHairstylePointerMove);
+  template.querySelector(".cup-hairstyle")?.addEventListener("pointerup", cupPointerController.onHairstylePointerUp);
+  template.querySelector(".cup-hairstyle")?.addEventListener("pointercancel", cupPointerController.onHairstylePointerUp);
 
   return template;
 }
@@ -505,6 +509,7 @@ const gameRulesController = window.CuppyLandGameRulesController.createController
   setActiveCupInstance,
   renderWorldCups,
   hideTrashCan,
+  defaultCupState,
 });
 
 function addCupToWorld() {
@@ -539,70 +544,6 @@ function removeSelectedObject() {
   gameRulesController.removeSelectedObject();
 }
 
-function onCupPointerDown(event) {
-  cupPointerController.onCupPointerDown(event);
-}
-
-function onCupPointerMove(event) {
-  cupPointerController.onCupPointerMove(event);
-}
-
-function onCupPointerUp(event) {
-  cupPointerController.onCupPointerUp(event);
-}
-
-function onLidPointerDown(event) {
-  cupPointerController.onLidPointerDown(event);
-}
-
-function onLidPointerMove(event) {
-  cupPointerController.onLidPointerMove(event);
-}
-
-function onLidPointerUp(event) {
-  cupPointerController.onLidPointerUp(event);
-}
-
-function onHairstylePointerDown(event) {
-  cupPointerController.onHairstylePointerDown(event);
-}
-
-function onHairstylePointerMove(event) {
-  cupPointerController.onHairstylePointerMove(event);
-}
-
-function onHairstylePointerUp(event) {
-  cupPointerController.onHairstylePointerUp(event);
-}
-
-function onSleevePointerDown(event) {
-  cupPointerController.onSleevePointerDown(event);
-}
-
-function onSleevePointerMove(event) {
-  cupPointerController.onSleevePointerMove(event);
-}
-
-function onSleevePointerUp(event) {
-  cupPointerController.onSleevePointerUp(event);
-}
-
-function onInventoryPointerDown(event) {
-  inventoryInteractionController.onPointerDown(event);
-}
-
-function onInventoryClick(event) {
-  inventoryInteractionController.onClick(event);
-}
-
-function onInventoryPointerMove(event) {
-  inventoryInteractionController.onPointerMove(event);
-}
-
-function onInventoryPointerEnd(event) {
-  inventoryInteractionController.onPointerEnd(event);
-}
-
 const bootstrapController = window.CuppyLandBootstrapController.createController({
   documentRef: document,
   windowRef: window,
@@ -629,22 +570,22 @@ const bootstrapController = window.CuppyLandBootstrapController.createController
     trashCanBtn,
   },
   handlers: {
-    onCupPointerDown,
-    onCupPointerMove,
-    onCupPointerUp,
-    onLidPointerDown,
-    onLidPointerMove,
-    onLidPointerUp,
-    onHairstylePointerDown,
-    onHairstylePointerMove,
-    onHairstylePointerUp,
-    onSleevePointerDown,
-    onSleevePointerMove,
-    onSleevePointerUp,
-    onInventoryPointerDown,
-    onInventoryClick,
-    onInventoryPointerMove,
-    onInventoryPointerEnd,
+    onCupPointerDown: cupPointerController.onCupPointerDown,
+    onCupPointerMove: cupPointerController.onCupPointerMove,
+    onCupPointerUp: cupPointerController.onCupPointerUp,
+    onLidPointerDown: cupPointerController.onLidPointerDown,
+    onLidPointerMove: cupPointerController.onLidPointerMove,
+    onLidPointerUp: cupPointerController.onLidPointerUp,
+    onHairstylePointerDown: cupPointerController.onHairstylePointerDown,
+    onHairstylePointerMove: cupPointerController.onHairstylePointerMove,
+    onHairstylePointerUp: cupPointerController.onHairstylePointerUp,
+    onSleevePointerDown: cupPointerController.onSleevePointerDown,
+    onSleevePointerMove: cupPointerController.onSleevePointerMove,
+    onSleevePointerUp: cupPointerController.onSleevePointerUp,
+    onInventoryPointerDown: inventoryInteractionController.onPointerDown,
+    onInventoryClick: inventoryInteractionController.onClick,
+    onInventoryPointerMove: inventoryInteractionController.onPointerMove,
+    onInventoryPointerEnd: inventoryInteractionController.onPointerEnd,
   },
   actions: {
     showScreen,

@@ -15,6 +15,7 @@
       setActiveCupInstance,
       renderWorldCups,
       hideTrashCan,
+      defaultCupState,
     } = options;
 
     function addCupToWorld() {
@@ -76,14 +77,14 @@
         if (activeCupState.lidVisible === false) {
           activeCupState.lidVisible = true;
           activeCupState.lidDetached = false;
-          activeCupState.lidOffsetX = 17;
-          activeCupState.lidOffsetY = 0;
+          activeCupState.lidOffsetX = defaultCupState?.lidOffsetX ?? 17;
+          activeCupState.lidOffsetY = defaultCupState?.lidOffsetY ?? 0;
         }
         activeCupState.hairstyle = value;
         activeCupState.hairstyleVisible = true;
         activeCupState.hairstyleDetached = false;
-        activeCupState.hairstyleOffsetX = 17;
-        activeCupState.hairstyleOffsetY = -22;
+        activeCupState.hairstyleOffsetX = defaultCupState?.hairstyleOffsetX ?? 17;
+        activeCupState.hairstyleOffsetY = defaultCupState?.hairstyleOffsetY ?? -22;
         return { valid: true };
       }
 

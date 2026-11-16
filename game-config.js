@@ -113,6 +113,23 @@
       lid: "./assets/lid-grayscale.png",
       cup: "./assets/cup-grayscale.png",
     },
+    gameplayConfig: {
+      dragOutsidePadding: 12,
+      dragMovementThreshold: 8,
+      snapDistance: {
+        lidToCup: 110,
+        sleeveToCup: 120,
+        hairstyleToLid: 90,
+      },
+      dragClamp: {
+        lid: { minLeft: -60, maxLeft: 200, minTop: -80, maxTop: 120 },
+        sleeve: { minLeft: -60, maxLeft: 200, minTop: -20, maxTop: 220 },
+        hairstyle: { minLeft: -80, maxLeft: 220, minTop: -120, maxTop: 160 },
+      },
+      anchors: {
+        hairstyleFromLidOffsetX: 10,
+      },
+    },
     defaultSleeveAsset: "./assets/sleeve-child.png",
     audioConfig: {
       menu: "./assets/Kailua_Breeze.mp3",

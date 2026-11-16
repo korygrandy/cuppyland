@@ -18,6 +18,7 @@
 - Audio app facade/wiring: [audio.js](C:/dev/oliviaworld/cuppy-land/audio.js)
 - Game config and defaults: [game-config.js](C:/dev/oliviaworld/cuppy-land/game-config.js)
 - Inventory item builders: [inventory.js](C:/dev/oliviaworld/cuppy-land/inventory.js)
+- Gameplay constants live under `gameplayConfig` in [game-config.js](C:/dev/oliviaworld/cuppy-land/game-config.js) (snap thresholds, drag clamp ranges, movement thresholds, drag-out padding, anchor offsets).
 
 ## 3) Core gameplay invariants
 1. **Per-world isolation**  

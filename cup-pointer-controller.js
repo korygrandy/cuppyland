@@ -28,7 +28,12 @@
       isLidNearCup,
       isSleeveNearCup,
       isHairstyleNearLid,
+      gameplayConfig,
+      defaultCupState,
     } = options;
+    const dragClamp = gameplayConfig?.dragClamp || {};
+    const anchors = gameplayConfig?.anchors || {};
+    const dragMovementThreshold = gameplayConfig?.dragMovementThreshold ?? 8;
 
     function onCupPointerDown(event) {
       const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
@@ -127,8 +132,8 @@
       const parentRect = cupElement.getBoundingClientRect();
       lidDragState.active = true;
       lidDragState.pointerId = event.pointerId;
-      lidDragState.initialLeft = cupState.lidDetached ? cupState.lidOffsetX : 17;
-      lidDragState.initialTop = cupState.lidDetached ? cupState.lidOffsetY : 0;
+      lidDragState.initialLeft = cupState.lidDetached ? cupState.lidOffsetX : (defaultCupState?.lidOffsetX ?? 17);
+      lidDragState.initialTop = cupState.lidDetached ? cupState.lidOffsetY : (defaultCupState?.lidOffsetY ?? 0);
       lidDragState.anchorX = event.clientX - parentRect.left;
       lidDragState.anchorY = event.clientY - parentRect.top;
       trySetPointerCapture(event.currentTarget, event.pointerId);
@@ -158,10 +163,10 @@
         localY,
         anchorX: lidDragState.anchorX,
         anchorY: lidDragState.anchorY,
-        minLeft: -60,
-        maxLeft: 200,
-        minTop: -80,
-        maxTop: 120,
+        minLeft: dragClamp.lid?.minLeft ?? -60,
+        maxLeft: dragClamp.lid?.maxLeft ?? 200,
+        minTop: dragClamp.lid?.minTop ?? -80,
+        maxTop: dragClamp.lid?.maxTop ?? 120,
       });
       cupState.lidDetached = true;
       cupState.lidOffsetX = nextLeft;
@@ -180,8 +185,8 @@
         removeSelectedObject();
       } else if (isLidNearCup(cupElement)) {
         cupState.lidDetached = false;
-        cupState.lidOffsetX = 17;
-        cupState.lidOffsetY = 0;
+        cupState.lidOffsetX = defaultCupState?.lidOffsetX ?? 17;
+        cupState.lidOffsetY = defaultCupState?.lidOffsetY ?? 0;
       }
 
       trashCanBtn.classList.remove("highlight");
@@ -209,8 +214,11 @@
       hairstyleDragState.active = true;
       hairstyleDragState.pointerId = event.pointerId;
       hairstyleDragState.moved = false;
-      hairstyleDragState.initialLeft = cupState.hairstyleDetached ? cupState.hairstyleOffsetX : 27;
-      hairstyleDragState.initialTop = cupState.hairstyleDetached ? cupState.hairstyleOffsetY : -22;
+      const hairAttachOffsetX = anchors.hairstyleFromLidOffsetX ?? 10;
+      const lidLeft = cupState.lidDetached ? cupState.lidOffsetX : (defaultCupState?.lidOffsetX ?? 17);
+      const lidTop = cupState.lidDetached ? cupState.lidOffsetY : (defaultCupState?.lidOffsetY ?? 0);
+      hairstyleDragState.initialLeft = cupState.hairstyleDetached ? cupState.hairstyleOffsetX : lidLeft + hairAttachOffsetX;
+      hairstyleDragState.initialTop = cupState.hairstyleDetached ? cupState.hairstyleOffsetY : lidTop + (defaultCupState?.hairstyleOffsetY ?? -22);
       hairstyleDragState.anchorX = event.clientX - parentRect.left;
       hairstyleDragState.anchorY = event.clientY - parentRect.top;
       trySetPointerCapture(event.currentTarget, event.pointerId);
@@ -233,7 +241,7 @@
       const localX = event.clientX - parentRect.left;
       const localY = event.clientY - parentRect.top;
       const movementDistance = Math.hypot(localX - hairstyleDragState.anchorX, localY - hairstyleDragState.anchorY);
-      hairstyleDragState.moved = movementDistance > 8;
+      hairstyleDragState.moved = movementDistance > dragMovementThreshold;
 
       const { nextLeft, nextTop } = clampDetachedOffset({
         initialLeft: hairstyleDragState.initialLeft,
@@ -242,10 +250,10 @@
         localY,
         anchorX: hairstyleDragState.anchorX,
         anchorY: hairstyleDragState.anchorY,
-        minLeft: -80,
-        maxLeft: 220,
-        minTop: -120,
-        maxTop: 160,
+        minLeft: dragClamp.hairstyle?.minLeft ?? -80,
+        maxLeft: dragClamp.hairstyle?.maxLeft ?? 220,
+        minTop: dragClamp.hairstyle?.minTop ?? -120,
+        maxTop: dragClamp.hairstyle?.maxTop ?? 160,
       });
       cupState.hairstyleDetached = true;
       cupState.hairstyleOffsetX = nextLeft;
@@ -269,8 +277,8 @@
         cupState.hairstyleDetached = true;
       } else {
         cupState.hairstyleDetached = false;
-        cupState.hairstyleOffsetX = 17;
-        cupState.hairstyleOffsetY = -22;
+        cupState.hairstyleOffsetX = defaultCupState?.hairstyleOffsetX ?? 17;
+        cupState.hairstyleOffsetY = defaultCupState?.hairstyleOffsetY ?? -22;
       }
 
       trashCanBtn.classList.remove("highlight");
@@ -298,8 +306,8 @@
       const parentRect = cupElement.getBoundingClientRect();
       sleeveDragState.active = true;
       sleeveDragState.pointerId = event.pointerId;
-      sleeveDragState.initialLeft = cupState.sleeveDetached ? cupState.sleeveOffsetX : 32;
-      sleeveDragState.initialTop = cupState.sleeveDetached ? cupState.sleeveOffsetY : 160;
+      sleeveDragState.initialLeft = cupState.sleeveDetached ? cupState.sleeveOffsetX : (defaultCupState?.sleeveOffsetX ?? 32);
+      sleeveDragState.initialTop = cupState.sleeveDetached ? cupState.sleeveOffsetY : (defaultCupState?.sleeveOffsetY ?? 160);
       sleeveDragState.anchorX = event.clientX - parentRect.left;
       sleeveDragState.anchorY = event.clientY - parentRect.top;
       trySetPointerCapture(event.currentTarget, event.pointerId);
@@ -329,10 +337,10 @@
         localY,
         anchorX: sleeveDragState.anchorX,
         anchorY: sleeveDragState.anchorY,
-        minLeft: -60,
-        maxLeft: 200,
-        minTop: -20,
-        maxTop: 220,
+        minLeft: dragClamp.sleeve?.minLeft ?? -60,
+        maxLeft: dragClamp.sleeve?.maxLeft ?? 200,
+        minTop: dragClamp.sleeve?.minTop ?? -20,
+        maxTop: dragClamp.sleeve?.maxTop ?? 220,
       });
       cupState.sleeveDetached = true;
       cupState.sleeveOffsetX = nextLeft;
@@ -352,8 +360,8 @@
         removeSelectedObject();
       } else if (isSleeveNearCup(cupElement)) {
         cupState.sleeveDetached = false;
-        cupState.sleeveOffsetX = 32;
-        cupState.sleeveOffsetY = 160;
+        cupState.sleeveOffsetX = defaultCupState?.sleeveOffsetX ?? 32;
+        cupState.sleeveOffsetY = defaultCupState?.sleeveOffsetY ?? 160;
       }
 
       trashCanBtn.classList.remove("highlight");

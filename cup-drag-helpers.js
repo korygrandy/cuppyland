@@ -18,23 +18,25 @@
     return { nextLeft, nextTop };
   }
 
-  function createHelpers({ cupLayer, lidLayer, sleeveLayer, hairstyleLayer }) {
+  function createHelpers({ cupLayer, lidLayer, sleeveLayer, hairstyleLayer, gameplayConfig }) {
+    const snapDistance = gameplayConfig?.snapDistance || {};
+
     function isLidNearCup(cupElement) {
       const cupBaseElement = (cupElement && cupElement.querySelector(".cup-base")) || cupLayer;
       const lidLayerElement = (cupElement && cupElement.querySelector(".cup-lid")) || lidLayer;
-      return centerDistance(cupBaseElement.getBoundingClientRect(), lidLayerElement.getBoundingClientRect()) < 110;
+      return centerDistance(cupBaseElement.getBoundingClientRect(), lidLayerElement.getBoundingClientRect()) < (snapDistance.lidToCup ?? 110);
     }
 
     function isSleeveNearCup(cupElement) {
       const cupBaseElement = (cupElement && cupElement.querySelector(".cup-base")) || cupLayer;
       const sleeveLayerElement = (cupElement && cupElement.querySelector(".cup-sleeve")) || sleeveLayer;
-      return centerDistance(cupBaseElement.getBoundingClientRect(), sleeveLayerElement.getBoundingClientRect()) < 120;
+      return centerDistance(cupBaseElement.getBoundingClientRect(), sleeveLayerElement.getBoundingClientRect()) < (snapDistance.sleeveToCup ?? 120);
     }
 
     function isHairstyleNearLid(cupElement, hairstyleVisible) {
       const lidRect = (cupElement.querySelector(".cup-lid") || lidLayer).getBoundingClientRect();
       const hairRect = (cupElement.querySelector(".cup-hairstyle") || hairstyleLayer).getBoundingClientRect();
-      return centerDistance(lidRect, hairRect) < 90 && hairstyleVisible !== false;
+      return centerDistance(lidRect, hairRect) < (snapDistance.hairstyleToLid ?? 90) && hairstyleVisible !== false;
     }
 
     return {

@@ -4,6 +4,7 @@
       documentRef,
       worldViewport,
       trashCanBtn,
+      gameplayConfig,
       dropZones = [],
       onHoveredCup = () => {},
     } = options;
@@ -145,7 +146,7 @@
       return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
     }
 
-    function isPointerOutsideWorldCanvas(x, y, padding = 12) {
+    function isPointerOutsideWorldCanvas(x, y, padding = gameplayConfig?.dragOutsidePadding ?? 12) {
       const bounds = worldViewport.getBoundingClientRect();
       return x < bounds.left - padding || x > bounds.right + padding || y < bounds.top - padding || y > bounds.bottom + padding;
     }
