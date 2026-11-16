@@ -103,17 +103,6 @@ const trashState = {
   active: false,
   target: null,
 };
-const chocolateMilkRuntime = new Map();
-const chocolateMilkDragFillState = {
-  cupId: null,
-  intervalId: null,
-  finalAnimationId: null,
-  completionLocked: false,
-  frame: 2,
-  overlay: null,
-};
-let worldHeadlineFadeTimerId = null;
-let worldHeadlineHideTimerId = null;
 const cupStateStore = window.CuppyLandCupState.createStore({
   gameConfig: window.CuppyLandGame,
   state,
@@ -210,6 +199,50 @@ const inventoryInteractionController = window.CuppyLandInventoryInteraction.crea
   onChocolateMilkFillComplete,
   onChocolateMilkFillEnd,
 });
+const sparkleEffectController = window.CuppyLandSparkleEffectController.createController({
+  worldCanvas,
+  getCupStateById: (cupId) => findCupById(cupId)?.state || null,
+  playSfxClip: (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName),
+});
+const chocolateMilkFillController = window.CuppyLandChocolateMilkFillController.createController({
+  worldCanvas,
+  getCupStateById: (cupId) => findCupById(cupId)?.state || null,
+  getSequenceConfig: () => getChocolateMilkSequenceConfig(),
+  playLoopingSfxClip: (clipName) => window.CuppyLandAudio?.playLoopingSfxClip?.(clipName),
+  stopSfxClip: (clipName) => window.CuppyLandAudio?.stopSfxClip?.(clipName),
+  onComplete: (cupId) => triggerCupSparkle(cupId),
+});
+const chocolateMilkSequenceController = window.CuppyLandChocolateMilkSequenceController.createController({
+  getWorldFriendList: () => getWorldFriendList(state.activeWorld),
+  findFriendById: (friendId) => findFriendById(friendId, state.activeWorld),
+  isCupOpen: (cupId) => {
+    const cupState = findCupById(cupId, state.activeWorld)?.state;
+    return Boolean(cupState && cupState.lidVisible === false);
+  },
+  getSequenceConfig: () => getChocolateMilkSequenceConfig(),
+  syncAttachedFriendPosition: (friendState) => {
+    const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`);
+    syncAttachedFriendPosition(friendState, friendElement);
+  },
+  updateFriendElementAsset: (friendId) => updateFriendElementAsset(friendId),
+  onCompleted: (cupId) => triggerCupSparkle(cupId),
+});
+const worldHeadlineController = window.CuppyLandWorldHeadlineController.createController({
+  overlay: worldHeadlineOverlay,
+  config: worldHeadlineConfig,
+});
+const friendPointerController = window.CuppyLandFriendPointerController.createController({
+  state,
+  worldCanvas,
+  friendDragState,
+  trySetPointerCapture,
+  isPointerOutsideWorldCanvas,
+  resolveFriendStateForElement,
+  getElementDragScale,
+  getWorldPointFromClient,
+  removeFriendInstance,
+  stopChocolateMilkSequence: (friendId) => chocolateMilkSequenceController.stop(friendId),
+});
 
 function syncAudioForCurrentScreen() {
   if (window.CuppyLandAudio && typeof window.CuppyLandAudio.syncAudioForCurrentScreen === "function") {
@@ -265,109 +298,27 @@ function getChocolateMilkSequenceConfig() {
 }
 
 function clearChocolateMilkDragFillPreview() {
-  if (chocolateMilkDragFillState.intervalId) {
-    clearInterval(chocolateMilkDragFillState.intervalId);
-  }
-  if (chocolateMilkDragFillState.finalAnimationId) {
-    clearInterval(chocolateMilkDragFillState.finalAnimationId);
-  }
-  chocolateMilkDragFillState.intervalId = null;
-  chocolateMilkDragFillState.finalAnimationId = null;
-  chocolateMilkDragFillState.completionLocked = false;
-  chocolateMilkDragFillState.cupId = null;
-  chocolateMilkDragFillState.frame = 2;
-  if (chocolateMilkDragFillState.overlay) {
-    chocolateMilkDragFillState.overlay.remove();
-    chocolateMilkDragFillState.overlay = null;
-  }
-}
-
-function ensureChocolateMilkDragFillOverlay(cupId) {
-  const cupState = findCupById(cupId)?.state;
-  if (!cupState) {
-    clearChocolateMilkDragFillPreview();
-    return null;
-  }
-  const sequenceConfig = getChocolateMilkSequenceConfig();
-  const previewConfig = sequenceConfig.preview;
-
-  if (!chocolateMilkDragFillState.overlay) {
-    const overlay = document.createElement("div");
-    overlay.className = "cup-fill-preview";
-    worldCanvas.appendChild(overlay);
-    chocolateMilkDragFillState.overlay = overlay;
-  }
-
-  const overlay = chocolateMilkDragFillState.overlay;
-  overlay.style.left = `${cupState.worldX + previewConfig.offsetX}px`;
-  overlay.style.top = `${cupState.worldY + previewConfig.offsetY}px`;
-  overlay.style.width = `${previewConfig.width}px`;
-  overlay.style.height = `${previewConfig.height}px`;
-  overlay.style.opacity = String(previewConfig.opacity);
-  overlay.style.transform = `translate(-50%, -50%) rotate(${previewConfig.rotationDeg}deg)`;
-  return overlay;
-}
-
-function paintChocolateMilkDragFillFrame(cupId, frame) {
-  const sequenceConfig = getChocolateMilkSequenceConfig();
-  const overlay = ensureChocolateMilkDragFillOverlay(cupId);
-  if (!overlay) {
-    return;
-  }
-  const frameAsset = frame === 3 ? sequenceConfig.frame3Asset : sequenceConfig.frame2Asset;
-  overlay.style.backgroundImage = `url("${frameAsset}")`;
+  chocolateMilkFillController.clearPreview();
 }
 
 function onChocolateMilkFillStart(cupId) {
-  if (!cupId || chocolateMilkDragFillState.completionLocked) {
-    return;
-  }
-
-  window.CuppyLandAudio?.playLoopingSfxClip?.("milkPour");
-
-  if (chocolateMilkDragFillState.cupId !== cupId) {
-    clearChocolateMilkDragFillPreview();
-    chocolateMilkDragFillState.cupId = cupId;
-  }
-
-  paintChocolateMilkDragFillFrame(cupId, 2);
-  const intervalMs = 250;
-  chocolateMilkDragFillState.intervalId = setInterval(() => {
-    if (!chocolateMilkDragFillState.cupId) {
-      clearChocolateMilkDragFillPreview();
-      return;
-    }
-    chocolateMilkDragFillState.frame = chocolateMilkDragFillState.frame === 2 ? 3 : 2;
-    paintChocolateMilkDragFillFrame(chocolateMilkDragFillState.cupId, chocolateMilkDragFillState.frame);
-  }, intervalMs);
+  chocolateMilkFillController.onFillStart(cupId);
 }
 
 function onChocolateMilkFillTick(cupId) {
-  if (!cupId || chocolateMilkDragFillState.completionLocked || chocolateMilkDragFillState.cupId !== cupId) {
-    return;
-  }
-  ensureChocolateMilkDragFillOverlay(cupId);
+  chocolateMilkFillController.onFillTick(cupId);
 }
 
 function onChocolateMilkFillCancel() {
-  window.CuppyLandAudio?.stopSfxClip?.("milkPour");
-  clearChocolateMilkDragFillPreview();
+  chocolateMilkFillController.onFillCancel();
 }
 
 function onChocolateMilkFillComplete(cupId) {
-  if (!cupId || chocolateMilkDragFillState.completionLocked) {
-    return;
-  }
-  chocolateMilkDragFillState.completionLocked = true;
-
-  window.CuppyLandAudio?.stopSfxClip?.("milkPour");
-  clearChocolateMilkDragFillPreview();
-  triggerCupSparkle(cupId);
+  chocolateMilkFillController.onFillComplete(cupId);
 }
 
 function onChocolateMilkFillEnd() {
-  window.CuppyLandAudio?.stopSfxClip?.("milkPour");
-  clearChocolateMilkDragFillPreview();
+  chocolateMilkFillController.onFillEnd();
 }
 
 function resolveFriendAsset(friendState) {
@@ -397,181 +348,24 @@ function updateFriendElementAsset(friendId) {
   }
 }
 
-function isChocolateMilkAttachedAndOpen(friendState) {
-  if (!friendState || friendState.type !== "chocolate-milk" || !friendState.attachedCupId) {
-    return false;
-  }
-
-  const attachedCup = findCupById(friendState.attachedCupId);
-  return Boolean(attachedCup && attachedCup.state?.lidVisible === false);
-}
-
-function stopChocolateMilkSequence(friendId, keepFrame = false) {
-  const runtime = chocolateMilkRuntime.get(friendId);
-  if (runtime) {
-    clearInterval(runtime.intervalId);
-    chocolateMilkRuntime.delete(friendId);
-  }
-
-  const friendState = findFriendById(friendId);
-  if (friendState && !keepFrame) {
-    friendState.sequenceFrame = null;
-    updateFriendElementAsset(friendId);
-  }
-}
-
 function triggerCupSparkle(cupId) {
-  const cupState = findCupById(cupId)?.state;
-  if (!cupState) {
-    return;
-  }
-
-  window.CuppyLandAudio?.playSfxClip?.("shimmer");
-
-  const sparkle = document.createElement("div");
-  sparkle.className = "cup-sparkle-burst";
-  sparkle.style.left = `${cupState.worldX + 120}px`;
-  sparkle.style.top = `${cupState.worldY + 108}px`;
-  const rayAngles = [45, 135, 225, 315];
-  rayAngles.forEach((angle, index) => {
-    const node = document.createElement("span");
-    node.className = "cup-sparkle-ray";
-    node.style.setProperty("--ray-angle", `${angle}deg`);
-    node.style.setProperty("--ray-delay", `${index * 45}ms`);
-    sparkle.appendChild(node);
-  });
-
-  const particleCount = 5 + Math.floor(Math.random() * 2);
-  for (let index = 0; index < particleCount; index += 1) {
-    const particle = document.createElement("span");
-    particle.className = "cup-sparkle-orb";
-    const startX = Math.round((Math.random() * 76) - 38);
-    const startY = Math.round((Math.random() * 76) - 38);
-    const driftX = startX + Math.round((Math.random() * 44) - 22);
-    const driftY = startY + Math.round((Math.random() * 44) - 22);
-    const size = 4 + Math.round(Math.random() * 4);
-    const delayMs = 30 + (index * 35) + Math.round(Math.random() * 45);
-    const durationMs = 560 + Math.round(Math.random() * 220);
-
-    particle.style.setProperty("--orb-start-x", `${startX}px`);
-    particle.style.setProperty("--orb-start-y", `${startY}px`);
-    particle.style.setProperty("--orb-drift-x", `${driftX}px`);
-    particle.style.setProperty("--orb-drift-y", `${driftY}px`);
-    particle.style.setProperty("--orb-size", `${size}px`);
-    particle.style.setProperty("--orb-delay", `${delayMs}ms`);
-    particle.style.setProperty("--orb-duration", `${durationMs}ms`);
-    sparkle.appendChild(particle);
-  }
-  worldCanvas.appendChild(sparkle);
-  window.setTimeout(() => sparkle.remove(), 1300);
-}
-
-function startChocolateMilkSequence(friendState) {
-  if (!friendState || friendState.sequenceCompleted || chocolateMilkRuntime.has(friendState.id)) {
-    return;
-  }
-
-  const sequenceConfig = getChocolateMilkSequenceConfig();
-  friendState.sequenceFrame = 2;
-  updateFriendElementAsset(friendState.id);
-  const startedAt = Date.now();
-  const intervalId = setInterval(() => {
-    const activeFriend = findFriendById(friendState.id);
-    if (!isChocolateMilkAttachedAndOpen(activeFriend)) {
-      stopChocolateMilkSequence(friendState.id);
-      return;
-    }
-
-    const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${activeFriend.id}"]`);
-    syncAttachedFriendPosition(activeFriend, friendElement);
-    const elapsedMs = Date.now() - startedAt;
-    activeFriend.sequenceFrame = activeFriend.sequenceFrame === 2 ? 3 : 2;
-    updateFriendElementAsset(activeFriend.id);
-
-    if (elapsedMs >= sequenceConfig.durationMs) {
-      const attachedCupId = activeFriend.attachedCupId;
-      activeFriend.sequenceCompleted = true;
-      stopChocolateMilkSequence(activeFriend.id);
-      if (attachedCupId) {
-        triggerCupSparkle(attachedCupId);
-      }
-    }
-  }, sequenceConfig.frameIntervalMs);
-
-  chocolateMilkRuntime.set(friendState.id, { intervalId, startedAt });
+  sparkleEffectController.triggerCupSparkle(cupId);
 }
 
 function refreshChocolateMilkSequences() {
-  const worldFriends = getWorldFriendList(state.activeWorld);
-  const worldFriendIds = new Set(worldFriends.map((friend) => friend.id));
-
-  chocolateMilkRuntime.forEach((_, friendId) => {
-    if (!worldFriendIds.has(friendId)) {
-      stopChocolateMilkSequence(friendId);
-    }
-  });
-
-  worldFriends.forEach((friendState) => {
-    if (isChocolateMilkAttachedAndOpen(friendState) && !friendState.sequenceCompleted) {
-      startChocolateMilkSequence(friendState);
-      return;
-    }
-
-    if (chocolateMilkRuntime.has(friendState.id)) {
-      stopChocolateMilkSequence(friendState.id);
-    } else if (friendState.type === "chocolate-milk" && friendState.sequenceFrame) {
-      friendState.sequenceFrame = null;
-    }
-  });
+  chocolateMilkSequenceController.refresh();
 }
 
 function stopAllChocolateMilkSequences() {
-  Array.from(chocolateMilkRuntime.keys()).forEach((friendId) => stopChocolateMilkSequence(friendId));
-}
-
-function clearWorldHeadlineTimers() {
-  if (worldHeadlineFadeTimerId) {
-    clearTimeout(worldHeadlineFadeTimerId);
-    worldHeadlineFadeTimerId = null;
-  }
-  if (worldHeadlineHideTimerId) {
-    clearTimeout(worldHeadlineHideTimerId);
-    worldHeadlineHideTimerId = null;
-  }
+  chocolateMilkSequenceController.stopAll();
 }
 
 function hideWorldHeadlineOverlay() {
-  if (!worldHeadlineOverlay) {
-    return;
-  }
-  clearWorldHeadlineTimers();
-  worldHeadlineOverlay.classList.remove("visible", "fading");
-  worldHeadlineOverlay.style.backgroundImage = "";
+  worldHeadlineController.hide();
 }
 
 function showWorldHeadlineOverlay(worldId) {
-  if (!worldHeadlineOverlay) {
-    return;
-  }
-
-  hideWorldHeadlineOverlay();
-  const headlineAsset = worldHeadlineConfig?.assets?.[worldId] || "";
-  if (!headlineAsset) {
-    return;
-  }
-
-  const displayMs = worldHeadlineConfig?.durationMs ?? 3000;
-  const fadeMs = worldHeadlineConfig?.fadeOutMs ?? 700;
-  worldHeadlineOverlay.style.transitionDuration = `${fadeMs}ms`;
-  worldHeadlineOverlay.style.backgroundImage = `url("${headlineAsset}")`;
-  worldHeadlineOverlay.classList.add("visible");
-  worldHeadlineHideTimerId = setTimeout(() => {
-    worldHeadlineOverlay.classList.add("fading");
-    worldHeadlineOverlay.classList.remove("visible");
-    worldHeadlineFadeTimerId = setTimeout(() => {
-      hideWorldHeadlineOverlay();
-    }, fadeMs);
-  }, displayMs);
+  worldHeadlineController.show(worldId);
 }
 
 function ensureCupLayerOrder(cupState, fallbackOrder = 1) {
@@ -701,101 +495,9 @@ function removeFriendInstance(friendId) {
   if (friendIndex < 0) {
     return;
   }
-  stopChocolateMilkSequence(friendId);
+  chocolateMilkSequenceController.stop(friendId);
   worldFriends.splice(friendIndex, 1);
   renderWorldCups();
-}
-
-function setFriendDragVisual(friendElement, friendState, isDragging) {
-  if (!friendElement || !friendState || friendState.type !== "chocolate-milk") {
-    return;
-  }
-
-  const friendArt = friendElement.querySelector(".friend-character-art");
-  if (!friendArt) {
-    return;
-  }
-
-  friendArt.style.transform = isDragging ? "rotate(-45deg)" : "";
-  friendArt.style.transformOrigin = isDragging ? "center center" : "";
-}
-
-function onFriendPointerDown(event) {
-  if (state.currentScreen !== "world") {
-    return;
-  }
-
-  const friendElement = event.currentTarget.closest(".friend-character");
-  const friendState = resolveFriendStateForElement(friendElement);
-  if (!friendElement || !friendState) {
-    return;
-  }
-
-  event.preventDefault();
-  event.stopPropagation();
-
-  const pointerScale = getElementDragScale(friendElement);
-  const localPointerX = (event.clientX - friendElement.getBoundingClientRect().left) / pointerScale;
-  const localPointerY = (event.clientY - friendElement.getBoundingClientRect().top) / pointerScale;
-  friendDragState.active = true;
-  friendDragState.pointerId = event.pointerId;
-  friendDragState.friendId = friendState.id;
-  friendDragState.pointerOffsetX = localPointerX;
-  friendDragState.pointerOffsetY = localPointerY;
-  if (friendState.type === "chocolate-milk") {
-    friendState.attachedCupId = null;
-    friendState.sequenceCompleted = false;
-    stopChocolateMilkSequence(friendState.id);
-  }
-  setFriendDragVisual(friendElement, friendState, true);
-  trySetPointerCapture(friendElement, event.pointerId);
-}
-
-function onFriendPointerMove(event) {
-  if (!friendDragState.active || event.pointerId !== friendDragState.pointerId) {
-    return;
-  }
-
-  if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
-    const friendId = friendDragState.friendId;
-    friendDragState.active = false;
-    friendDragState.pointerId = null;
-    friendDragState.friendId = null;
-    removeFriendInstance(friendId);
-    return;
-  }
-
-  const friendElement = event.currentTarget.closest(".friend-character");
-  const friendState = resolveFriendStateForElement(friendElement);
-  if (!friendElement || !friendState) {
-    return;
-  }
-
-  const { worldX, worldY } = getWorldPointFromClient(event.clientX, event.clientY);
-  const nextX = worldX - friendDragState.pointerOffsetX;
-  const nextY = worldY - friendDragState.pointerOffsetY;
-  friendState.worldX = Math.max(0, Math.min(worldCanvas.offsetWidth - friendElement.offsetWidth, nextX));
-  friendState.worldY = Math.max(0, Math.min(worldCanvas.offsetHeight - friendElement.offsetHeight, nextY));
-  friendElement.style.left = `${friendState.worldX}px`;
-  friendElement.style.top = `${friendState.worldY}px`;
-}
-
-function onFriendPointerUp(event) {
-  if (!friendDragState.active || event.pointerId !== friendDragState.pointerId) {
-    return;
-  }
-
-  const friendElement = event.currentTarget.closest(".friend-character");
-  const friendState = resolveFriendStateForElement(friendElement);
-  setFriendDragVisual(friendElement, friendState, false);
-
-  if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
-    removeFriendInstance(friendDragState.friendId);
-  }
-
-  friendDragState.active = false;
-  friendDragState.pointerId = null;
-  friendDragState.friendId = null;
 }
 
 function createCupElement(cupId, cupState) {
@@ -879,10 +581,10 @@ function createFriendElement(friendState) {
   art.className = "friend-character-art";
   art.style.backgroundImage = `url("${resolveFriendAsset(friendState)}")`;
   friendElement.appendChild(art);
-  friendElement.addEventListener("pointerdown", onFriendPointerDown);
-  friendElement.addEventListener("pointermove", onFriendPointerMove);
-  friendElement.addEventListener("pointerup", onFriendPointerUp);
-  friendElement.addEventListener("pointercancel", onFriendPointerUp);
+  friendElement.addEventListener("pointerdown", friendPointerController.onPointerDown);
+  friendElement.addEventListener("pointermove", friendPointerController.onPointerMove);
+  friendElement.addEventListener("pointerup", friendPointerController.onPointerUp);
+  friendElement.addEventListener("pointercancel", friendPointerController.onPointerUp);
   return friendElement;
 }
 

@@ -189,18 +189,22 @@
     },
     defaultSleeveAsset: "./assets/sleeve-child.png",
     audioConfig: {
-      menu: "./sfx/Kailua_Breeze.mp3",
+      menu: "./sfx/Kailua_Breeze.ogg",
       worlds: {
-        playground: "./sfx/playground.mp3",
-        "olivia-room": "./sfx/olivias-room.mp3",
+        playground: "./sfx/theme-playground.ogg",
+        "olivia-room": "./sfx/theme-olivias-room.ogg",
       },
       sfxClips: {
         welcomeToCuppyland: "./sfx/welcome-to-cuppyland.mp3",
         myNameIsOlivia: "./sfx/my-name-is-olivia.mp3",
         hi: "./sfx/hi.mp3",
-        rocketship: "./sfx/rocketship.mp3",
+        rocketship: "./sfx/rocketship-snap.ogg",
         milkPour: "./sfx/milk-pour.ogg",
         shimmer: "./sfx/shimmer.ogg",
+        lidSnapOn: "./sfx/lid-snap-on.ogg",
+        lidSnapOff: "./sfx/lid-snap-off.ogg",
+        sleeveSnapOn: "./sfx/sleeve-snap-on.ogg",
+        sleeveSnapOff: "./sfx/sleeve-snap-off.ogg",
       },
       transitions: {
         fadeOutMs: 220,
