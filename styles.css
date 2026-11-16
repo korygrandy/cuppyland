@@ -291,6 +291,11 @@ body {
   z-index: 9999 !important;
 }
 
+.cup-character.is-dragging-lid,
+.cup-character.is-dragging-hairstyle {
+  z-index: 9999 !important;
+}
+
 .trash-can {
   position: absolute;
   right: 26px;
@@ -413,6 +418,18 @@ body {
 
 .cup-character.is-dragging-sleeve .cup-face {
   z-index: 121;
+}
+
+.cup-character.is-dragging-lid .cup-lid {
+  z-index: 130;
+}
+
+.cup-character.is-dragging-lid .cup-hairstyle {
+  z-index: 131;
+}
+
+.cup-character.is-dragging-hairstyle .cup-hairstyle {
+  z-index: 132;
 }
 
 .drop-zone {

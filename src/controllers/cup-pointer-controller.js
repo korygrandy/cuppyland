@@ -42,6 +42,20 @@
       cupElement.classList.toggle("is-dragging-sleeve", Boolean(isActive));
     }
 
+    function setLidDragForeground(cupElement, isActive) {
+      if (!cupElement) {
+        return;
+      }
+      cupElement.classList.toggle("is-dragging-lid", Boolean(isActive));
+    }
+
+    function setHairstyleDragForeground(cupElement, isActive) {
+      if (!cupElement) {
+        return;
+      }
+      cupElement.classList.toggle("is-dragging-hairstyle", Boolean(isActive));
+    }
+
     function onCupPointerDown(event) {
       const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
       const cupState = resolveCupStateForElement(cupElement);
@@ -134,6 +148,7 @@
       }
 
       showTrashCan("lid");
+      setLidDragForeground(cupElement, true);
       event.preventDefault();
       event.stopPropagation();
       const parentRect = cupElement.getBoundingClientRect();
@@ -154,11 +169,14 @@
       }
 
       if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
+        setLidDragForeground(cupElement, false);
         cupState.lidVisible = false;
         cupState.hairstyleVisible = false;
         renderWorldCups();
         return;
       }
+
+      bringCupElementToFront(cupElement);
 
       const parentRect = cupElement.getBoundingClientRect();
       const localX = event.clientX - parentRect.left;
@@ -189,12 +207,14 @@
       }
 
       if (isPointerOverTrashCan(event.clientX, event.clientY)) {
+        setLidDragForeground(cupElement, false);
         removeSelectedObject();
       } else if (isLidNearCup(cupElement)) {
         cupState.lidDetached = false;
         cupState.lidOffsetX = defaultCupState?.lidOffsetX ?? 17;
         cupState.lidOffsetY = defaultCupState?.lidOffsetY ?? 0;
       }
+      setLidDragForeground(cupElement, false);
 
       trashCanBtn.classList.remove("highlight");
       lidDragState.active = false;
@@ -215,6 +235,7 @@
       }
 
       showTrashCan("hairstyle");
+      setHairstyleDragForeground(cupElement, true);
       event.preventDefault();
       event.stopPropagation();
       const parentRect = cupElement.getBoundingClientRect();
@@ -239,10 +260,13 @@
       }
 
       if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
+        setHairstyleDragForeground(cupElement, false);
         cupState.hairstyleVisible = false;
         renderWorldCups();
         return;
       }
+
+      bringCupElementToFront(cupElement);
 
       const parentRect = cupElement.getBoundingClientRect();
       const localX = event.clientX - parentRect.left;
@@ -276,8 +300,10 @@
       }
 
       if (isPointerOverTrashCan(event.clientX, event.clientY)) {
+        setHairstyleDragForeground(cupElement, false);
         removeSelectedObject();
       } else if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
+        setHairstyleDragForeground(cupElement, false);
         cupState.hairstyleVisible = false;
         renderWorldCups();
       } else if (hairstyleDragState.moved && !isHairstyleNearLid(cupElement, cupState.hairstyleVisible)) {
@@ -287,6 +313,7 @@
         cupState.hairstyleOffsetX = defaultCupState?.hairstyleOffsetX ?? 17;
         cupState.hairstyleOffsetY = defaultCupState?.hairstyleOffsetY ?? -22;
       }
+      setHairstyleDragForeground(cupElement, false);
 
       trashCanBtn.classList.remove("highlight");
       hairstyleDragState.active = false;
