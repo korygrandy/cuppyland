@@ -46,6 +46,9 @@
         zIndex: 90 + fallbackIndex,
       });
       renderWorldCups();
+      if (friendType === "rocketman-craft") {
+        window.CuppyLandAudio?.playSfxClip?.("rocketship");
+      }
       return true;
     }
 

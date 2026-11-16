@@ -1,5 +1,7 @@
 (function () {
   function createController(options) {
+    const game = window.CuppyLandGame || {};
+    const imageCache = new Map();
     const {
       state,
       dragState,
@@ -19,8 +21,105 @@
       getWorldDropPoint,
     } = options;
 
-    function showDragGhost(pointerX, pointerY, label) {
-      dragGhost.textContent = label;
+    function loadImage(src) {
+      if (!src) {
+        return Promise.reject(new Error("Missing image source"));
+      }
+      if (imageCache.has(src)) {
+        return imageCache.get(src);
+      }
+      const imagePromise = new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error(`Failed to load ${src}`));
+        image.src = src;
+      });
+      imageCache.set(src, imagePromise);
+      return imagePromise;
+    }
+
+    function createTintedGhostCanvas(partType, colorName, width, height) {
+      const canvas = document.createElement("canvas");
+      canvas.className = "drag-ghost-object";
+      canvas.width = width;
+      canvas.height = height;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      const asset = partType === "lid" ? game.tintAssetConfig?.lid : game.tintAssetConfig?.cup;
+      const colorHex = game.colorMap?.[colorName] || "#ffffff";
+      if (!asset) {
+        return canvas;
+      }
+      loadImage(asset)
+        .then((image) => {
+          const context = canvas.getContext("2d");
+          if (!context) {
+            return;
+          }
+          context.clearRect(0, 0, canvas.width, canvas.height);
+          context.fillStyle = colorHex;
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.save();
+          context.globalCompositeOperation = "multiply";
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          context.restore();
+          context.save();
+          context.globalCompositeOperation = "destination-in";
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          context.restore();
+        })
+        .catch(() => {});
+      return canvas;
+    }
+
+    function createVisualGhost(type, value, sourceItem) {
+      if (type === "lid") {
+        return createTintedGhostCanvas("lid", value, 232, 149);
+      }
+
+      if (type === "cup") {
+        return createTintedGhostCanvas("cup", value, 220, 230);
+      }
+
+      if (type === "expression") {
+        const face = document.createElement("span");
+        face.className = "drag-ghost-object drag-ghost-expression";
+        const faceAsset = game.expressionAssetMap?.[value] || game.expressionAssetMap?.happy;
+        face.style.backgroundImage = `url("${faceAsset || ""}")`;
+        return face;
+      }
+
+      if (type === "hairstyle") {
+        const hair = document.createElement("span");
+        hair.className = "drag-ghost-object drag-ghost-hairstyle";
+        hair.style.backgroundImage = `url("${game.hairstyleAssetMap?.[value] || ""}")`;
+        return hair;
+      }
+
+      if (type === "friend") {
+        const friend = document.createElement("span");
+        friend.className = "drag-ghost-object drag-ghost-friend";
+        friend.style.backgroundImage = `url("${game.friendAssetMap?.[value] || ""}")`;
+        return friend;
+      }
+
+      const fallbackThumb = sourceItem?.querySelector(".inventory-expression-thumb, .inventory-hairstyle-thumb, .inventory-friend-thumb");
+      if (fallbackThumb) {
+        const img = document.createElement("img");
+        img.className = "drag-ghost-object";
+        img.src = window.getComputedStyle(fallbackThumb).backgroundImage.replace(/^url\(["']?/, "").replace(/["']?\)$/, "");
+        img.alt = "";
+        return img;
+      }
+      return null;
+    }
+
+    function showDragGhost(pointerX, pointerY, sourceItem, type, value) {
+      dragGhost.innerHTML = "";
+      const visual = createVisualGhost(type, value, sourceItem);
+      if (visual) {
+        dragGhost.appendChild(visual);
+      }
       dragGhost.classList.remove("hidden");
       dragGhost.style.left = `${pointerX}px`;
       dragGhost.style.top = `${pointerY}px`;
@@ -54,7 +153,7 @@
       dragState.startX = event.clientX;
       dragState.startY = event.clientY;
       trySetPointerCapture(target, event.pointerId);
-      showDragGhost(event.clientX, event.clientY, `${dragState.type}: ${dragState.value}`);
+      showDragGhost(event.clientX, event.clientY, target, dragState.type, dragState.value);
       setZoneHighlight(event.clientX, event.clientY);
     }
 

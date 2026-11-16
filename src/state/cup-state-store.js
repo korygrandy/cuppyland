@@ -5,7 +5,7 @@
       cupColor: "red",
       sleeve: "child",
       expression: "happy",
-      hairstyle: "child",
+      hairstyle: null,
       worldX: 920,
       worldY: 430,
       zIndex: 1,
@@ -23,7 +23,7 @@
       hairstyleDetached: false,
       hairstyleOffsetX: 17,
       hairstyleOffsetY: -22,
-      hairstyleVisible: true,
+      hairstyleVisible: false,
     };
   }
 
