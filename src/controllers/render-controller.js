@@ -1,4 +1,43 @@
 (function () {
+  const tintedImageCache = new Map();
+  const canvasDrawSequence = new WeakMap();
+
+  function loadTintedImage(src) {
+    if (!src) {
+      return Promise.reject(new Error("Missing image source"));
+    }
+
+    if (tintedImageCache.has(src)) {
+      return tintedImageCache.get(src);
+    }
+
+    const imagePromise = new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error(`Failed to load ${src}`));
+      image.src = src;
+    });
+
+    tintedImageCache.set(src, imagePromise);
+    return imagePromise;
+  }
+
+  function paintTintedImage(context, canvas, image, colorHex) {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = colorHex;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    context.save();
+    context.globalCompositeOperation = "multiply";
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    context.restore();
+
+    context.save();
+    context.globalCompositeOperation = "destination-in";
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    context.restore();
+  }
+
   function getCanvasContext(canvasElement, layerName) {
     const context = canvasElement.getContext("2d");
     if (!context) {
@@ -13,23 +52,24 @@
       return;
     }
 
-    const image = new Image();
-    image.onload = () => {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.fillStyle = colorHex;
-      context.fillRect(0, 0, canvas.width, canvas.height);
+    const nextSequence = (canvasDrawSequence.get(canvas) || 0) + 1;
+    canvasDrawSequence.set(canvas, nextSequence);
 
-      context.save();
-      context.globalCompositeOperation = "multiply";
-      context.drawImage(image, 0, 0, canvas.width, canvas.height);
-      context.restore();
+    loadTintedImage(src)
+      .then((image) => {
+        if (canvasDrawSequence.get(canvas) !== nextSequence) {
+          return;
+        }
 
-      context.save();
-      context.globalCompositeOperation = "destination-in";
-      context.drawImage(image, 0, 0, canvas.width, canvas.height);
-      context.restore();
-    };
-    image.src = src;
+        paintTintedImage(context, canvas, image, colorHex);
+        canvas.dataset.renderSrc = src;
+      })
+      .catch(() => {
+        if (canvasDrawSequence.get(canvas) !== nextSequence) {
+          return;
+        }
+        context.clearRect(0, 0, canvas.width, canvas.height);
+      });
   }
 
   function createController(options) {
