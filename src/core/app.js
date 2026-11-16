@@ -240,9 +240,18 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   resolveFriendStateForElement,
   getElementDragScale,
   getWorldPointFromClient,
+  getCupElementAtPoint,
+  zoneForPoint,
+  getCupStateById: (cupId) => findCupById(cupId)?.state || null,
+  getSequenceConfig: () => getChocolateMilkSequenceConfig(),
   removeFriendInstance,
   stopChocolateMilkSequence: (friendId) => chocolateMilkSequenceController.stop(friendId),
   bringFriendElementToFront,
+  onChocolateMilkFillStart,
+  onChocolateMilkFillTick,
+  onChocolateMilkFillCancel,
+  onChocolateMilkFillComplete,
+  onChocolateMilkFillEnd,
 });
 
 function syncAudioForCurrentScreen() {
@@ -520,16 +529,18 @@ function syncAttachedFriendPosition(friendState, friendElement = null) {
 
 function removeFriendInstance(friendId) {
   if (!state.activeWorld || !friendId) {
-    return;
+    return false;
   }
   const worldFriends = getWorldFriendList(state.activeWorld);
   const friendIndex = worldFriends.findIndex((friend) => friend.id === friendId);
   if (friendIndex < 0) {
-    return;
+    return false;
   }
   chocolateMilkSequenceController.stop(friendId);
   worldFriends.splice(friendIndex, 1);
+  window.CuppyLandAudio?.playSfxClip?.("defaultObjectRemoved");
   renderWorldCups();
+  return true;
 }
 
 function createCupElement(cupId, cupState) {

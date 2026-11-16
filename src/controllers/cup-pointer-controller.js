@@ -56,6 +56,10 @@
       cupElement.classList.toggle("is-dragging-hairstyle", Boolean(isActive));
     }
 
+    function playDefaultObjectRemovedSfx() {
+      window.CuppyLandAudio?.playSfxClip?.("defaultObjectRemoved");
+    }
+
     function onCupPointerDown(event) {
       const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
       const cupState = resolveCupStateForElement(cupElement);
@@ -188,8 +192,12 @@
 
       if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
         setLidDragForeground(cupElement, false);
+        const shouldPlayRemovedSfx = cupState.lidVisible || cupState.hairstyleVisible;
         cupState.lidVisible = false;
         cupState.hairstyleVisible = false;
+        if (shouldPlayRemovedSfx) {
+          playDefaultObjectRemovedSfx();
+        }
         renderWorldCups();
         return;
       }
@@ -289,7 +297,11 @@
 
       if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
         setHairstyleDragForeground(cupElement, false);
+        const shouldPlayRemovedSfx = cupState.hairstyleVisible;
         cupState.hairstyleVisible = false;
+        if (shouldPlayRemovedSfx) {
+          playDefaultObjectRemovedSfx();
+        }
         renderWorldCups();
         return;
       }
@@ -332,7 +344,11 @@
         removeSelectedObject();
       } else if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
         setHairstyleDragForeground(cupElement, false);
+        const shouldPlayRemovedSfx = cupState.hairstyleVisible;
         cupState.hairstyleVisible = false;
+        if (shouldPlayRemovedSfx) {
+          playDefaultObjectRemovedSfx();
+        }
         renderWorldCups();
       } else if (hairstyleDragState.moved && !isHairstyleNearLid(cupElement, cupState.hairstyleVisible)) {
         cupState.hairstyleDetached = true;
@@ -387,8 +403,12 @@
 
       if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
         setSleeveDragForeground(cupElement, false);
+        const shouldPlayRemovedSfx = cupState.sleeveVisible || cupState.faceVisible;
         cupState.sleeveVisible = false;
         cupState.faceVisible = false;
+        if (shouldPlayRemovedSfx) {
+          playDefaultObjectRemovedSfx();
+        }
         renderWorldCups();
         return;
       }
