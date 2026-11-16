@@ -32,7 +32,7 @@ Use **Capacitor + Android WebView**:
 
 ## 4) First APK setup steps
 
-Run from [cuppy-land](C:/dev/oliviaworld/cuppy-land):
+Run from [cuppy-land](C:/dev/oliviaworld/cuppy-land) (important: commands assume this working directory):
 
 ```bash
 npm init -y
@@ -44,7 +44,7 @@ npm install @capacitor/android
 Initialize Capacitor (with a dedicated web output folder):
 
 ```bash
-npx cap init "Olivia's World" "com.oliviaworld.game" --web-dir=web
+npm exec -- cap init "Olivia's World" "com.oliviaworld.game" --web-dir=web
 ```
 
 Use the included web-packaging script:
@@ -63,9 +63,9 @@ This copies runtime files into `web/`:
 Then:
 
 ```bash
-npx cap add android
-npx cap copy android
-npx cap open android
+npm exec -- cap add android
+npm exec -- cap copy android
+npm exec -- cap open android
 ```
 
 In Android Studio:
@@ -80,7 +80,7 @@ In Android Studio:
 ```bash
 # refresh web/ from source files + copy into Android project
 npm run cap:copy
-npx cap open android
+npm exec -- cap open android
 ```
 
 Rebuild/install from Android Studio.
@@ -161,9 +161,9 @@ Vector files (`.svg`) are already efficient; keep as vector.
 After creating the `web/` folder, run:
 
 ```bash
-npx cap add android
-npx cap copy android
-npx cap open android
+npm exec -- cap add android
+npm exec -- cap copy android
+npm exec -- cap open android
 ```
 
 Then generate the first debug APK and install to tablet for real touch/audio validation.
@@ -178,7 +178,7 @@ Then generate the first debug APK and install to tablet for real touch/audio val
    ```
 2. Open Android Studio:
    ```bash
-   npx cap open android
+   npm exec -- cap open android
    ```
 3. In Android Studio:
    - wait for Gradle sync to finish
@@ -209,7 +209,7 @@ Store the keystore safely (backup it). Do **not** lose this file or password if 
 
 ### B) Configure signing in Android Studio
 
-1. `npx cap open android`
+1. `npm exec -- cap open android`
 2. **Build > Generate Signed Bundle / APK**
 3. Choose **APK**
 4. Select keystore path, alias, and passwords

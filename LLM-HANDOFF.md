@@ -78,3 +78,113 @@ cuppy-land/
 - Sleeve apply/remove + expression behavior.
 - Trash/out-of-bounds removal behavior.
 - World switching with no state leakage.
+
+## 6) Production build and deploy workflow
+### 6.1 Browser web bundle
+The generated `web/` directory is the public browser deployable output. It contains the static HTML/CSS/JS bundle for the game and is what should be uploaded to the hosted site, not the raw source tree.
+
+Generate it:
+```powershell
+Set-Location "C:\dev\oliviaworld\cuppy-land"
+npm run prepare:web
+```
+
+This writes the browser-ready output to:
+- [web](./web)
+
+Recommended public hosting structure:
+```text
+/cupplandapp/
+  index.html
+  app-release.apk
+  manifest.webmanifest
+  service-worker.js
+  icons/
+  ...all generated files copied from web/
+```
+
+Note: do not upload the raw `src/` tree to the public browser site in production. Upload the generated `web/` bundle instead.
+
+### 6.2 Android APK build
+Build the Android release package from the project:
+```powershell
+Set-Location "C:\dev\oliviaworld\cuppy-land\android"
+$env:JAVA_HOME = "C:\Users\KG1\.jdks\jbr-21.0.11"
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+.\gradlew.bat assembleRelease
+```
+
+Unsigned output:
+- `android/app/build/outputs/apk/release/app-release-unsigned.apk`
+
+The signed deployment APK should be created with the release keystore before publishing. Example:
+```powershell
+$env:JAVA_HOME = "C:\Users\KG1\.jdks\jbr-21.0.11"
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+$apksigner = "C:\Users\KG1\AppData\Local\Android\Sdk\build-tools\35.0.0\apksigner.bat"
+$keystore = "C:\dev\oliviaworld\cuppy-land\android\my-release-key.keystore"
+$alias = "cuppyland"
+$unsigned = "C:\dev\oliviaworld\cuppy-land\android\app\build\outputs\apk\release\app-release-unsigned.apk"
+$signed = "C:\dev\oliviaworld\cuppy-land\android\app\build\outputs\apk\release\app-release.apk"
+
+& $apksigner sign --ks $keystore --ks-key-alias $alias --out $signed $unsigned
+& $apksigner verify $signed
+```
+
+Final public APK artifact:
+- `android/app/build/outputs/apk/release/app-release.apk`
+
+### 6.3 Public deployment flow
+1. Generate the browser bundle in `web/`.
+2. Upload the contents of `web/` to the HTTPS host folder for the public site.
+3. Upload the signed APK to the same folder as `app-release.apk`.
+4. Publish a small download page like `cupplandapp/index.html` that links to `/cupplandapp/app-release.apk`.
+5. Confirm the public path works:
+   - `https://www.kgenteprises.com/cupplandapp/`
+   - `https://www.kgenteprises.com/cupplandapp/app-release.apk`
+
+Important: the FTP hostname must remain direct (DNS only) and not proxied through Cloudflare. Keep `ftp.kgenteprises.com` off the Cloudflare proxy for file transfer access.
+
+## 7) Build and test log review workflow
+The repo currently does not have a formal automated test suite, so validation logs are the primary review artifact for release checks.
+
+Create a dedicated log folder:
+```powershell
+New-Item -ItemType Directory -Force -Path "C:\dev\oliviaworld\cuppy-land\logs" | Out-Null
+```
+
+Capture the browser build:
+```powershell
+Set-Location "C:\dev\oliviaworld\cuppy-land"
+npm run prepare:web *> "C:\dev\oliviaworld\cuppy-land\logs\web-build.log" 2>&1
+```
+
+Capture the Android release build:
+```powershell
+Set-Location "C:\dev\oliviaworld\cuppy-land\android"
+$env:JAVA_HOME = "C:\Users\KG1\.jdks\jbr-21.0.11"
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+.\gradlew.bat assembleRelease *> "C:\dev\oliviaworld\cuppy-land\logs\android-release.log" 2>&1
+```
+
+Capture device logs for tablet validation:
+```powershell
+& "C:\Users\KG1\AppData\Local\Android\Sdk\platform-tools\adb.exe" logcat -d > "C:\dev\oliviaworld\cuppy-land\logs\device-log.txt"
+```
+
+Review the latest output:
+```powershell
+Get-Content "C:\dev\oliviaworld\cuppy-land\logs\android-release.log" -Tail 80
+Get-Content "C:\dev\oliviaworld\cuppy-land\logs\device-log.txt" -Tail 80
+```
+
+These logs should be retained alongside each deployment attempt so the latest build and QA status can be reviewed before the next release.
+
+## 8) Deployment checklist before public launch
+- Release APK signed and verified.
+- `web/` bundle generated and uploaded to host.
+- HTTPS site is live and redirects work.
+- `ftp.kgenteprises.com` is still functional and not proxied through Cloudflare.
+- APK install link works on a real tablet.
+- Device log reviewed for runtime issues after install.
+- Download page is hosted under `/cupplandapp/` and references the signed APK.
