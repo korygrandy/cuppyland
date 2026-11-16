@@ -107,6 +107,8 @@ const chocolateMilkRuntime = new Map();
 const chocolateMilkDragFillState = {
   cupId: null,
   intervalId: null,
+  finalAnimationId: null,
+  completionLocked: false,
   frame: 2,
   overlay: null,
 };
@@ -266,7 +268,12 @@ function clearChocolateMilkDragFillPreview() {
   if (chocolateMilkDragFillState.intervalId) {
     clearInterval(chocolateMilkDragFillState.intervalId);
   }
+  if (chocolateMilkDragFillState.finalAnimationId) {
+    clearInterval(chocolateMilkDragFillState.finalAnimationId);
+  }
   chocolateMilkDragFillState.intervalId = null;
+  chocolateMilkDragFillState.finalAnimationId = null;
+  chocolateMilkDragFillState.completionLocked = false;
   chocolateMilkDragFillState.cupId = null;
   chocolateMilkDragFillState.frame = 2;
   if (chocolateMilkDragFillState.overlay) {
@@ -312,7 +319,7 @@ function paintChocolateMilkDragFillFrame(cupId, frame) {
 }
 
 function onChocolateMilkFillStart(cupId) {
-  if (!cupId) {
+  if (!cupId || chocolateMilkDragFillState.completionLocked) {
     return;
   }
 
@@ -336,7 +343,7 @@ function onChocolateMilkFillStart(cupId) {
 }
 
 function onChocolateMilkFillTick(cupId) {
-  if (!cupId || chocolateMilkDragFillState.cupId !== cupId) {
+  if (!cupId || chocolateMilkDragFillState.completionLocked || chocolateMilkDragFillState.cupId !== cupId) {
     return;
   }
   ensureChocolateMilkDragFillOverlay(cupId);
@@ -348,9 +355,10 @@ function onChocolateMilkFillCancel() {
 }
 
 function onChocolateMilkFillComplete(cupId) {
-  if (!cupId) {
+  if (!cupId || chocolateMilkDragFillState.completionLocked) {
     return;
   }
+  chocolateMilkDragFillState.completionLocked = true;
 
   window.CuppyLandAudio?.stopSfxClip?.("milkPour");
 
@@ -362,9 +370,8 @@ function onChocolateMilkFillComplete(cupId) {
   const sequenceConfig = getChocolateMilkSequenceConfig();
   const completedAtMs = Date.now();
   const finalizeIntervalMs = 160;
-  const finalAnimationId = setInterval(() => {
+  chocolateMilkDragFillState.finalAnimationId = setInterval(() => {
     if (Date.now() - completedAtMs >= 1000) {
-      clearInterval(finalAnimationId);
       clearChocolateMilkDragFillPreview();
       triggerCupSparkle(cupId);
       return;

@@ -31,6 +31,7 @@
       cupId: null,
       startedAtMs: 0,
       completed: false,
+      completionTimerId: null,
     };
 
     function loadImage(src) {
@@ -150,6 +151,10 @@
     }
 
     function resetChocolateMilkFill(reason = "cancelled") {
+      if (chocolateMilkFillState.completionTimerId) {
+        clearTimeout(chocolateMilkFillState.completionTimerId);
+        chocolateMilkFillState.completionTimerId = null;
+      }
       if (!chocolateMilkFillState.cupId) {
         return;
       }
@@ -161,6 +166,35 @@
       if (!chocolateMilkFillState.completed && typeof onChocolateMilkFillEnd === "function") {
         onChocolateMilkFillEnd(endedCupId, reason);
       }
+      chocolateMilkFillState.cupId = null;
+      chocolateMilkFillState.startedAtMs = 0;
+      chocolateMilkFillState.completed = false;
+    }
+
+    function completeChocolateMilkFill(cupId) {
+      if (!cupId || chocolateMilkFillState.completed) {
+        return;
+      }
+
+      if (chocolateMilkFillState.completionTimerId) {
+        clearTimeout(chocolateMilkFillState.completionTimerId);
+        chocolateMilkFillState.completionTimerId = null;
+      }
+
+      chocolateMilkFillState.completed = true;
+      if (typeof onChocolateMilkFillComplete === "function") {
+        onChocolateMilkFillComplete(cupId);
+      }
+
+      dragState.suppressClick = true;
+      dragState.active = false;
+      dragState.type = "";
+      dragState.value = "";
+      dragState.pointerId = null;
+      dragState.moved = true;
+      hideDragGhost();
+      clearZoneHighlights();
+
       chocolateMilkFillState.cupId = null;
       chocolateMilkFillState.startedAtMs = 0;
       chocolateMilkFillState.completed = false;
@@ -211,6 +245,13 @@
         chocolateMilkFillState.cupId = hoveredCupId;
         chocolateMilkFillState.startedAtMs = nowMs;
         chocolateMilkFillState.completed = false;
+        chocolateMilkFillState.completionTimerId = setTimeout(() => {
+          const isStillDraggingChocolateMilk = dragState.active && dragState.type === "friend" && dragState.value === "chocolate-milk";
+          if (!isStillDraggingChocolateMilk || chocolateMilkFillState.cupId !== hoveredCupId || !isOpenCupTarget(hoveredCupId)) {
+            return;
+          }
+          completeChocolateMilkFill(hoveredCupId);
+        }, chocolateMilkFillDurationMs);
         if (typeof onChocolateMilkFillStart === "function") {
           onChocolateMilkFillStart(hoveredCupId);
         }
@@ -222,10 +263,7 @@
       }
 
       if (elapsedMs >= chocolateMilkFillDurationMs && !chocolateMilkFillState.completed) {
-        chocolateMilkFillState.completed = true;
-        if (typeof onChocolateMilkFillComplete === "function") {
-          onChocolateMilkFillComplete(hoveredCupId);
-        }
+        completeChocolateMilkFill(hoveredCupId);
       }
     }
 
