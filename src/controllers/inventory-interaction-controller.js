@@ -17,9 +17,21 @@
       renderWorldCups,
       getActiveCupId,
       getActiveCupInstance,
+      getCupInstanceById,
       getDefaultFriendDropPoint,
       getWorldDropPoint,
+      onChocolateMilkFillStart,
+      onChocolateMilkFillTick,
+      onChocolateMilkFillCancel,
+      onChocolateMilkFillComplete,
+      onChocolateMilkFillEnd,
     } = options;
+    const chocolateMilkFillDurationMs = game.chocolateMilkSequence?.durationMs || 5000;
+    const chocolateMilkFillState = {
+      cupId: null,
+      startedAtMs: 0,
+      completed: false,
+    };
 
     function loadImage(src) {
       if (!src) {
@@ -134,6 +146,86 @@
       dragGhost.classList.add("hidden");
     }
 
+    function resetChocolateMilkFill(reason = "cancelled") {
+      if (!chocolateMilkFillState.cupId) {
+        return;
+      }
+
+      const endedCupId = chocolateMilkFillState.cupId;
+      if (!chocolateMilkFillState.completed && typeof onChocolateMilkFillCancel === "function") {
+        onChocolateMilkFillCancel(endedCupId, reason);
+      }
+      if (!chocolateMilkFillState.completed && typeof onChocolateMilkFillEnd === "function") {
+        onChocolateMilkFillEnd(endedCupId, reason);
+      }
+      chocolateMilkFillState.cupId = null;
+      chocolateMilkFillState.startedAtMs = 0;
+      chocolateMilkFillState.completed = false;
+    }
+
+    function isOpenCupTarget(cupId) {
+      if (!cupId) {
+        return false;
+      }
+      const cupInstance = getCupInstanceById?.(cupId) || (getActiveCupInstance?.()?.id === cupId ? getActiveCupInstance?.() : null);
+      if (!cupInstance?.state) {
+        return false;
+      }
+      return cupInstance.state.lidVisible === false || cupInstance.state.lidDetached === true;
+    }
+
+    function updateChocolateMilkFill(pointerX, pointerY) {
+      if (!(dragState.type === "friend" && dragState.value === "chocolate-milk")) {
+        resetChocolateMilkFill("not-chocolate-milk");
+        return;
+      }
+
+      const hoveredCup = getCupElementAtPoint(pointerX, pointerY);
+      const hoveredCupId = hoveredCup?.dataset?.cupId || null;
+      const zone = zoneForPoint(pointerX, pointerY);
+      const isZoneNearCupOpening = zone === "cup" || zone === "lid";
+      let isPointerNearCupOpening = false;
+      if (hoveredCup) {
+        const cupRect = hoveredCup.getBoundingClientRect();
+        const localX = pointerX - cupRect.left;
+        const localY = pointerY - cupRect.top;
+        isPointerNearCupOpening = (
+          localX >= cupRect.width * 0.2 &&
+          localX <= cupRect.width * 0.8 &&
+          localY >= cupRect.height * 0.02 &&
+          localY <= cupRect.height * 0.42
+        );
+      }
+      const isValidFillHover = isOpenCupTarget(hoveredCupId) && (isZoneNearCupOpening || isPointerNearCupOpening);
+      if (!isValidFillHover) {
+        resetChocolateMilkFill("left-fill-zone");
+        return;
+      }
+
+      const nowMs = Date.now();
+      if (chocolateMilkFillState.cupId !== hoveredCupId) {
+        resetChocolateMilkFill("changed-cup");
+        chocolateMilkFillState.cupId = hoveredCupId;
+        chocolateMilkFillState.startedAtMs = nowMs;
+        chocolateMilkFillState.completed = false;
+        if (typeof onChocolateMilkFillStart === "function") {
+          onChocolateMilkFillStart(hoveredCupId);
+        }
+      }
+
+      const elapsedMs = nowMs - chocolateMilkFillState.startedAtMs;
+      if (typeof onChocolateMilkFillTick === "function") {
+        onChocolateMilkFillTick(hoveredCupId, elapsedMs, Math.max(0, chocolateMilkFillDurationMs - elapsedMs));
+      }
+
+      if (elapsedMs >= chocolateMilkFillDurationMs && !chocolateMilkFillState.completed) {
+        chocolateMilkFillState.completed = true;
+        if (typeof onChocolateMilkFillComplete === "function") {
+          onChocolateMilkFillComplete(hoveredCupId);
+        }
+      }
+    }
+
     function onPointerDown(event) {
       const target = event.target.closest(".inventory-item");
       if (!target || state.currentScreen !== "world") {
@@ -186,6 +278,7 @@
       }
       moveDragGhost(event.clientX, event.clientY);
       setZoneHighlight(event.clientX, event.clientY);
+      updateChocolateMilkFill(event.clientX, event.clientY);
     }
 
     function onPointerEnd(event) {
@@ -199,7 +292,7 @@
       const isFriendDrop = dragState.type === "friend";
       const dropPoint = isFriendDrop ? getWorldDropPoint(event.clientX, event.clientY) : null;
       const result = isFriendDrop
-        ? applyDrop(dragState.type, dragState.value, "friend", targetCupId, dropPoint)
+        ? applyDrop(dragState.type, dragState.value, zone || "friend", targetCupId, dropPoint)
         : (zone ? applyDrop(dragState.type, dragState.value, zone, targetCupId) : { valid: false, reason: "no-zone" });
 
       if (result.valid) {
@@ -214,6 +307,7 @@
       dragState.value = "";
       dragState.pointerId = null;
       dragState.moved = false;
+      resetChocolateMilkFill("pointer-end");
       hideDragGhost();
       clearZoneHighlights();
     }

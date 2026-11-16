@@ -29,21 +29,32 @@
       return true;
     }
 
-    function addFriendToWorld(friendType, dropPoint) {
+    function addFriendToWorld(friendType, dropPoint, options = {}) {
       if (!state.activeWorld) {
         return false;
       }
 
       const worldFriends = getWorldFriendList(state.activeWorld);
       const fallbackIndex = worldFriends.length;
-      const worldX = Number.isFinite(dropPoint?.worldX) ? dropPoint.worldX : 900 + (fallbackIndex % 3) * 120;
-      const worldY = Number.isFinite(dropPoint?.worldY) ? dropPoint.worldY : 360 + Math.floor(fallbackIndex / 3) * 110;
+      const attachedCupId = options.attachedCupId || null;
+      const attachedOffsetX = Number.isFinite(options.attachedOffsetX) ? options.attachedOffsetX : 70;
+      const attachedOffsetY = Number.isFinite(options.attachedOffsetY) ? options.attachedOffsetY : 64;
+      const attachedCup = attachedCupId ? getWorldCupList(state.activeWorld).find((cup) => cup.id === attachedCupId) : null;
+      const fallbackWorldX = Number.isFinite(dropPoint?.worldX) ? dropPoint.worldX : 900 + (fallbackIndex % 3) * 120;
+      const fallbackWorldY = Number.isFinite(dropPoint?.worldY) ? dropPoint.worldY : 360 + Math.floor(fallbackIndex / 3) * 110;
+      const worldX = attachedCup ? attachedCup.state.worldX + attachedOffsetX : fallbackWorldX;
+      const worldY = attachedCup ? attachedCup.state.worldY + attachedOffsetY : fallbackWorldY;
+
       worldFriends.push({
         id: `friend-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
         type: friendType,
         worldX,
         worldY,
         zIndex: 90 + fallbackIndex,
+        attachedCupId,
+        attachedOffsetX,
+        attachedOffsetY,
+        sequenceCompleted: false,
       });
       renderWorldCups();
       if (friendType === "rocketman-craft") {
