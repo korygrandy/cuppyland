@@ -152,40 +152,40 @@ interface GameState {
 ## 10) MVP Todo List
 
 ### Foundation
-- [ ] Create project scaffold under `cuppy-land/` (HTML, CSS, JS/TS, assets, config).
-- [ ] Add responsive layout locked to landscape gameplay with rotate prompt fallback.
-- [ ] Implement global game state store and screen routing.
+- [x] Create project scaffold under `cuppy-land/` (HTML, CSS, JS/TS, assets, config).
+- [x] Add responsive layout locked to landscape gameplay with rotate prompt fallback.
+- [x] Implement global game state store and screen routing.
 
 ### Splash + Navigation
-- [ ] Build splash screen using `cuppyland-splash-horizontal.jpg`.
-- [ ] Implement animated Play button and touch handler.
-- [ ] Build world selection screen with Playground + Olivia's Room cards.
-- [ ] Implement transitions between splash, world select, and world canvas.
+- [x] Build splash screen using `cuppyland-splash-horizontal.jpg`.
+- [x] Implement animated Play button and touch handler.
+- [x] Build world selection screen with Playground + Olivia's Room cards.
+- [x] Implement transitions between splash, world select, and world canvas.
 
 ### World Canvas UI
-- [ ] Build world canvas container with horizontal pan/scroll support.
-- [ ] Add close (X) button.
-- [ ] Add confirm modal (Yes/No) for world exit.
-- [ ] Add inventory icon button styled to match art direction.
+- [x] Build world canvas container with horizontal pan/scroll support.
+- [x] Add close (X) button.
+- [x] Add confirm modal (Yes/No) for world exit.
+- [x] Add inventory icon button styled to match art direction.
 
 ### Inventory + Drag/Drop
-- [ ] Build inventory panel UI with categories (lid color, cup color, sleeve type).
-- [ ] Implement drag source behaviors for touch devices.
-- [ ] Implement snap targets on cup object (lid/base/sleeve zones).
-- [ ] Implement drop validation rules.
-- [ ] Add invalid-drop feedback animation/effect.
+- [x] Build inventory panel UI with categories (lid color, cup color, sleeve type).
+- [x] Implement drag source behaviors for touch devices.
+- [x] Implement snap targets on cup object (lid/base/sleeve zones).
+- [x] Implement drop validation rules.
+- [x] Add invalid-drop feedback animation/effect.
 
 ### Character Customization Logic
-- [ ] Implement primary color application for lid.
-- [ ] Implement primary color application for cup base.
-- [ ] Implement sleeve switching (`child`, `parent`, `grandparent`).
-- [ ] Bind sleeve selection to expression variant update.
+- [x] Implement primary color application for lid.
+- [x] Implement primary color application for cup base.
+- [x] Implement sleeve switching (`child`, `parent`, `grandparent`).
+- [x] Bind sleeve selection to expression variant update.
 
 ### Assets + Polish
-- [ ] Export and add grayscale tint assets (`lid-grayscale.png`, `cup-grayscale.png`) to `cuppy-land/assets/`.
-- [ ] Gather/create missing sleeve and world assets.
-- [ ] Optimize image sizes for tablet performance.
-- [ ] Add basic transition/audio feedback hooks (optional, non-blocking).
+- [x] Export and add grayscale tint assets (`lid-grayscale.png`, `cup-grayscale.png`) to `cuppy-land/assets/`.
+- [x] Gather/create missing sleeve and world assets.
+- [x] Optimize image sizes for tablet performance.
+- [x] Add basic transition/audio feedback hooks (optional, non-blocking).
 
 ### QA for MVP
 - [ ] Validate touch interactions on tablet browser.
