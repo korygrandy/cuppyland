@@ -82,9 +82,24 @@
       cupDragState.startClientY = event.clientY;
       cupDragState.startWorldX = Number.isFinite(cupState.worldX) ? cupState.worldX : 920;
       cupDragState.startWorldY = Number.isFinite(cupState.worldY) ? cupState.worldY : 430;
+      cupDragState.pointerScale = getElementDragScale(cupElement);
       if (cupElement) {
         trySetPointerCapture(cupElement, event.pointerId);
       }
+    }
+
+    function getElementDragScale(element) {
+      if (!element) {
+        return 1;
+      }
+
+      const rect = element.getBoundingClientRect();
+      const baseWidth = element.offsetWidth || rect.width || 1;
+      const derivedScale = rect.width / baseWidth;
+      if (!Number.isFinite(derivedScale) || derivedScale <= 0) {
+        return 1;
+      }
+      return derivedScale;
     }
 
     function onCupPointerMove(event) {
@@ -101,11 +116,11 @@
         return;
       }
 
-      const deltaX = event.clientX - cupDragState.startClientX;
-      const deltaY = event.clientY - cupDragState.startClientY;
-      const bounds = worldCanvas.getBoundingClientRect();
-      const maxX = Math.max(0, bounds.width - cupElement.offsetWidth);
-      const maxY = Math.max(0, bounds.height - cupElement.offsetHeight);
+      const pointerScale = cupDragState.pointerScale || getElementDragScale(cupElement);
+      const deltaX = (event.clientX - cupDragState.startClientX) / pointerScale;
+      const deltaY = (event.clientY - cupDragState.startClientY) / pointerScale;
+      const maxX = Math.max(0, worldCanvas.offsetWidth - cupElement.offsetWidth);
+      const maxY = Math.max(0, worldCanvas.offsetHeight - cupElement.offsetHeight);
       const nextX = Math.min(maxX, Math.max(0, cupDragState.startWorldX + deltaX));
       const nextY = Math.min(maxY, Math.max(0, cupDragState.startWorldY + deltaY));
       cupState.worldX = nextX;
@@ -133,6 +148,7 @@
 
       cupDragState.active = false;
       cupDragState.pointerId = null;
+      cupDragState.pointerScale = 1;
     }
 
     function onLidPointerDown(event) {
