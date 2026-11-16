@@ -200,6 +200,7 @@
         hi: "./sfx/hi.mp3",
         rocketship: "./sfx/rocketship-snap.ogg",
         spongebob: "./sfx/spongebob-snap.ogg",
+        hairyGuy: "./sfx/hairy-guy-drawing-snap.ogg",
         cupRemoved: "./sfx/goodbye.ogg",
         defaultObjectRemoved: "./sfx/default-object-removed.ogg",
         milkPour: "./sfx/milk-pour.ogg",

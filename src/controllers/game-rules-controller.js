@@ -64,6 +64,9 @@
       if (friendType === "spongebob-stuffy") {
         window.CuppyLandAudio?.playSfxClip?.("spongebob");
       }
+      if (friendType === "hairy-guy") {
+        window.CuppyLandAudio?.playSfxClip?.("hairyGuy");
+      }
       return true;
     }
 
