@@ -344,19 +344,29 @@ function renderWorldCups() {
   syncCupSelectionVisualState();
 }
 
+const screenWorldController = window.CuppyLandScreenWorldController.createController({
+  state,
+  screenEls,
+  worldBackground,
+  worldViewport,
+  closeModal,
+  rotatePrompt,
+  fixedViewport,
+  worldClasses,
+  documentRef: document,
+  ensureWorldCupState,
+  cloneCupState,
+  renderWorldCups,
+  toggleInventory,
+  onScreenChanged: syncAudioForCurrentScreen,
+});
+
 function showScreen(screen) {
-  state.currentScreen = screen;
-  screenEls.splash.classList.toggle("active", screen === "splash");
-  screenEls.worldSelect.classList.toggle("active", screen === "worldSelect");
-  screenEls.world.classList.toggle("active", screen === "world");
-  syncAudioForCurrentScreen();
+  screenWorldController.showScreen(screen);
 }
 
 function updateWorldBackground() {
-  worldBackground.classList.remove("playground", "olivia-room");
-  if (state.activeWorld) {
-    worldBackground.classList.add(worldClasses[state.activeWorld]);
-  }
+  screenWorldController.updateWorldBackground();
 }
 
 function resolveCupStateForElement(cupElement) {
@@ -597,45 +607,27 @@ function ensureWorldCupState(worldId) {
 }
 
 function openWorld(worldId) {
-  const worldState = ensureWorldCupState(worldId);
-  state.activeWorld = worldId;
-  state.activeCupId = worldState.cups[0]?.id || null;
-  state.cup = worldState.cups[0]?.state || cloneCupState();
-  updateWorldBackground();
-  renderWorldCups();
-  showScreen("world");
-  toggleInventory(false);
-  closeModal.classList.add("hidden");
-  worldViewport.scrollLeft = Math.floor((2200 - worldViewport.clientWidth) / 2);
+  screenWorldController.openWorld(worldId);
 }
 
 function closeWorld() {
-  state.activeWorld = null;
-  state.activeCupId = null;
-  toggleInventory(false);
-  showScreen("worldSelect");
+  screenWorldController.closeWorld();
 }
 
 function showCloseModal() {
-  closeModal.classList.remove("hidden");
+  screenWorldController.showCloseModal();
 }
 
 function hideCloseModal() {
-  closeModal.classList.add("hidden");
+  screenWorldController.hideCloseModal();
 }
 
 function updateLandscapePrompt() {
-  const isLandscape = window.innerWidth > window.innerHeight;
-  rotatePrompt.classList.toggle("hidden", isLandscape);
+  screenWorldController.updateLandscapePrompt();
 }
 
 function updateGameViewportScale() {
-  const scale = Math.min(
-    1,
-    window.innerWidth / fixedViewport.width,
-    window.innerHeight / fixedViewport.height
-  );
-  document.documentElement.style.setProperty("--game-scale", String(scale));
+  screenWorldController.updateGameViewportScale();
 }
 
 function addCupToWorld() {
