@@ -99,6 +99,8 @@ const friendDragState = {
   pointerOffsetX: 0,
   pointerOffsetY: 0,
 };
+let friendWorldController = null;
+let worldCupController = null;
 const trashState = {
   active: false,
   target: null,
@@ -106,6 +108,29 @@ const trashState = {
 const cupStateStore = window.CuppyLandCupState.createStore({
   gameConfig: window.CuppyLandGame,
   state,
+});
+const worldCoordinateController = window.CuppyLandWorldCoordinateController.createController({
+  worldCanvas,
+  worldViewport,
+});
+const cupPositionController = window.CuppyLandCupPositionController.createController({
+  state,
+  cupCharacter,
+  lidLayer,
+  sleeveLayer,
+  hairstyleLayer,
+  faceLayer,
+  getWorldCupList: (worldId = state.activeWorld) => getWorldCupList(worldId),
+  defaultCupState,
+  gameplayConfig,
+});
+const worldLayerController = window.CuppyLandWorldLayerController.createController({
+  state,
+  documentRef: document,
+  cupStateStore,
+  getWorldCupList: (worldId = state.activeWorld) => getWorldCupList(worldId),
+  getWorldFriendList: (worldId = state.activeWorld) => getWorldFriendList(worldId),
+  resolveCupStateForElement: (cupElement) => resolveCupStateForElement(cupElement),
 });
 const interactionHelpers = window.CuppyLandInteraction.createHelpers({
   documentRef: document,
@@ -253,6 +278,21 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   onChocolateMilkFillComplete,
   onChocolateMilkFillEnd,
 });
+friendWorldController = window.CuppyLandWorldFriendController.createController({
+  state,
+  worldCanvas,
+  getWorldFriendList: (worldId = state.activeWorld) => getWorldFriendList(worldId),
+  findCupById: (cupId) => findCupById(cupId, state.activeWorld),
+  getSequenceConfig: () => getChocolateMilkSequenceConfig(),
+  getFriendAssetMap: () => window.CuppyLandGame.friendAssetMap,
+  onFriendPointerDown: friendPointerController.onPointerDown,
+  onFriendPointerMove: friendPointerController.onPointerMove,
+  onFriendPointerUp: friendPointerController.onPointerUp,
+  playSfxClip: (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName),
+  stopChocolateMilkSequence: (friendId) => chocolateMilkSequenceController.stop(friendId),
+  onRenderWorldCups: () => renderWorldCups(),
+  onRefreshChocolateMilkSequences: () => refreshChocolateMilkSequences(),
+});
 
 function syncAudioForCurrentScreen() {
   if (window.CuppyLandAudio && typeof window.CuppyLandAudio.syncAudioForCurrentScreen === "function") {
@@ -331,31 +371,8 @@ function onChocolateMilkFillEnd() {
   chocolateMilkFillController.onFillEnd();
 }
 
-function resolveFriendAsset(friendState) {
-  if (!friendState) {
-    return "";
-  }
-
-  if (friendState.type === "chocolate-milk") {
-    const sequenceConfig = getChocolateMilkSequenceConfig();
-    if (friendState.sequenceFrame === 2) {
-      return sequenceConfig.frame2Asset;
-    }
-    if (friendState.sequenceFrame === 3) {
-      return sequenceConfig.frame3Asset;
-    }
-  }
-
-  return window.CuppyLandGame.friendAssetMap?.[friendState.type] || "";
-}
-
 function updateFriendElementAsset(friendId) {
-  const friendState = findFriendById(friendId);
-  const asset = resolveFriendAsset(friendState);
-  const friendArt = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"] .friend-character-art`);
-  if (friendArt) {
-    friendArt.style.backgroundImage = `url("${asset}")`;
-  }
+  friendWorldController?.updateFriendElementAsset(friendId);
 }
 
 function triggerCupSparkle(cupId) {
@@ -379,293 +396,79 @@ function showWorldHeadlineOverlay(worldId) {
 }
 
 function ensureCupLayerOrder(cupState, fallbackOrder = 1) {
-  return cupStateStore.ensureCupLayerOrder(cupState, fallbackOrder);
+  return worldLayerController.ensureCupLayerOrder(cupState, fallbackOrder);
 }
 
 function getWorldMaxZIndex(worldId = state.activeWorld) {
-  if (!worldId) {
-    return 1;
-  }
-
-  const maxCupZIndex = getWorldCupList(worldId).reduce((max, cupInfo) => (
-    Math.max(max, Number.isFinite(cupInfo?.state?.zIndex) ? cupInfo.state.zIndex : 0)
-  ), 0);
-  const maxFriendZIndex = getWorldFriendList(worldId).reduce((max, friendState) => (
-    Math.max(max, Number.isFinite(friendState?.zIndex) ? friendState.zIndex : 0)
-  ), 0);
-  return Math.max(1, maxCupZIndex, maxFriendZIndex);
+  return worldLayerController.getWorldMaxZIndex(worldId);
 }
 
 function getNextWorldZIndex(worldId = state.activeWorld) {
-  return getWorldMaxZIndex(worldId) + 1;
+  return worldLayerController.getNextWorldZIndex(worldId);
 }
 
 function bringCupElementToFront(cupElement) {
-  if (!cupElement) {
-    return;
-  }
-
-  const cupState = resolveCupStateForElement(cupElement);
-  if (!cupState) {
-    return;
-  }
-  const nextZIndex = getNextWorldZIndex();
-  cupState.zIndex = nextZIndex;
-  if (Number.isFinite(nextZIndex)) {
-    cupElement.style.zIndex = String(nextZIndex);
-  }
+  worldLayerController.bringCupElementToFront(cupElement);
 }
 
 function bringFriendElementToFront(friendElement, friendState) {
-  if (!friendElement || !friendState) {
-    return;
-  }
-  const nextZIndex = getNextWorldZIndex();
-  friendState.zIndex = nextZIndex;
-  friendElement.style.zIndex = String(nextZIndex);
+  worldLayerController.bringFriendElementToFront(friendElement, friendState);
 }
 
 function syncCupSelectionVisualState() {
-  document.querySelectorAll(".cup-character[data-cup-id]").forEach((cupNode) => {
-    const isSelected = cupNode.dataset.cupId === state.activeCupId;
-    cupNode.classList.toggle("is-selected", isSelected);
-  });
+  worldLayerController.syncCupSelectionVisualState();
 }
 
 function setActiveCupInstance(cupId) {
-  const nextActiveCup = cupStateStore.setActiveCupInstance(cupId);
-  if (nextActiveCup) {
-    syncCupSelectionVisualState();
-  }
+  worldLayerController.setActiveCupInstance(cupId);
 }
 
 function getActiveCupInstance() {
-  return cupStateStore.getActiveCupInstance();
+  return worldLayerController.getActiveCupInstance();
 }
 
 function getCupInstanceById(cupId, worldId = state.activeWorld) {
-  if (!cupId) {
-    return null;
-  }
-  return getWorldCupList(worldId).find((cup) => cup.id === cupId) || null;
+  return worldLayerController.getCupInstanceById(cupId, worldId);
 }
 
 function syncWorldCupSelection() {
-  cupStateStore.syncWorldCupSelection();
-}
-
-function getTargetCupState() {
-  return cupStateStore.getTargetCupState();
+  worldLayerController.syncWorldCupSelection();
 }
 
 function getElementDragScale(element) {
-  if (!element) {
-    return 1;
-  }
-
-  const rect = element.getBoundingClientRect();
-  const baseWidth = element.offsetWidth || rect.width || 1;
-  const derivedScale = rect.width / baseWidth;
-  if (!Number.isFinite(derivedScale) || derivedScale <= 0) {
-    return 1;
-  }
-  return derivedScale;
+  return worldCoordinateController.getElementDragScale(element);
 }
 
 function getWorldPointFromClient(clientX, clientY) {
-  const bounds = worldCanvas.getBoundingClientRect();
-  const widthScale = bounds.width > 0 ? worldCanvas.offsetWidth / bounds.width : 1;
-  const heightScale = bounds.height > 0 ? worldCanvas.offsetHeight / bounds.height : 1;
-  return {
-    worldX: (clientX - bounds.left) * widthScale,
-    worldY: (clientY - bounds.top) * heightScale,
-  };
+  return worldCoordinateController.getWorldPointFromClient(clientX, clientY);
 }
 
 function getWorldDropPoint(clientX, clientY) {
-  const { worldX, worldY } = getWorldPointFromClient(clientX, clientY);
-
-  return {
-    worldX: Math.max(0, Math.min(worldCanvas.offsetWidth - 132, worldX - 66)),
-    worldY: Math.max(0, Math.min(worldCanvas.offsetHeight - 132, worldY - 66)),
-  };
+  return worldCoordinateController.getWorldDropPoint(clientX, clientY);
 }
 
 function getDefaultFriendDropPoint() {
-  const centerClientX = worldViewport.getBoundingClientRect().left + worldViewport.clientWidth / 2;
-  const centerClientY = worldViewport.getBoundingClientRect().top + worldViewport.clientHeight / 2;
-  return getWorldDropPoint(centerClientX, centerClientY);
+  return worldCoordinateController.getDefaultFriendDropPoint();
 }
 
 function resolveFriendStateForElement(friendElement) {
-  const friendId = friendElement?.dataset?.friendId;
-  if (!friendId) {
-    return null;
-  }
-  const worldFriends = getWorldFriendList(state.activeWorld);
-  return worldFriends.find((friend) => friend.id === friendId) || null;
+  return friendWorldController?.resolveFriendStateForElement(friendElement) || null;
 }
 
 function syncAttachedFriendPosition(friendState, friendElement = null) {
-  if (!friendState?.attachedCupId) {
-    return;
-  }
-
-  const attachedCup = findCupById(friendState.attachedCupId);
-  if (!attachedCup) {
-    friendState.attachedCupId = null;
-    return;
-  }
-
-  const offsetX = Number.isFinite(friendState.attachedOffsetX) ? friendState.attachedOffsetX : 70;
-  const offsetY = Number.isFinite(friendState.attachedOffsetY) ? friendState.attachedOffsetY : 64;
-  friendState.worldX = attachedCup.state.worldX + offsetX;
-  friendState.worldY = attachedCup.state.worldY + offsetY;
-  if (friendElement) {
-    friendElement.style.left = `${friendState.worldX}px`;
-    friendElement.style.top = `${friendState.worldY}px`;
-  }
+  friendWorldController?.syncAttachedFriendPosition(friendState, friendElement);
 }
 
-function removeFriendInstance(friendId) {
-  if (!state.activeWorld || !friendId) {
-    return false;
-  }
-  const worldFriends = getWorldFriendList(state.activeWorld);
-  const friendIndex = worldFriends.findIndex((friend) => friend.id === friendId);
-  if (friendIndex < 0) {
-    return false;
-  }
-  chocolateMilkSequenceController.stop(friendId);
-  worldFriends.splice(friendIndex, 1);
-  window.CuppyLandAudio?.playSfxClip?.("defaultObjectRemoved");
-  renderWorldCups();
-  return true;
-}
-
-function createCupElement(cupId, cupState) {
-  const template = cupCharacter.cloneNode(true);
-  template.dataset.cupId = cupId;
-  template.id = `cupCharacter-${cupId}`;
-  template.classList.remove("hidden-object");
-  template.style.left = `${cupState.worldX}px`;
-  template.style.top = `${cupState.worldY}px`;
-  template.style.zIndex = String(ensureCupLayerOrder(cupState));
-
-  template.querySelectorAll("[id]").forEach((node) => {
-    const nextId = `${cupId}-${node.id}`;
-    node.id = nextId;
-    node.dataset.cupId = cupId;
-  });
-
-  const cupNode = template.querySelector(".cup-base");
-  if (cupNode) {
-    cupNode.dataset.cupId = cupId;
-  }
-
-  const lidNode = template.querySelector(".cup-lid");
-  if (lidNode) {
-    lidNode.dataset.cupId = cupId;
-  }
-
-  const sleeveNode = template.querySelector(".cup-sleeve");
-  if (sleeveNode) {
-    sleeveNode.dataset.cupId = cupId;
-  }
-
-  const hairstyleNode = template.querySelector(".cup-hairstyle");
-  if (hairstyleNode) {
-    hairstyleNode.dataset.cupId = cupId;
-  }
-
-  const faceNode = template.querySelector(".cup-face");
-  if (faceNode) {
-    faceNode.dataset.cupId = cupId;
-  }
-
-  template.addEventListener("pointerdown", cupPointerController.onCupPointerDown);
-  template.addEventListener("pointermove", cupPointerController.onCupPointerMove);
-  template.addEventListener("pointerup", cupPointerController.onCupPointerUp);
-  template.addEventListener("pointercancel", cupPointerController.onCupPointerUp);
-
-  template.querySelector(".cup-base")?.addEventListener("pointerdown", cupPointerController.onCupPointerDown);
-  template.querySelector(".cup-base")?.addEventListener("pointermove", cupPointerController.onCupPointerMove);
-  template.querySelector(".cup-base")?.addEventListener("pointerup", cupPointerController.onCupPointerUp);
-  template.querySelector(".cup-base")?.addEventListener("pointercancel", cupPointerController.onCupPointerUp);
-
-  template.querySelector(".cup-lid")?.addEventListener("pointerdown", cupPointerController.onLidPointerDown);
-  template.querySelector(".cup-lid")?.addEventListener("pointermove", cupPointerController.onLidPointerMove);
-  template.querySelector(".cup-lid")?.addEventListener("pointerup", cupPointerController.onLidPointerUp);
-  template.querySelector(".cup-lid")?.addEventListener("pointercancel", cupPointerController.onLidPointerUp);
-
-  template.querySelector(".cup-sleeve")?.addEventListener("pointerdown", cupPointerController.onSleevePointerDown);
-  template.querySelector(".cup-sleeve")?.addEventListener("pointermove", cupPointerController.onSleevePointerMove);
-  template.querySelector(".cup-sleeve")?.addEventListener("pointerup", cupPointerController.onSleevePointerUp);
-  template.querySelector(".cup-sleeve")?.addEventListener("pointercancel", cupPointerController.onSleevePointerUp);
-
-  template.querySelector(".cup-hairstyle")?.addEventListener("pointerdown", cupPointerController.onHairstylePointerDown);
-  template.querySelector(".cup-hairstyle")?.addEventListener("pointermove", cupPointerController.onHairstylePointerMove);
-  template.querySelector(".cup-hairstyle")?.addEventListener("pointerup", cupPointerController.onHairstylePointerUp);
-  template.querySelector(".cup-hairstyle")?.addEventListener("pointercancel", cupPointerController.onHairstylePointerUp);
-
-  return template;
-}
-
-function createFriendElement(friendState) {
-  syncAttachedFriendPosition(friendState);
-  const friendElement = document.createElement("div");
-  friendElement.className = "friend-character";
-  friendElement.dataset.friendId = friendState.id;
-  friendElement.style.left = `${friendState.worldX || 0}px`;
-  friendElement.style.top = `${friendState.worldY || 0}px`;
-  friendElement.style.zIndex = String(Number.isFinite(friendState.zIndex) ? friendState.zIndex : 90);
-
-  const art = document.createElement("span");
-  art.className = "friend-character-art";
-  art.style.backgroundImage = `url("${resolveFriendAsset(friendState)}")`;
-  friendElement.appendChild(art);
-  friendElement.addEventListener("pointerdown", friendPointerController.onPointerDown);
-  friendElement.addEventListener("pointermove", friendPointerController.onPointerMove);
-  friendElement.addEventListener("pointerup", friendPointerController.onPointerUp);
-  friendElement.addEventListener("pointercancel", friendPointerController.onPointerUp);
-  return friendElement;
+function removeFriendInstance(friendId, options = {}) {
+  return friendWorldController?.removeFriendInstance(friendId, options) || false;
 }
 
 function renderWorldFriends() {
-  worldCanvas.querySelectorAll(".friend-character").forEach((node) => node.remove());
-  const worldFriends = getWorldFriendList(state.activeWorld);
-  if (!worldFriends.length) {
-    refreshChocolateMilkSequences();
-    return;
-  }
-
-  [...worldFriends]
-    .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
-    .forEach((friendState) => {
-      worldCanvas.appendChild(createFriendElement(friendState));
-    });
-  refreshChocolateMilkSequences();
+  friendWorldController?.renderWorldFriends();
 }
 
 function renderWorldCups() {
-  worldCanvas.querySelectorAll(".cup-character").forEach((node) => node.remove());
-  const worldCups = getWorldCupList(state.activeWorld);
-  if (worldCups.length) {
-    worldCups.forEach((cupInfo, index) => ensureCupLayerOrder(cupInfo.state, index + 1));
-
-    [...worldCups]
-      .sort((a, b) => ensureCupLayerOrder(a.state) - ensureCupLayerOrder(b.state))
-      .forEach((cupInfo) => {
-      const cupElement = createCupElement(cupInfo.id, cupInfo.state);
-      cupElement.classList.toggle("is-selected", cupInfo.id === state.activeCupId);
-      worldCanvas.appendChild(cupElement);
-      renderCupInstance(cupInfo.state, cupElement);
-      });
-
-    syncWorldCupSelection();
-    syncCupSelectionVisualState();
-  }
-  renderWorldFriends();
+  worldCupController?.renderWorldCups();
 }
 
 const screenWorldController = window.CuppyLandScreenWorldController.createController({
@@ -694,73 +497,23 @@ function updateWorldBackground() {
 }
 
 function resolveCupStateForElement(cupElement) {
-  if (cupElement && cupElement.dataset && cupElement.dataset.cupId && state.activeWorld) {
-    const matchingCup = getWorldCupList(state.activeWorld).find((cup) => cup.id === cupElement.dataset.cupId);
-    if (matchingCup) {
-      return matchingCup.state;
-    }
-  }
-  return state.cup;
+  return cupPositionController.resolveCupStateForElement(cupElement);
 }
 
 function syncCupWorldPosition(cupElement = cupCharacter) {
-  const cupState = resolveCupStateForElement(cupElement);
-  if (!cupElement) {
-    return;
-  }
-
-  const worldX = Number.isFinite(cupState.worldX) ? cupState.worldX : 920;
-  const worldY = Number.isFinite(cupState.worldY) ? cupState.worldY : 430;
-  cupElement.style.left = `${worldX}px`;
-  cupElement.style.top = `${worldY}px`;
-  cupElement.style.bottom = "auto";
+  cupPositionController.syncCupWorldPosition(cupElement);
 }
 
 function syncLidPosition(cupElement = cupCharacter) {
-  const cupState = resolveCupStateForElement(cupElement);
-  const lidLayerElement = cupElement.querySelector(".cup-lid") || lidLayer;
-  const hairstyleLayerElement = cupElement.querySelector(".cup-hairstyle") || hairstyleLayer;
-  const left = cupState.lidDetached ? cupState.lidOffsetX : 17;
-  const top = cupState.lidDetached ? cupState.lidOffsetY : 0;
-  lidLayerElement.style.left = `${left}px`;
-  lidLayerElement.style.top = `${top}px`;
-  if (hairstyleLayerElement) {
-    const hairLeft = cupState.hairstyleDetached ? cupState.hairstyleOffsetX : left + 10;
-    const hairTop = cupState.hairstyleDetached ? cupState.hairstyleOffsetY : top - 22;
-    hairstyleLayerElement.style.left = `${hairLeft}px`;
-    hairstyleLayerElement.style.top = `${hairTop}px`;
-  }
+  cupPositionController.syncLidPosition(cupElement);
 }
 
 function syncSleevePosition(cupElement = cupCharacter) {
-  const cupState = resolveCupStateForElement(cupElement);
-  const sleeveLayerElement = cupElement.querySelector(".cup-sleeve") || sleeveLayer;
-  const left = cupState.sleeveDetached ? cupState.sleeveOffsetX : 32;
-  const top = cupState.sleeveDetached ? cupState.sleeveOffsetY : 160;
-  sleeveLayerElement.style.left = `${left}px`;
-  sleeveLayerElement.style.top = `${top}px`;
+  cupPositionController.syncSleevePosition(cupElement);
 }
 
 function syncFacePosition(cupElement = cupCharacter) {
-  const cupState = resolveCupStateForElement(cupElement);
-  const sleeveLayerElement = cupElement.querySelector(".cup-sleeve") || sleeveLayer;
-  const faceLayerElement = cupElement.querySelector(".cup-face") || faceLayer;
-  if (!faceLayerElement) {
-    return;
-  }
-
-  const left = cupState.sleeveDetached ? cupState.sleeveOffsetX : 32;
-  const top = cupState.sleeveDetached ? cupState.sleeveOffsetY : 160;
-  const faceOffsetX = cupState.faceOffsetX ?? 10;
-  const faceOffsetY = cupState.faceOffsetY ?? 18;
-
-  const sleeveAnchorX = left + (sleeveLayerElement.offsetWidth || 200) * 0.5;
-  const sleeveAnchorY = top + (sleeveLayerElement.offsetHeight || 110) * 0.45;
-  const faceCenterX = (faceLayerElement.offsetWidth || 120) * 0.5;
-  const faceCenterY = (faceLayerElement.offsetHeight || 90) * 0.5;
-
-  faceLayerElement.style.left = `${sleeveAnchorX - faceCenterX + faceOffsetX}px`;
-  faceLayerElement.style.top = `${sleeveAnchorY - faceCenterY + faceOffsetY}px`;
+  cupPositionController.syncFacePosition(cupElement);
 }
 
 const renderController = window.CuppyLandRenderController.createController({
@@ -790,17 +543,35 @@ function renderCup() {
   renderController.renderCup();
 }
 
-function renderTintedPart(part, colorName) {
-  renderController.renderTintedPart(part, colorName);
-}
-
-function renderTintedPartForCanvas(part, colorName, targetCanvas) {
-  renderController.renderTintedPartForCanvas(part, colorName, targetCanvas);
-}
-
 async function loadTintAssets() {
   await renderController.loadTintAssets();
 }
+
+worldCupController = window.CuppyLandWorldCupController.createController({
+  state,
+  worldCanvas,
+  cupCharacter,
+  getWorldCupList: (worldId = state.activeWorld) => getWorldCupList(worldId),
+  ensureCupLayerOrder,
+  renderCupInstance,
+  renderWorldFriends,
+  syncWorldCupSelection,
+  syncCupSelectionVisualState,
+  cupPointerHandlers: {
+    onCupPointerDown: cupPointerController.onCupPointerDown,
+    onCupPointerMove: cupPointerController.onCupPointerMove,
+    onCupPointerUp: cupPointerController.onCupPointerUp,
+    onLidPointerDown: cupPointerController.onLidPointerDown,
+    onLidPointerMove: cupPointerController.onLidPointerMove,
+    onLidPointerUp: cupPointerController.onLidPointerUp,
+    onHairstylePointerDown: cupPointerController.onHairstylePointerDown,
+    onHairstylePointerMove: cupPointerController.onHairstylePointerMove,
+    onHairstylePointerUp: cupPointerController.onHairstylePointerUp,
+    onSleevePointerDown: cupPointerController.onSleevePointerDown,
+    onSleevePointerMove: cupPointerController.onSleevePointerMove,
+    onSleevePointerUp: cupPointerController.onSleevePointerUp,
+  },
+});
 
 function buildInventoryItems() {
   window.CuppyLandInventory.buildInventoryItems();

@@ -29,6 +29,37 @@
       completed: false,
       completionTimerId: null,
     };
+    let hoverMonitorIntervalId = null;
+
+    function clearHoverMonitor() {
+      if (hoverMonitorIntervalId) {
+        clearInterval(hoverMonitorIntervalId);
+        hoverMonitorIntervalId = null;
+      }
+    }
+
+    function startHoverMonitor() {
+      clearHoverMonitor();
+      hoverMonitorIntervalId = setInterval(() => {
+        if (!friendDragState.active || !friendDragState.friendId) {
+          clearHoverMonitor();
+          return;
+        }
+        const pointerX = friendDragState.currentClientX;
+        const pointerY = friendDragState.currentClientY;
+        if (!Number.isFinite(pointerX) || !Number.isFinite(pointerY)) {
+          return;
+        }
+
+        const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendDragState.friendId}"]`);
+        const friendState = resolveFriendStateForElement(friendElement);
+        if (!friendElement || !friendState) {
+          return;
+        }
+
+        updateChocolateMilkFill(friendElement, friendState, pointerX, pointerY);
+      }, 120);
+    }
 
     function setFriendDragVisual(friendElement, friendState, isDragging) {
       if (!friendElement || !friendState || friendState.type !== "chocolate-milk") {
@@ -50,6 +81,10 @@
       friendDragState.friendId = null;
       friendDragState.pointerOffsetX = 0;
       friendDragState.pointerOffsetY = 0;
+      friendDragState.currentClientX = null;
+      friendDragState.currentClientY = null;
+      friendDragState.dragStartedAtMs = 0;
+      clearHoverMonitor();
     }
 
     function isOpenCupTarget(cupId) {
@@ -85,7 +120,7 @@
       chocolateMilkFillState.completed = false;
     }
 
-    function completeChocolateMilkFill(cupId) {
+    function completeChocolateMilkFill(cupId, friendState, friendElement) {
       if (!cupId || chocolateMilkFillState.completed) {
         return;
       }
@@ -96,9 +131,14 @@
       }
 
       chocolateMilkFillState.completed = true;
+      if (friendState?.id) {
+        removeFriendInstance(friendState.id, { playRemovedSfx: false });
+      }
       if (typeof onChocolateMilkFillComplete === "function") {
         onChocolateMilkFillComplete(cupId);
       }
+      setFriendDragVisual(friendElement, friendState, false);
+      resetFriendDragState();
       chocolateMilkFillState.cupId = null;
       chocolateMilkFillState.startedAtMs = 0;
       chocolateMilkFillState.completed = false;
@@ -108,6 +148,39 @@
       if (friendState?.type !== "chocolate-milk") {
         resetChocolateMilkFill("not-chocolate-milk");
         return;
+      }
+
+      function isPointerNearCupOpening(cupElement) {
+        if (!cupElement) {
+          return false;
+        }
+        const cupRect = cupElement.getBoundingClientRect();
+        const localX = pointerX - cupRect.left;
+        const localY = pointerY - cupRect.top;
+        return (
+          localX >= cupRect.width * 0.15 &&
+          localX <= cupRect.width * 0.85 &&
+          localY >= cupRect.height * -0.02 &&
+          localY <= cupRect.height * 0.48
+        );
+      }
+
+      if (chocolateMilkFillState.cupId) {
+        const activeCupElement = worldCanvas.querySelector(`.cup-character[data-cup-id="${chocolateMilkFillState.cupId}"]`);
+        if (activeCupElement && isOpenCupTarget(chocolateMilkFillState.cupId) && isPointerNearCupOpening(activeCupElement)) {
+          const elapsedMs = Date.now() - chocolateMilkFillState.startedAtMs;
+          if (typeof onChocolateMilkFillTick === "function") {
+            onChocolateMilkFillTick(
+              chocolateMilkFillState.cupId,
+              elapsedMs,
+              Math.max(0, chocolateMilkFillDurationMs - elapsedMs)
+            );
+          }
+          if (elapsedMs >= chocolateMilkFillDurationMs && !chocolateMilkFillState.completed) {
+            completeChocolateMilkFill(chocolateMilkFillState.cupId, friendState, friendElement);
+          }
+          return;
+        }
       }
 
       const previousPointerEvents = friendElement?.style?.pointerEvents || "";
@@ -121,20 +194,9 @@
         friendElement.style.pointerEvents = previousPointerEvents;
       }
       const isZoneNearCupOpening = zone === "cup" || zone === "lid";
-      let isPointerNearCupOpening = false;
-      if (hoveredCup) {
-        const cupRect = hoveredCup.getBoundingClientRect();
-        const localX = pointerX - cupRect.left;
-        const localY = pointerY - cupRect.top;
-        isPointerNearCupOpening = (
-          localX >= cupRect.width * 0.2 &&
-          localX <= cupRect.width * 0.8 &&
-          localY >= cupRect.height * 0.02 &&
-          localY <= cupRect.height * 0.42
-        );
-      }
+      const isPointerNearCup = isPointerNearCupOpening(hoveredCup);
 
-      const isValidFillHover = isOpenCupTarget(hoveredCupId) && (isZoneNearCupOpening || isPointerNearCupOpening);
+      const isValidFillHover = isOpenCupTarget(hoveredCupId) && (isZoneNearCupOpening || isPointerNearCup);
       if (!isValidFillHover) {
         resetChocolateMilkFill("left-fill-zone");
         return;
@@ -155,7 +217,7 @@
           if (!isStillDraggingChocolateMilk || chocolateMilkFillState.cupId !== hoveredCupId || !isOpenCupTarget(hoveredCupId)) {
             return;
           }
-          completeChocolateMilkFill(hoveredCupId);
+          completeChocolateMilkFill(hoveredCupId, friendState, friendElement);
         }, chocolateMilkFillDurationMs);
         if (typeof onChocolateMilkFillStart === "function") {
           onChocolateMilkFillStart(hoveredCupId);
@@ -168,7 +230,7 @@
       }
 
       if (elapsedMs >= chocolateMilkFillDurationMs && !chocolateMilkFillState.completed) {
-        completeChocolateMilkFill(hoveredCupId);
+        completeChocolateMilkFill(hoveredCupId, friendState, friendElement);
       }
     }
 
@@ -195,10 +257,14 @@
       friendDragState.friendId = friendState.id;
       friendDragState.pointerOffsetX = localPointerX;
       friendDragState.pointerOffsetY = localPointerY;
+      friendDragState.currentClientX = event.clientX;
+      friendDragState.currentClientY = event.clientY;
+      friendDragState.dragStartedAtMs = Date.now();
       if (friendState.type === "chocolate-milk") {
         friendState.attachedCupId = null;
         friendState.sequenceCompleted = false;
         stopChocolateMilkSequence(friendState.id);
+        startHoverMonitor();
       }
       if (typeof bringFriendElementToFront === "function") {
         bringFriendElementToFront(friendElement, friendState);
@@ -227,6 +293,8 @@
       }
 
       const { worldX, worldY } = getWorldPointFromClient(event.clientX, event.clientY);
+      friendDragState.currentClientX = event.clientX;
+      friendDragState.currentClientY = event.clientY;
       const nextX = worldX - friendDragState.pointerOffsetX;
       const nextY = worldY - friendDragState.pointerOffsetY;
       friendState.worldX = Math.max(0, Math.min(worldCanvas.offsetWidth - friendElement.offsetWidth, nextX));
@@ -244,6 +312,22 @@
       const friendElement = event.currentTarget.closest(".friend-character");
       const friendState = resolveFriendStateForElement(friendElement);
       setFriendDragVisual(friendElement, friendState, false);
+
+      if (friendElement && friendState?.type === "chocolate-milk") {
+        const previousPointerEvents = friendElement.style.pointerEvents || "";
+        friendElement.style.pointerEvents = "none";
+        const hoveredCup = getCupElementAtPoint(event.clientX, event.clientY);
+        friendElement.style.pointerEvents = previousPointerEvents;
+        const hoveredCupId = hoveredCup?.dataset?.cupId || null;
+        const dragElapsedMs = Date.now() - (friendDragState.dragStartedAtMs || Date.now());
+        if (
+          hoveredCupId
+          && dragElapsedMs >= chocolateMilkFillDurationMs
+          && isOpenCupTarget(hoveredCupId)
+        ) {
+          completeChocolateMilkFill(hoveredCupId, friendState, friendElement);
+        }
+      }
 
       if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
         removeFriendInstance(friendDragState.friendId);
