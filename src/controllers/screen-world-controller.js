@@ -66,10 +66,15 @@
     }
 
     function updateGameViewportScale() {
+      const visualViewport = window.visualViewport;
+      const viewportWidth = visualViewport?.width || window.innerWidth;
+      const viewportHeight = visualViewport?.height || window.innerHeight;
+      const horizontalPadding = 16;
+      const verticalPadding = 16;
       const scale = Math.min(
         1,
-        window.innerWidth / fixedViewport.width,
-        window.innerHeight / fixedViewport.height
+        Math.max(0.1, (viewportWidth - horizontalPadding) / fixedViewport.width),
+        Math.max(0.1, (viewportHeight - verticalPadding) / fixedViewport.height)
       );
       documentRef.documentElement.style.setProperty("--game-scale", String(scale));
     }

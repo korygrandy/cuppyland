@@ -55,6 +55,10 @@
         actions.updateLandscapePrompt();
         actions.updateGameViewportScale();
       });
+      if (windowRef.visualViewport) {
+        windowRef.visualViewport.addEventListener("resize", actions.updateGameViewportScale);
+        windowRef.visualViewport.addEventListener("scroll", actions.updateGameViewportScale);
+      }
 
       ui.cupCharacter.addEventListener("pointerdown", handlers.onCupPointerDown);
       ui.cupCharacter.addEventListener("pointermove", handlers.onCupPointerMove);
