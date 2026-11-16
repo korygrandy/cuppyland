@@ -316,6 +316,8 @@ function onChocolateMilkFillStart(cupId) {
     return;
   }
 
+  window.CuppyLandAudio?.playLoopingSfxClip?.("milkPour");
+
   if (chocolateMilkDragFillState.cupId !== cupId) {
     clearChocolateMilkDragFillPreview();
     chocolateMilkDragFillState.cupId = cupId;
@@ -341,6 +343,7 @@ function onChocolateMilkFillTick(cupId) {
 }
 
 function onChocolateMilkFillCancel() {
+  window.CuppyLandAudio?.stopSfxClip?.("milkPour");
   clearChocolateMilkDragFillPreview();
 }
 
@@ -348,6 +351,8 @@ function onChocolateMilkFillComplete(cupId) {
   if (!cupId) {
     return;
   }
+
+  window.CuppyLandAudio?.stopSfxClip?.("milkPour");
 
   if (chocolateMilkDragFillState.intervalId) {
     clearInterval(chocolateMilkDragFillState.intervalId);
@@ -373,6 +378,7 @@ function onChocolateMilkFillComplete(cupId) {
 }
 
 function onChocolateMilkFillEnd() {
+  window.CuppyLandAudio?.stopSfxClip?.("milkPour");
   clearChocolateMilkDragFillPreview();
 }
 
@@ -1053,6 +1059,7 @@ function openWorld(worldId) {
 }
 
 function closeWorld() {
+  window.CuppyLandAudio?.stopSfxClip?.("milkPour");
   hideWorldHeadlineOverlay();
   clearChocolateMilkDragFillPreview();
   stopAllChocolateMilkSequences();

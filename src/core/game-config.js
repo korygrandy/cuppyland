@@ -199,6 +199,7 @@
         myNameIsOlivia: "./sfx/my-name-is-olivia.mp3",
         hi: "./sfx/hi.mp3",
         rocketship: "./sfx/rocketship.mp3",
+        milkPour: "./sfx/milk-pour.ogg",
       },
       transitions: {
         fadeOutMs: 220,
