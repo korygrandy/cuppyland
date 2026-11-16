@@ -17,6 +17,7 @@
       renderWorldCups,
       hideTrashCan,
       defaultCupState,
+      getNextWorldZIndex,
     } = options;
 
     function addCupToWorld() {
@@ -50,7 +51,7 @@
         type: friendType,
         worldX,
         worldY,
-        zIndex: 90 + fallbackIndex,
+        zIndex: typeof getNextWorldZIndex === "function" ? getNextWorldZIndex(state.activeWorld) : (90 + fallbackIndex),
         attachedCupId,
         attachedOffsetX,
         attachedOffsetY,
@@ -59,6 +60,9 @@
       renderWorldCups();
       if (friendType === "rocketman-craft") {
         window.CuppyLandAudio?.playSfxClip?.("rocketship");
+      }
+      if (friendType === "spongebob-stuffy") {
+        window.CuppyLandAudio?.playSfxClip?.("spongebob");
       }
       return true;
     }
@@ -159,9 +163,11 @@
     function removeCupInstance(cupId) {
       const result = cupStateStore.removeCupInstance(cupId);
       if (!result.removed) {
-        return;
+        return false;
       }
+      window.CuppyLandAudio?.playSfxClip?.("cupRemoved");
       renderWorldCups();
+      return true;
     }
 
     function removeSelectedObject() {
@@ -170,18 +176,22 @@
       }
 
       const selectedCup = getActiveCupInstance();
+      let objectRemoved = false;
 
       if (trashState.target === "cup") {
         if (selectedCup) {
-          removeCupInstance(selectedCup.id);
+          objectRemoved = removeCupInstance(selectedCup.id);
         } else {
           cupCharacter.classList.add("hidden-object");
+          objectRemoved = true;
+          window.CuppyLandAudio?.playSfxClip?.("cupRemoved");
         }
         return;
       }
 
       if (trashState.target === "lid") {
         if (selectedCup) {
+          objectRemoved = selectedCup.state.lidVisible || selectedCup.state.hairstyleVisible;
           selectedCup.state.lidVisible = false;
           selectedCup.state.hairstyleVisible = false;
         }
@@ -191,6 +201,7 @@
 
       if (trashState.target === "sleeve") {
         if (selectedCup) {
+          objectRemoved = selectedCup.state.sleeveVisible || selectedCup.state.faceVisible;
           selectedCup.state.sleeveVisible = false;
           selectedCup.state.faceVisible = false;
         }
@@ -200,11 +211,15 @@
 
       if (trashState.target === "hairstyle") {
         if (selectedCup) {
+          objectRemoved = selectedCup.state.hairstyleVisible;
           selectedCup.state.hairstyleVisible = false;
         }
         hairstyleLayer.style.display = "none";
       }
 
+      if (objectRemoved) {
+        window.CuppyLandAudio?.playSfxClip?.("defaultObjectRemoved");
+      }
       hideTrashCan();
       renderWorldCups();
     }
