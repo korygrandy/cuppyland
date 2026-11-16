@@ -201,7 +201,7 @@ body {
 
 .world-topbar {
   position: absolute;
-  z-index: 12;
+  z-index: 1300;
   top: 0.6rem;
   left: 0.6rem;
   right: 0.6rem;
@@ -288,12 +288,12 @@ body {
 }
 
 .cup-character.is-dragging-sleeve {
-  z-index: 9999 !important;
+  z-index: 1100 !important;
 }
 
 .cup-character.is-dragging-lid,
 .cup-character.is-dragging-hairstyle {
-  z-index: 9999 !important;
+  z-index: 1100 !important;
 }
 
 .trash-can {
@@ -470,7 +470,7 @@ body {
   top: 0;
   height: 100%;
   width: min(380px, 84vw);
-  z-index: 5;
+  z-index: 1200;
   background: rgba(14, 24, 41, 0.93);
   border-left: 1px solid rgba(255, 255, 255, 0.18);
   transform: translateX(100%);
