@@ -132,10 +132,10 @@
     },
     defaultSleeveAsset: "./assets/sleeve-child.png",
     audioConfig: {
-      menu: "./assets/Kailua_Breeze.mp3",
+      menu: "./sfx/Kailua_Breeze.mp3",
       worlds: {
-        playground: ["./assets/playgound.mp3", "./assets/playground.mp3"],
-        "olivia-room": "./assets/olivias-room.mp3",
+        playground: ["./sfx/playgound.mp3", "./sfx/playground.mp3"],
+        "olivia-room": "./sfx/olivias-room.mp3",
       },
       transitions: {
         fadeOutMs: 220,
