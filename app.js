@@ -148,6 +148,22 @@ const {
   isSleeveNearCup,
   isHairstyleNearLid,
 } = cupDragHelpers;
+const inventoryInteractionController = window.CuppyLandInventoryInteraction.createController({
+  state,
+  dragState,
+  dragGhost,
+  trySetPointerCapture,
+  setZoneHighlight,
+  clearZoneHighlights,
+  getCupElementAtPoint,
+  zoneForPoint,
+  applyDrop,
+  applyInventorySelection,
+  showInvalidFeedback,
+  renderWorldCups,
+  getActiveCupId: () => state.activeCupId,
+  getActiveCupInstance,
+});
 
 function syncAudioForCurrentScreen() {
   if (window.CuppyLandAudio && typeof window.CuppyLandAudio.syncAudioForCurrentScreen === "function") {
@@ -679,22 +695,6 @@ function applyInventorySelection(itemType, value, targetCupId = state.activeCupI
   return false;
 }
 
-function showDragGhost(pointerX, pointerY, label) {
-  dragGhost.textContent = label;
-  dragGhost.classList.remove("hidden");
-  dragGhost.style.left = `${pointerX}px`;
-  dragGhost.style.top = `${pointerY}px`;
-}
-
-function moveDragGhost(pointerX, pointerY) {
-  dragGhost.style.left = `${pointerX}px`;
-  dragGhost.style.top = `${pointerY}px`;
-}
-
-function hideDragGhost() {
-  dragGhost.classList.add("hidden");
-}
-
 function showInvalidFeedback() {
   sleeveLayer.classList.remove("invalid-shake");
   cupLayer.classList.remove("invalid-shake");
@@ -1098,66 +1098,19 @@ function onSleevePointerUp(event) {
 }
 
 function onInventoryPointerDown(event) {
-  const target = event.target.closest(".inventory-item");
-  if (!target || state.currentScreen !== "world") {
-    return;
-  }
-
-  if (target.dataset.itemType === "cup-create") {
-    return;
-  }
-
-  event.preventDefault();
-  dragState.active = true;
-  dragState.type = target.dataset.itemType;
-  dragState.value = target.dataset.value;
-  dragState.pointerId = event.pointerId;
-  trySetPointerCapture(target, event.pointerId);
-  showDragGhost(event.clientX, event.clientY, `${dragState.type}: ${dragState.value}`);
-  setZoneHighlight(event.clientX, event.clientY);
+  inventoryInteractionController.onPointerDown(event);
 }
 
 function onInventoryClick(event) {
-  const target = event.target.closest(".inventory-item");
-  if (!target || state.currentScreen !== "world") {
-    return;
-  }
-
-  event.preventDefault();
-  const targetCupId = state.activeCupId || getActiveCupInstance()?.id || null;
-  applyInventorySelection(target.dataset.itemType, target.dataset.value, targetCupId);
+  inventoryInteractionController.onClick(event);
 }
 
 function onInventoryPointerMove(event) {
-  if (!dragState.active || event.pointerId !== dragState.pointerId) {
-    return;
-  }
-  moveDragGhost(event.clientX, event.clientY);
-  setZoneHighlight(event.clientX, event.clientY);
+  inventoryInteractionController.onPointerMove(event);
 }
 
 function onInventoryPointerEnd(event) {
-  if (!dragState.active || event.pointerId !== dragState.pointerId) {
-    return;
-  }
-
-  const hoveredCup = getCupElementAtPoint(event.clientX, event.clientY);
-  const targetCupId = hoveredCup?.dataset.cupId || state.activeCupId;
-  const zone = zoneForPoint(event.clientX, event.clientY);
-  const result = zone ? applyDrop(dragState.type, dragState.value, zone, targetCupId) : { valid: false, reason: "no-zone" };
-
-  if (result.valid) {
-    renderWorldCups();
-  } else {
-    showInvalidFeedback();
-  }
-
-  dragState.active = false;
-  dragState.type = "";
-  dragState.value = "";
-  dragState.pointerId = null;
-  hideDragGhost();
-  clearZoneHighlights();
+  inventoryInteractionController.onPointerEnd(event);
 }
 
 function wireEvents() {
