@@ -709,106 +709,65 @@ function onInventoryPointerEnd(event) {
   inventoryInteractionController.onPointerEnd(event);
 }
 
-function wireEvents() {
-  document.addEventListener("pointerdown", () => window.CuppyLandAudio.unlockAudio(), { once: true });
-  document.addEventListener("keydown", () => window.CuppyLandAudio.unlockAudio(), { once: true });
+const bootstrapController = window.CuppyLandBootstrapController.createController({
+  documentRef: document,
+  windowRef: window,
+  audio: window.CuppyLandAudio,
+  ui: {
+    playBtn,
+    backToSplashBtn,
+    worldButtons,
+    inventoryToggleBtn,
+    closeWorldBtn,
+    confirmCloseBtn,
+    cancelCloseBtn,
+    cupCharacter,
+    cupLayer,
+    lidLayer,
+    hairstyleLayer,
+    sleeveLayer,
+    inventoryPanel,
+    musicVolumeInput,
+    sfxVolumeInput,
+    musicMuteBtn,
+    sfxMuteBtn,
+    worldCanvas,
+    trashCanBtn,
+  },
+  handlers: {
+    onCupPointerDown,
+    onCupPointerMove,
+    onCupPointerUp,
+    onLidPointerDown,
+    onLidPointerMove,
+    onLidPointerUp,
+    onHairstylePointerDown,
+    onHairstylePointerMove,
+    onHairstylePointerUp,
+    onSleevePointerDown,
+    onSleevePointerMove,
+    onSleevePointerUp,
+    onInventoryPointerDown,
+    onInventoryClick,
+    onInventoryPointerMove,
+    onInventoryPointerEnd,
+  },
+  actions: {
+    showScreen,
+    openWorld,
+    closeWorld,
+    toggleInventory,
+    showCloseModal,
+    hideCloseModal,
+    updateLandscapePrompt,
+    updateGameViewportScale,
+    buildInventoryItems,
+    renderCup,
+    loadTintAssets,
+    safeClosest,
+    hideTrashCan,
+    removeSelectedObject,
+  },
+});
 
-  playBtn.addEventListener("click", () => {
-    window.CuppyLandAudio.playSfx("standard");
-    showScreen("worldSelect");
-  });
-  backToSplashBtn.addEventListener("click", () => {
-    window.CuppyLandAudio.playSfx("standard");
-    showScreen("splash");
-  });
-  worldButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      window.CuppyLandAudio.playSfx("standard");
-      openWorld(button.dataset.world);
-    });
-  });
-  inventoryToggleBtn.addEventListener("click", () => {
-    window.CuppyLandAudio.playSfx("standard");
-    toggleInventory();
-  });
-  closeWorldBtn.addEventListener("click", () => {
-    window.CuppyLandAudio.playSfx("close");
-    showCloseModal();
-  });
-  confirmCloseBtn.addEventListener("click", () => {
-    window.CuppyLandAudio.playSfx("yes");
-    hideCloseModal();
-    closeWorld();
-  });
-  cancelCloseBtn.addEventListener("click", () => {
-    window.CuppyLandAudio.playSfx("no");
-    hideCloseModal();
-  });
-  window.addEventListener("resize", () => {
-    updateLandscapePrompt();
-    updateGameViewportScale();
-  });
-
-  cupCharacter.addEventListener("pointerdown", onCupPointerDown);
-  cupCharacter.addEventListener("pointermove", onCupPointerMove);
-  cupCharacter.addEventListener("pointerup", onCupPointerUp);
-  cupCharacter.addEventListener("pointercancel", onCupPointerUp);
-
-  cupLayer.addEventListener("pointerdown", onCupPointerDown);
-  cupLayer.addEventListener("pointermove", onCupPointerMove);
-  cupLayer.addEventListener("pointerup", onCupPointerUp);
-  cupLayer.addEventListener("pointercancel", onCupPointerUp);
-
-  lidLayer.addEventListener("pointerdown", onLidPointerDown);
-  lidLayer.addEventListener("pointermove", onLidPointerMove);
-  lidLayer.addEventListener("pointerup", onLidPointerUp);
-  lidLayer.addEventListener("pointercancel", onLidPointerUp);
-
-  hairstyleLayer.addEventListener("pointerdown", onHairstylePointerDown);
-  hairstyleLayer.addEventListener("pointermove", onHairstylePointerMove);
-  hairstyleLayer.addEventListener("pointerup", onHairstylePointerUp);
-  hairstyleLayer.addEventListener("pointercancel", onHairstylePointerUp);
-
-  sleeveLayer.addEventListener("pointerdown", onSleevePointerDown);
-  sleeveLayer.addEventListener("pointermove", onSleevePointerMove);
-  sleeveLayer.addEventListener("pointerup", onSleevePointerUp);
-  sleeveLayer.addEventListener("pointercancel", onSleevePointerUp);
-
-  inventoryPanel.addEventListener("pointerdown", onInventoryPointerDown);
-  inventoryPanel.addEventListener("click", onInventoryClick);
-  inventoryPanel.addEventListener("pointermove", onInventoryPointerMove);
-  inventoryPanel.addEventListener("pointerup", onInventoryPointerEnd);
-  inventoryPanel.addEventListener("pointercancel", onInventoryPointerEnd);
-  musicVolumeInput.addEventListener("input", window.CuppyLandAudio.handleMusicVolumeChange);
-  sfxVolumeInput.addEventListener("input", window.CuppyLandAudio.handleSfxVolumeChange);
-  musicMuteBtn.addEventListener("click", window.CuppyLandAudio.toggleMusicMute);
-  sfxMuteBtn.addEventListener("click", window.CuppyLandAudio.toggleSfxMute);
-  worldCanvas.addEventListener("pointerdown", (event) => {
-    if (
-      !safeClosest(event.target, "#trashCanBtn") &&
-      !safeClosest(event.target, ".cup-lid") &&
-      !safeClosest(event.target, ".cup-sleeve") &&
-      !safeClosest(event.target, ".cup-character")
-    ) {
-      hideTrashCan();
-    }
-  });
-  trashCanBtn.addEventListener("click", () => {
-    removeSelectedObject();
-  });
-}
-
-function init() {
-  window.CuppyLandAudio.loadAudioSettings();
-  window.CuppyLandAudio.applyMusicVolume();
-  window.CuppyLandAudio.syncAudioControlsUi();
-  buildInventoryItems();
-  renderCup();
-  wireEvents();
-  updateLandscapePrompt();
-  updateGameViewportScale();
-  showScreen("splash");
-  loadTintAssets();
-}
-
-init();
+bootstrapController.init();
