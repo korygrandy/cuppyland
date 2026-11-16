@@ -1041,6 +1041,34 @@ body {
   animation: shake 320ms ease;
 }
 
+.cup-face.invalid-shake {
+  animation: shake-face 320ms ease;
+}
+
+.sleeve-pop-in {
+  animation: sleeve-pop-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes sleeve-pop-in {
+  0% {
+    opacity: 0.15;
+    transform: scale(0.72);
+    filter: saturate(0.7);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  75% {
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: saturate(1);
+  }
+}
+
 @keyframes shake {
   0%,
   100% {
@@ -1053,6 +1081,21 @@ body {
   40%,
   80% {
     transform: translateX(7px);
+  }
+}
+
+@keyframes shake-face {
+  0%,
+  100% {
+    transform: translateX(0) scale(0.8);
+  }
+  20%,
+  60% {
+    transform: translateX(-7px) scale(0.8);
+  }
+  40%,
+  80% {
+    transform: translateX(7px) scale(0.8);
   }
 }
 

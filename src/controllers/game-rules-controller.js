@@ -113,10 +113,20 @@
         activeCupState.expression = "happy";
         activeCupState.sleeveVisible = true;
         activeCupState.faceVisible = true;
+        triggerSleeveReappearPulse(selectedCup);
         return { valid: true };
       }
 
       if (itemType === "expression") {
+        if (activeCupState.sleeveVisible === false || !activeCupState.sleeve) {
+          activeCupState.sleeve = activeCupState.sleeve || defaultCupState?.sleeve || "child";
+          activeCupState.sleeveVisible = true;
+          activeCupState.faceVisible = true;
+          activeCupState.sleeveDetached = false;
+          activeCupState.sleeveOffsetX = defaultCupState?.sleeveOffsetX ?? 32;
+          activeCupState.sleeveOffsetY = defaultCupState?.sleeveOffsetY ?? 160;
+          triggerSleeveReappearPulse(selectedCup);
+        }
         activeCupState.expression = value;
         return { valid: true };
       }
@@ -139,12 +149,27 @@
       return { valid: false, reason: "unknown-item" };
     }
 
+    function triggerSleeveReappearPulse(selectedCup = getActiveCupInstance()) {
+      const activeCupElement = selectedCup && document.querySelector(`.cup-character[data-cup-id="${selectedCup.id}"]`);
+      const targetSleeve = activeCupElement ? activeCupElement.querySelector(".cup-sleeve") : sleeveLayer;
+      if (!targetSleeve) {
+        return;
+      }
+
+      targetSleeve.classList.remove("sleeve-pop-in");
+      void targetSleeve.offsetWidth;
+      targetSleeve.classList.add("sleeve-pop-in");
+    }
+
     function showInvalidFeedback() {
-      sleeveLayer.classList.remove("invalid-shake");
-      cupLayer.classList.remove("invalid-shake");
-      lidLayer.classList.remove("invalid-shake");
-      void sleeveLayer.offsetWidth;
-      sleeveLayer.classList.add("invalid-shake");
+      [sleeveLayer, cupLayer, lidLayer, faceLayer].forEach((layer) => {
+        if (!layer) {
+          return;
+        }
+        layer.classList.remove("invalid-shake");
+        void layer.offsetWidth;
+        layer.classList.add("invalid-shake");
+      });
     }
 
     function applyInventorySelection(itemType, value, targetCupId = state.activeCupId, dropPoint = null) {
