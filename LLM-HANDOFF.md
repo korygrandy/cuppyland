@@ -140,8 +140,15 @@ Final public APK artifact:
 3. Upload the signed APK to the same folder as `app-release.apk`.
 4. Publish a small download page like `cupplandapp/index.html` that links to `/cupplandapp/app-release.apk`.
 5. Confirm the public path works:
-   - `https://www.kgenteprises.com/cupplandapp/`
-   - `https://www.kgenteprises.com/cupplandapp/app-release.apk`
+   - `https://www.kgenterprises.com/cuppyland/`
+   - `https://www.kgenterprises.com/cuppylandapp/`
+   - `https://www.kgenterprises.com/cuppylandapp/app-release.apk`
+
+Live host layout in use:
+```text
+/cuppyland/         => browser game web app
+/cuppylandapp/      => APK download page and signed APK
+```
 
 Important: the FTP hostname must remain direct (DNS only) and not proxied through Cloudflare. Keep `ftp.kgenteprises.com` off the Cloudflare proxy for file transfer access.
 
