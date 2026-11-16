@@ -131,6 +131,22 @@
       "pizza-man-craft": "./assets/pizza-man-craft.png",
       "chocolate-milk": "./assets/chocolate-milk.png",
     },
+    chocolateMilkSequence: {
+      durationMs: 5000,
+      frameIntervalMs: 320,
+      frameAssets: {
+        frame2: "./assets/chocolate-milk-sequence2.png",
+        frame3: "./assets/chocolate-milk-sequence3.png",
+      },
+      preview: {
+        width: 188,
+        height: 188,
+        offsetX: 132,
+        offsetY: 18,
+        rotationDeg: -8,
+        opacity: 0.96,
+      },
+    },
     colorMap: {
       red: "#ff3c3c",
       blue: "#3e80ff",

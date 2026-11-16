@@ -450,6 +450,60 @@ body {
   background-size: contain;
 }
 
+.cup-fill-preview {
+  position: absolute;
+  width: 188px;
+  height: 188px;
+  pointer-events: none;
+  z-index: 1325;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.95;
+  transform: translate(-50%, -50%);
+  transform-origin: center center;
+}
+
+.cup-sparkle-burst {
+  position: absolute;
+  width: 112px;
+  height: 112px;
+  margin-left: -56px;
+  margin-top: -56px;
+  pointer-events: none;
+  z-index: 1350;
+}
+
+.cup-sparkle-burst::before,
+.cup-sparkle-burst::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 249, 170, 0.95) 0%, rgba(255, 206, 74, 0.75) 32%, rgba(255, 160, 56, 0) 72%);
+  animation: cupSparklePulse 850ms ease-out forwards;
+}
+
+.cup-sparkle-burst::after {
+  animation-delay: 90ms;
+  opacity: 0.7;
+}
+
+@keyframes cupSparklePulse {
+  0% {
+    transform: scale(0.25);
+    opacity: 0;
+  }
+  20% {
+    transform: scale(0.75);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
 .drop-zone {
   position: absolute;
   border-radius: 12px;

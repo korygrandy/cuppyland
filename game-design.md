@@ -196,6 +196,7 @@ interface GameState {
 - [ ] Run quick performance pass for smooth dragging/panning.
 
 ## 11) Post-MVP Backlog (Next)
+- Chocolate milk cup interaction: drag `chocolate-milk` onto an open cup to run a 5s two-frame sequence and sparkle completion effect.
 - Additional worlds and characters.
 - Save/load outfit presets.
 - Character animations and emotes.
