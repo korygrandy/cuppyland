@@ -65,6 +65,9 @@
           return { valid: false, reason: "duplicate-sleeve" };
         }
         activeCupState.sleeve = value;
+        activeCupState.expression = "happy";
+        activeCupState.sleeveVisible = true;
+        activeCupState.faceVisible = true;
         return { valid: true };
       }
 
