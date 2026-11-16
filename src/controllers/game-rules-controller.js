@@ -17,6 +17,7 @@
       renderWorldCups,
       hideTrashCan,
       defaultCupState,
+      getNextWorldZIndex,
     } = options;
 
     function addCupToWorld() {
@@ -50,7 +51,7 @@
         type: friendType,
         worldX,
         worldY,
-        zIndex: 90 + fallbackIndex,
+        zIndex: typeof getNextWorldZIndex === "function" ? getNextWorldZIndex(state.activeWorld) : (90 + fallbackIndex),
         attachedCupId,
         attachedOffsetX,
         attachedOffsetY,

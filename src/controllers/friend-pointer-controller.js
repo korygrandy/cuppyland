@@ -11,6 +11,7 @@
       getWorldPointFromClient,
       removeFriendInstance,
       stopChocolateMilkSequence,
+      bringFriendElementToFront,
     } = options;
 
     function setFriendDragVisual(friendElement, friendState, isDragging) {
@@ -61,6 +62,9 @@
         friendState.attachedCupId = null;
         friendState.sequenceCompleted = false;
         stopChocolateMilkSequence(friendState.id);
+      }
+      if (typeof bringFriendElementToFront === "function") {
+        bringFriendElementToFront(friendElement, friendState);
       }
       setFriendDragVisual(friendElement, friendState, true);
       trySetPointerCapture(friendElement, event.pointerId);

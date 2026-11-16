@@ -242,6 +242,7 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   getWorldPointFromClient,
   removeFriendInstance,
   stopChocolateMilkSequence: (friendId) => chocolateMilkSequenceController.stop(friendId),
+  bringFriendElementToFront,
 });
 
 function syncAudioForCurrentScreen() {
@@ -372,16 +373,47 @@ function ensureCupLayerOrder(cupState, fallbackOrder = 1) {
   return cupStateStore.ensureCupLayerOrder(cupState, fallbackOrder);
 }
 
+function getWorldMaxZIndex(worldId = state.activeWorld) {
+  if (!worldId) {
+    return 1;
+  }
+
+  const maxCupZIndex = getWorldCupList(worldId).reduce((max, cupInfo) => (
+    Math.max(max, Number.isFinite(cupInfo?.state?.zIndex) ? cupInfo.state.zIndex : 0)
+  ), 0);
+  const maxFriendZIndex = getWorldFriendList(worldId).reduce((max, friendState) => (
+    Math.max(max, Number.isFinite(friendState?.zIndex) ? friendState.zIndex : 0)
+  ), 0);
+  return Math.max(1, maxCupZIndex, maxFriendZIndex);
+}
+
+function getNextWorldZIndex(worldId = state.activeWorld) {
+  return getWorldMaxZIndex(worldId) + 1;
+}
+
 function bringCupElementToFront(cupElement) {
   if (!cupElement) {
     return;
   }
 
   const cupState = resolveCupStateForElement(cupElement);
-  const nextZIndex = cupStateStore.bringCupToFront(cupState);
+  if (!cupState) {
+    return;
+  }
+  const nextZIndex = getNextWorldZIndex();
+  cupState.zIndex = nextZIndex;
   if (Number.isFinite(nextZIndex)) {
     cupElement.style.zIndex = String(nextZIndex);
   }
+}
+
+function bringFriendElementToFront(friendElement, friendState) {
+  if (!friendElement || !friendState) {
+    return;
+  }
+  const nextZIndex = getNextWorldZIndex();
+  friendState.zIndex = nextZIndex;
+  friendElement.style.zIndex = String(nextZIndex);
 }
 
 function syncCupSelectionVisualState() {
@@ -821,6 +853,7 @@ const gameRulesController = window.CuppyLandGameRulesController.createController
   renderWorldCups,
   hideTrashCan,
   defaultCupState,
+  getNextWorldZIndex,
 });
 
 function addCupToWorld() {
