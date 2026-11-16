@@ -189,9 +189,9 @@ interface GameState {
 
 ### QA for MVP
 - [ ] Validate touch interactions on tablet browser.
-- [ ] Test landscape lock behavior and rotate prompt.
+- [x] Test landscape lock behavior and rotate prompt.
 - [ ] Test invalid duplicate sleeve drag case.
-- [ ] Test close confirmation flow from each world.
+- [x] Test close confirmation flow from each world.
 - [ ] Run quick performance pass for smooth dragging/panning.
 
 ## 11) Post-MVP Backlog (Next)
