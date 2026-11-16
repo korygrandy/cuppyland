@@ -54,6 +54,8 @@
 
     const nextSequence = (canvasDrawSequence.get(canvas) || 0) + 1;
     canvasDrawSequence.set(canvas, nextSequence);
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.dataset.renderSrc = "";
 
     loadTintedImage(src)
       .then((image) => {
