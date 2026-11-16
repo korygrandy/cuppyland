@@ -103,7 +103,6 @@ const trashState = {
   active: false,
   target: null,
 };
-const chocolateMilkRuntime = new Map();
 let worldHeadlineFadeTimerId = null;
 let worldHeadlineHideTimerId = null;
 const cupStateStore = window.CuppyLandCupState.createStore({
@@ -215,6 +214,21 @@ const chocolateMilkFillController = window.CuppyLandChocolateMilkFillController.
   stopSfxClip: (clipName) => window.CuppyLandAudio?.stopSfxClip?.(clipName),
   onComplete: (cupId) => triggerCupSparkle(cupId),
 });
+const chocolateMilkSequenceController = window.CuppyLandChocolateMilkSequenceController.createController({
+  getWorldFriendList: () => getWorldFriendList(state.activeWorld),
+  findFriendById: (friendId) => findFriendById(friendId, state.activeWorld),
+  isCupOpen: (cupId) => {
+    const cupState = findCupById(cupId, state.activeWorld)?.state;
+    return Boolean(cupState && cupState.lidVisible === false);
+  },
+  getSequenceConfig: () => getChocolateMilkSequenceConfig(),
+  syncAttachedFriendPosition: (friendState) => {
+    const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`);
+    syncAttachedFriendPosition(friendState, friendElement);
+  },
+  updateFriendElementAsset: (friendId) => updateFriendElementAsset(friendId),
+  onCompleted: (cupId) => triggerCupSparkle(cupId),
+});
 
 function syncAudioForCurrentScreen() {
   if (window.CuppyLandAudio && typeof window.CuppyLandAudio.syncAudioForCurrentScreen === "function") {
@@ -320,94 +334,16 @@ function updateFriendElementAsset(friendId) {
   }
 }
 
-function isChocolateMilkAttachedAndOpen(friendState) {
-  if (!friendState || friendState.type !== "chocolate-milk" || !friendState.attachedCupId) {
-    return false;
-  }
-
-  const attachedCup = findCupById(friendState.attachedCupId);
-  return Boolean(attachedCup && attachedCup.state?.lidVisible === false);
-}
-
-function stopChocolateMilkSequence(friendId, keepFrame = false) {
-  const runtime = chocolateMilkRuntime.get(friendId);
-  if (runtime) {
-    clearInterval(runtime.intervalId);
-    chocolateMilkRuntime.delete(friendId);
-  }
-
-  const friendState = findFriendById(friendId);
-  if (friendState && !keepFrame) {
-    friendState.sequenceFrame = null;
-    updateFriendElementAsset(friendId);
-  }
-}
-
 function triggerCupSparkle(cupId) {
   sparkleEffectController.triggerCupSparkle(cupId);
 }
 
-function startChocolateMilkSequence(friendState) {
-  if (!friendState || friendState.sequenceCompleted || chocolateMilkRuntime.has(friendState.id)) {
-    return;
-  }
-
-  const sequenceConfig = getChocolateMilkSequenceConfig();
-  friendState.sequenceFrame = 2;
-  updateFriendElementAsset(friendState.id);
-  const startedAt = Date.now();
-  const intervalId = setInterval(() => {
-    const activeFriend = findFriendById(friendState.id);
-    if (!isChocolateMilkAttachedAndOpen(activeFriend)) {
-      stopChocolateMilkSequence(friendState.id);
-      return;
-    }
-
-    const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${activeFriend.id}"]`);
-    syncAttachedFriendPosition(activeFriend, friendElement);
-    const elapsedMs = Date.now() - startedAt;
-    activeFriend.sequenceFrame = activeFriend.sequenceFrame === 2 ? 3 : 2;
-    updateFriendElementAsset(activeFriend.id);
-
-    if (elapsedMs >= sequenceConfig.durationMs) {
-      const attachedCupId = activeFriend.attachedCupId;
-      activeFriend.sequenceCompleted = true;
-      stopChocolateMilkSequence(activeFriend.id);
-      if (attachedCupId) {
-        triggerCupSparkle(attachedCupId);
-      }
-    }
-  }, sequenceConfig.frameIntervalMs);
-
-  chocolateMilkRuntime.set(friendState.id, { intervalId, startedAt });
-}
-
 function refreshChocolateMilkSequences() {
-  const worldFriends = getWorldFriendList(state.activeWorld);
-  const worldFriendIds = new Set(worldFriends.map((friend) => friend.id));
-
-  chocolateMilkRuntime.forEach((_, friendId) => {
-    if (!worldFriendIds.has(friendId)) {
-      stopChocolateMilkSequence(friendId);
-    }
-  });
-
-  worldFriends.forEach((friendState) => {
-    if (isChocolateMilkAttachedAndOpen(friendState) && !friendState.sequenceCompleted) {
-      startChocolateMilkSequence(friendState);
-      return;
-    }
-
-    if (chocolateMilkRuntime.has(friendState.id)) {
-      stopChocolateMilkSequence(friendState.id);
-    } else if (friendState.type === "chocolate-milk" && friendState.sequenceFrame) {
-      friendState.sequenceFrame = null;
-    }
-  });
+  chocolateMilkSequenceController.refresh();
 }
 
 function stopAllChocolateMilkSequences() {
-  Array.from(chocolateMilkRuntime.keys()).forEach((friendId) => stopChocolateMilkSequence(friendId));
+  chocolateMilkSequenceController.stopAll();
 }
 
 function clearWorldHeadlineTimers() {
@@ -582,7 +518,7 @@ function removeFriendInstance(friendId) {
   if (friendIndex < 0) {
     return;
   }
-  stopChocolateMilkSequence(friendId);
+  chocolateMilkSequenceController.stop(friendId);
   worldFriends.splice(friendIndex, 1);
   renderWorldCups();
 }
@@ -626,7 +562,7 @@ function onFriendPointerDown(event) {
   if (friendState.type === "chocolate-milk") {
     friendState.attachedCupId = null;
     friendState.sequenceCompleted = false;
-    stopChocolateMilkSequence(friendState.id);
+    chocolateMilkSequenceController.stop(friendState.id);
   }
   setFriendDragVisual(friendElement, friendState, true);
   trySetPointerCapture(friendElement, event.pointerId);
