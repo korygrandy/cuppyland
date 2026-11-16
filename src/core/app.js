@@ -104,14 +104,6 @@ const trashState = {
   target: null,
 };
 const chocolateMilkRuntime = new Map();
-const chocolateMilkDragFillState = {
-  cupId: null,
-  intervalId: null,
-  finalAnimationId: null,
-  completionLocked: false,
-  frame: 2,
-  overlay: null,
-};
 let worldHeadlineFadeTimerId = null;
 let worldHeadlineHideTimerId = null;
 const cupStateStore = window.CuppyLandCupState.createStore({
@@ -215,6 +207,14 @@ const sparkleEffectController = window.CuppyLandSparkleEffectController.createCo
   getCupStateById: (cupId) => findCupById(cupId)?.state || null,
   playSfxClip: (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName),
 });
+const chocolateMilkFillController = window.CuppyLandChocolateMilkFillController.createController({
+  worldCanvas,
+  getCupStateById: (cupId) => findCupById(cupId)?.state || null,
+  getSequenceConfig: () => getChocolateMilkSequenceConfig(),
+  playLoopingSfxClip: (clipName) => window.CuppyLandAudio?.playLoopingSfxClip?.(clipName),
+  stopSfxClip: (clipName) => window.CuppyLandAudio?.stopSfxClip?.(clipName),
+  onComplete: (cupId) => triggerCupSparkle(cupId),
+});
 
 function syncAudioForCurrentScreen() {
   if (window.CuppyLandAudio && typeof window.CuppyLandAudio.syncAudioForCurrentScreen === "function") {
@@ -270,109 +270,27 @@ function getChocolateMilkSequenceConfig() {
 }
 
 function clearChocolateMilkDragFillPreview() {
-  if (chocolateMilkDragFillState.intervalId) {
-    clearInterval(chocolateMilkDragFillState.intervalId);
-  }
-  if (chocolateMilkDragFillState.finalAnimationId) {
-    clearInterval(chocolateMilkDragFillState.finalAnimationId);
-  }
-  chocolateMilkDragFillState.intervalId = null;
-  chocolateMilkDragFillState.finalAnimationId = null;
-  chocolateMilkDragFillState.completionLocked = false;
-  chocolateMilkDragFillState.cupId = null;
-  chocolateMilkDragFillState.frame = 2;
-  if (chocolateMilkDragFillState.overlay) {
-    chocolateMilkDragFillState.overlay.remove();
-    chocolateMilkDragFillState.overlay = null;
-  }
-}
-
-function ensureChocolateMilkDragFillOverlay(cupId) {
-  const cupState = findCupById(cupId)?.state;
-  if (!cupState) {
-    clearChocolateMilkDragFillPreview();
-    return null;
-  }
-  const sequenceConfig = getChocolateMilkSequenceConfig();
-  const previewConfig = sequenceConfig.preview;
-
-  if (!chocolateMilkDragFillState.overlay) {
-    const overlay = document.createElement("div");
-    overlay.className = "cup-fill-preview";
-    worldCanvas.appendChild(overlay);
-    chocolateMilkDragFillState.overlay = overlay;
-  }
-
-  const overlay = chocolateMilkDragFillState.overlay;
-  overlay.style.left = `${cupState.worldX + previewConfig.offsetX}px`;
-  overlay.style.top = `${cupState.worldY + previewConfig.offsetY}px`;
-  overlay.style.width = `${previewConfig.width}px`;
-  overlay.style.height = `${previewConfig.height}px`;
-  overlay.style.opacity = String(previewConfig.opacity);
-  overlay.style.transform = `translate(-50%, -50%) rotate(${previewConfig.rotationDeg}deg)`;
-  return overlay;
-}
-
-function paintChocolateMilkDragFillFrame(cupId, frame) {
-  const sequenceConfig = getChocolateMilkSequenceConfig();
-  const overlay = ensureChocolateMilkDragFillOverlay(cupId);
-  if (!overlay) {
-    return;
-  }
-  const frameAsset = frame === 3 ? sequenceConfig.frame3Asset : sequenceConfig.frame2Asset;
-  overlay.style.backgroundImage = `url("${frameAsset}")`;
+  chocolateMilkFillController.clearPreview();
 }
 
 function onChocolateMilkFillStart(cupId) {
-  if (!cupId || chocolateMilkDragFillState.completionLocked) {
-    return;
-  }
-
-  window.CuppyLandAudio?.playLoopingSfxClip?.("milkPour");
-
-  if (chocolateMilkDragFillState.cupId !== cupId) {
-    clearChocolateMilkDragFillPreview();
-    chocolateMilkDragFillState.cupId = cupId;
-  }
-
-  paintChocolateMilkDragFillFrame(cupId, 2);
-  const intervalMs = 250;
-  chocolateMilkDragFillState.intervalId = setInterval(() => {
-    if (!chocolateMilkDragFillState.cupId) {
-      clearChocolateMilkDragFillPreview();
-      return;
-    }
-    chocolateMilkDragFillState.frame = chocolateMilkDragFillState.frame === 2 ? 3 : 2;
-    paintChocolateMilkDragFillFrame(chocolateMilkDragFillState.cupId, chocolateMilkDragFillState.frame);
-  }, intervalMs);
+  chocolateMilkFillController.onFillStart(cupId);
 }
 
 function onChocolateMilkFillTick(cupId) {
-  if (!cupId || chocolateMilkDragFillState.completionLocked || chocolateMilkDragFillState.cupId !== cupId) {
-    return;
-  }
-  ensureChocolateMilkDragFillOverlay(cupId);
+  chocolateMilkFillController.onFillTick(cupId);
 }
 
 function onChocolateMilkFillCancel() {
-  window.CuppyLandAudio?.stopSfxClip?.("milkPour");
-  clearChocolateMilkDragFillPreview();
+  chocolateMilkFillController.onFillCancel();
 }
 
 function onChocolateMilkFillComplete(cupId) {
-  if (!cupId || chocolateMilkDragFillState.completionLocked) {
-    return;
-  }
-  chocolateMilkDragFillState.completionLocked = true;
-
-  window.CuppyLandAudio?.stopSfxClip?.("milkPour");
-  clearChocolateMilkDragFillPreview();
-  triggerCupSparkle(cupId);
+  chocolateMilkFillController.onFillComplete(cupId);
 }
 
 function onChocolateMilkFillEnd() {
-  window.CuppyLandAudio?.stopSfxClip?.("milkPour");
-  clearChocolateMilkDragFillPreview();
+  chocolateMilkFillController.onFillEnd();
 }
 
 function resolveFriendAsset(friendState) {
