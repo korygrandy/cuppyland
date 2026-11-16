@@ -400,7 +400,7 @@ body {
 
 .cup-sleeve {
   position: absolute;
-  z-index: 2;
+  z-index: 4;
   width: 200px;
   height: 110px;
   left: 30px;
@@ -416,13 +416,17 @@ body {
   transform-origin: center center;
 }
 
+.cup-character.is-dragging-sleeve .cup-lid {
+  z-index: 2;
+}
+
 .cup-character.is-dragging-sleeve .cup-sleeve {
   z-index: 120;
 }
 
 .cup-hairstyle {
   position: absolute;
-  z-index: 4;
+  z-index: 5;
   width: 220px;
   height: 128px;
   left: 17px;
@@ -439,7 +443,7 @@ body {
 
 .cup-face {
   position: absolute;
-  z-index: 5;
+  z-index: 6;
   width: 120px;
   height: 90px;
   left: 40px;
@@ -461,6 +465,12 @@ body {
 
 .cup-character.is-dragging-lid .cup-lid {
   z-index: 130;
+}
+
+.cup-character.is-dragging-lid .cup-sleeve,
+.cup-character.is-dragging-lid .cup-hairstyle,
+.cup-character.is-dragging-lid .cup-face {
+  z-index: 2;
 }
 
 .cup-character.is-dragging-lid .cup-hairstyle {
