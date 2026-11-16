@@ -361,27 +361,8 @@ function onChocolateMilkFillComplete(cupId) {
   chocolateMilkDragFillState.completionLocked = true;
 
   window.CuppyLandAudio?.stopSfxClip?.("milkPour");
-
-  if (chocolateMilkDragFillState.intervalId) {
-    clearInterval(chocolateMilkDragFillState.intervalId);
-    chocolateMilkDragFillState.intervalId = null;
-  }
-
-  const sequenceConfig = getChocolateMilkSequenceConfig();
-  const completedAtMs = Date.now();
-  const finalizeIntervalMs = 160;
-  chocolateMilkDragFillState.finalAnimationId = setInterval(() => {
-    if (Date.now() - completedAtMs >= 1000) {
-      clearChocolateMilkDragFillPreview();
-      triggerCupSparkle(cupId);
-      return;
-    }
-    chocolateMilkDragFillState.frame = chocolateMilkDragFillState.frame === 2 ? 3 : 2;
-    const frameAsset = chocolateMilkDragFillState.frame === 3 ? sequenceConfig.frame3Asset : sequenceConfig.frame2Asset;
-    if (chocolateMilkDragFillState.overlay) {
-      chocolateMilkDragFillState.overlay.style.backgroundImage = `url("${frameAsset}")`;
-    }
-  }, finalizeIntervalMs);
+  clearChocolateMilkDragFillPreview();
+  triggerCupSparkle(cupId);
 }
 
 function onChocolateMilkFillEnd() {
@@ -444,6 +425,8 @@ function triggerCupSparkle(cupId) {
   if (!cupState) {
     return;
   }
+
+  window.CuppyLandAudio?.playSfxClip?.("shimmer");
 
   const sparkle = document.createElement("div");
   sparkle.className = "cup-sparkle-burst";

@@ -200,6 +200,7 @@
         hi: "./sfx/hi.mp3",
         rocketship: "./sfx/rocketship.mp3",
         milkPour: "./sfx/milk-pour.ogg",
+        shimmer: "./sfx/shimmer.ogg",
       },
       transitions: {
         fadeOutMs: 220,

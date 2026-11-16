@@ -182,10 +182,6 @@
       }
 
       chocolateMilkFillState.completed = true;
-      if (typeof onChocolateMilkFillComplete === "function") {
-        onChocolateMilkFillComplete(cupId);
-      }
-
       dragState.suppressClick = true;
       dragState.active = false;
       dragState.type = "";
@@ -194,6 +190,9 @@
       dragState.moved = true;
       hideDragGhost();
       clearZoneHighlights();
+      if (typeof onChocolateMilkFillComplete === "function") {
+        onChocolateMilkFillComplete(cupId);
+      }
 
       chocolateMilkFillState.cupId = null;
       chocolateMilkFillState.startedAtMs = 0;
