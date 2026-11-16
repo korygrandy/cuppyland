@@ -62,10 +62,10 @@
     hairstyleTypes: ["child", "grandpa", "hat"],
     faceAssetMap: {
       child: {
-        happy: "./assets/happy-facial-expression.png",
-        excited: "./assets/happy-facial-expression.png",
-        surprised: "./assets/happy-facial-expression.png",
-        scared: "./assets/facial-expression-scared.png",
+        happy: "./assets/facial-expression-child.png",
+        excited: "./assets/facial-expression-child.png",
+        surprised: "./assets/facial-expression-child.png",
+        scared: "./assets/facial-expression-child.png",
       },
       parent: {
         happy: "./assets/happy-facial-expression.png",
@@ -74,10 +74,10 @@
         scared: "./assets/facial-expression-scared.png",
       },
       grandparent: {
-        happy: "./assets/happy-facial-expression.png",
-        excited: "./assets/happy-facial-expression.png",
-        surprised: "./assets/happy-facial-expression.png",
-        scared: "./assets/facial-expression-scared.png",
+        happy: "./assets/facial-expression-grandparent.png",
+        excited: "./assets/facial-expression-grandparent.png",
+        surprised: "./assets/facial-expression-grandparent.png",
+        scared: "./assets/facial-expression-grandparent.png",
       },
     },
     sleevePalette: {
