@@ -103,8 +103,6 @@ const trashState = {
   active: false,
   target: null,
 };
-let worldHeadlineFadeTimerId = null;
-let worldHeadlineHideTimerId = null;
 const cupStateStore = window.CuppyLandCupState.createStore({
   gameConfig: window.CuppyLandGame,
   state,
@@ -229,6 +227,10 @@ const chocolateMilkSequenceController = window.CuppyLandChocolateMilkSequenceCon
   updateFriendElementAsset: (friendId) => updateFriendElementAsset(friendId),
   onCompleted: (cupId) => triggerCupSparkle(cupId),
 });
+const worldHeadlineController = window.CuppyLandWorldHeadlineController.createController({
+  overlay: worldHeadlineOverlay,
+  config: worldHeadlineConfig,
+});
 
 function syncAudioForCurrentScreen() {
   if (window.CuppyLandAudio && typeof window.CuppyLandAudio.syncAudioForCurrentScreen === "function") {
@@ -346,49 +348,12 @@ function stopAllChocolateMilkSequences() {
   chocolateMilkSequenceController.stopAll();
 }
 
-function clearWorldHeadlineTimers() {
-  if (worldHeadlineFadeTimerId) {
-    clearTimeout(worldHeadlineFadeTimerId);
-    worldHeadlineFadeTimerId = null;
-  }
-  if (worldHeadlineHideTimerId) {
-    clearTimeout(worldHeadlineHideTimerId);
-    worldHeadlineHideTimerId = null;
-  }
-}
-
 function hideWorldHeadlineOverlay() {
-  if (!worldHeadlineOverlay) {
-    return;
-  }
-  clearWorldHeadlineTimers();
-  worldHeadlineOverlay.classList.remove("visible", "fading");
-  worldHeadlineOverlay.style.backgroundImage = "";
+  worldHeadlineController.hide();
 }
 
 function showWorldHeadlineOverlay(worldId) {
-  if (!worldHeadlineOverlay) {
-    return;
-  }
-
-  hideWorldHeadlineOverlay();
-  const headlineAsset = worldHeadlineConfig?.assets?.[worldId] || "";
-  if (!headlineAsset) {
-    return;
-  }
-
-  const displayMs = worldHeadlineConfig?.durationMs ?? 3000;
-  const fadeMs = worldHeadlineConfig?.fadeOutMs ?? 700;
-  worldHeadlineOverlay.style.transitionDuration = `${fadeMs}ms`;
-  worldHeadlineOverlay.style.backgroundImage = `url("${headlineAsset}")`;
-  worldHeadlineOverlay.classList.add("visible");
-  worldHeadlineHideTimerId = setTimeout(() => {
-    worldHeadlineOverlay.classList.add("fading");
-    worldHeadlineOverlay.classList.remove("visible");
-    worldHeadlineFadeTimerId = setTimeout(() => {
-      hideWorldHeadlineOverlay();
-    }, fadeMs);
-  }, displayMs);
+  worldHeadlineController.show(worldId);
 }
 
 function ensureCupLayerOrder(cupState, fallbackOrder = 1) {

@@ -105,9 +105,9 @@ interface GameState {
   - World backgrounds for Playground and Olivia's Room
   - Cup layers (lid, base, sleeve overlays, expression variants)
   - Music tracks:
-    - `cuppy-land/sfx/Kailua_Breeze.mp3` (menu music for splash + world select)
-    - `cuppy-land/sfx/playgound.mp3` (Playground world music)
-    - `cuppy-land/sfx/olivias-room.mp3` (Olivia's Room world music)
+    - `cuppy-land/sfx/Kailua_Breeze.ogg` (menu music for splash + world select)
+    - `cuppy-land/sfx/theme-playground.ogg` (Playground world music)
+    - `cuppy-land/sfx/theme-olivias-room.ogg` (Olivia's Room world music)
 
 ### 7.1 Grayscale Tint Pipeline (Implemented)
 - The MVP now supports grayscale tinting for lid and cup via code so one grayscale asset can produce many colors.

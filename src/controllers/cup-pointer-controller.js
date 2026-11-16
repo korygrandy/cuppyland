@@ -174,6 +174,8 @@
       lidDragState.initialTop = cupState.lidDetached ? cupState.lidOffsetY : (defaultCupState?.lidOffsetY ?? 0);
       lidDragState.anchorX = event.clientX - parentRect.left;
       lidDragState.anchorY = event.clientY - parentRect.top;
+      lidDragState.wasDetachedAtStart = cupState.lidDetached === true;
+      lidDragState.snapOffPlayed = false;
       trySetPointerCapture(event.currentTarget, event.pointerId);
     }
 
@@ -209,6 +211,10 @@
         minTop: dragClamp.lid?.minTop ?? -80,
         maxTop: dragClamp.lid?.maxTop ?? 120,
       });
+      if (!lidDragState.wasDetachedAtStart && !lidDragState.snapOffPlayed) {
+        window.CuppyLandAudio?.playSfxClip?.("lidSnapOff");
+        lidDragState.snapOffPlayed = true;
+      }
       cupState.lidDetached = true;
       cupState.lidOffsetX = nextLeft;
       cupState.lidOffsetY = nextTop;
@@ -226,15 +232,21 @@
         setLidDragForeground(cupElement, false);
         removeSelectedObject();
       } else if (isLidNearCup(cupElement)) {
+        const wasDetachedBeforeSnap = cupState.lidDetached === true;
         cupState.lidDetached = false;
         cupState.lidOffsetX = defaultCupState?.lidOffsetX ?? 17;
         cupState.lidOffsetY = defaultCupState?.lidOffsetY ?? 0;
+        if (wasDetachedBeforeSnap) {
+          window.CuppyLandAudio?.playSfxClip?.("lidSnapOn");
+        }
       }
       setLidDragForeground(cupElement, false);
 
       trashCanBtn.classList.remove("highlight");
       lidDragState.active = false;
       lidDragState.pointerId = null;
+      lidDragState.wasDetachedAtStart = false;
+      lidDragState.snapOffPlayed = false;
       syncLidPosition(cupElement);
     }
 
@@ -361,6 +373,8 @@
       sleeveDragState.initialTop = cupState.sleeveDetached ? cupState.sleeveOffsetY : (defaultCupState?.sleeveOffsetY ?? 160);
       sleeveDragState.anchorX = event.clientX - parentRect.left;
       sleeveDragState.anchorY = event.clientY - parentRect.top;
+      sleeveDragState.wasDetachedAtStart = cupState.sleeveDetached === true;
+      sleeveDragState.snapOffPlayed = false;
       trySetPointerCapture(event.currentTarget, event.pointerId);
     }
 
@@ -396,6 +410,10 @@
         minTop: dragClamp.sleeve?.minTop ?? -20,
         maxTop: dragClamp.sleeve?.maxTop ?? 220,
       });
+      if (!sleeveDragState.wasDetachedAtStart && !sleeveDragState.snapOffPlayed) {
+        window.CuppyLandAudio?.playSfxClip?.("sleeveSnapOff");
+        sleeveDragState.snapOffPlayed = true;
+      }
       cupState.sleeveDetached = true;
       cupState.sleeveOffsetX = nextLeft;
       cupState.sleeveOffsetY = nextTop;
@@ -414,15 +432,21 @@
         setSleeveDragForeground(cupElement, false);
         removeSelectedObject();
       } else if (isSleeveNearCup(cupElement)) {
+        const wasDetachedBeforeSnap = cupState.sleeveDetached === true;
         cupState.sleeveDetached = false;
         cupState.sleeveOffsetX = defaultCupState?.sleeveOffsetX ?? 32;
         cupState.sleeveOffsetY = defaultCupState?.sleeveOffsetY ?? 160;
+        if (wasDetachedBeforeSnap) {
+          window.CuppyLandAudio?.playSfxClip?.("sleeveSnapOn");
+        }
       }
       setSleeveDragForeground(cupElement, false);
 
       trashCanBtn.classList.remove("highlight");
       sleeveDragState.active = false;
       sleeveDragState.pointerId = null;
+      sleeveDragState.wasDetachedAtStart = false;
+      sleeveDragState.snapOffPlayed = false;
       syncSleevePosition(cupElement);
       syncFacePosition(cupElement);
     }
