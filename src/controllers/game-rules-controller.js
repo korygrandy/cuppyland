@@ -11,6 +11,7 @@
       cupLayer,
       cupStateStore,
       getWorldCupList,
+      getWorldFriendList,
       getActiveCupInstance,
       setActiveCupInstance,
       renderWorldCups,
@@ -24,12 +25,37 @@
         return false;
       }
       renderWorldCups();
+      window.CuppyLandAudio?.playSfxClip?.("hi");
       return true;
     }
 
-    function applyDrop(itemType, value, targetZone, targetCupId = state.activeCupId) {
+    function addFriendToWorld(friendType, dropPoint) {
+      if (!state.activeWorld) {
+        return false;
+      }
+
+      const worldFriends = getWorldFriendList(state.activeWorld);
+      const fallbackIndex = worldFriends.length;
+      const worldX = Number.isFinite(dropPoint?.worldX) ? dropPoint.worldX : 900 + (fallbackIndex % 3) * 120;
+      const worldY = Number.isFinite(dropPoint?.worldY) ? dropPoint.worldY : 360 + Math.floor(fallbackIndex / 3) * 110;
+      worldFriends.push({
+        id: `friend-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+        type: friendType,
+        worldX,
+        worldY,
+        zIndex: 90 + fallbackIndex,
+      });
+      renderWorldCups();
+      return true;
+    }
+
+    function applyDrop(itemType, value, targetZone, targetCupId = state.activeCupId, dropPoint = null) {
       if (itemType === "cup-create") {
         return addCupToWorld() ? { valid: true } : { valid: false, reason: "no-world" };
+      }
+
+      if (itemType === "friend") {
+        return addFriendToWorld(value, dropPoint) ? { valid: true } : { valid: false, reason: "no-world" };
       }
 
       if (!state.activeWorld) {
@@ -102,8 +128,8 @@
       sleeveLayer.classList.add("invalid-shake");
     }
 
-    function applyInventorySelection(itemType, value, targetCupId = state.activeCupId) {
-      const result = applyDrop(itemType, value, itemType, targetCupId);
+    function applyInventorySelection(itemType, value, targetCupId = state.activeCupId, dropPoint = null) {
+      const result = applyDrop(itemType, value, itemType, targetCupId, dropPoint);
       if (result.valid) {
         renderWorldCups();
         return true;
@@ -170,6 +196,7 @@
 
     return {
       addCupToWorld,
+      addFriendToWorld,
       applyDrop,
       applyInventorySelection,
       showInvalidFeedback,

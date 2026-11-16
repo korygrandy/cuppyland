@@ -12,9 +12,12 @@
     function wireEvents() {
       documentRef.addEventListener("pointerdown", () => audio.unlockAudio(), { once: true });
       documentRef.addEventListener("keydown", () => audio.unlockAudio(), { once: true });
+      documentRef.addEventListener("visibilitychange", audio.handleAppVisibilityChange);
+      windowRef.addEventListener("pagehide", audio.handleAppVisibilityChange);
+      windowRef.addEventListener("pageshow", audio.handleAppVisibilityChange);
 
       ui.playBtn.addEventListener("click", () => {
-        audio.playSfx("standard");
+        audio.playSfxClip("welcomeToCuppyland");
         actions.showScreen("worldSelect");
       });
 

@@ -35,9 +35,11 @@
       worlds: {
         playground: {
           cups: [{ id: "cup-playground-1", state: JSON.parse(JSON.stringify(defaultCupState)) }],
+          friends: [],
         },
         "olivia-room": {
           cups: [{ id: "cup-bedroom-1", state: JSON.parse(JSON.stringify(defaultCupState)) }],
+          friends: [],
         },
       },
       cup: JSON.parse(JSON.stringify(defaultCupState)),
@@ -46,7 +48,7 @@
       width: 1280,
       height: 800,
     },
-    palette: ["red", "blue", "yellow", "green"],
+    palette: ["red", "blue", "yellow", "green", "purple", "orange"],
     sleeveTypes: ["child", "parent", "grandparent"],
     sleeveFaceMap: {
       child: "😊",
@@ -60,6 +62,7 @@
     },
     expressionTypes: ["happy", "excited", "surprised", "scared"],
     hairstyleTypes: ["child", "grandpa", "hat"],
+    friendTypes: ["heart-women", "heart-man", "tricerotops-bead-craft", "rocketman-craft", "furball-guy", "hairy-guy"],
     faceAssetMap: {
       child: {
         happy: "./assets/facial-expression-child.png",
@@ -102,11 +105,21 @@
       grandpa: "./assets/hairstyle-grandpa.png",
       hat: "./assets/hairstyle-hat.svg",
     },
+    friendAssetMap: {
+      "heart-women": "./assets/heart-woman.png",
+      "heart-man": "./assets/heart-man.png",
+      "tricerotops-bead-craft": "./assets/tricerotops-bead-craft.png",
+      "rocketman-craft": "./assets/rocketman-craft.png",
+      "furball-guy": "./assets/furball-guy-drawing.png",
+      "hairy-guy": "./assets/hairy-guy-drawing.png",
+    },
     colorMap: {
       red: "#ff3c3c",
       blue: "#3e80ff",
       yellow: "#f3cf33",
       green: "#37c86e",
+      purple: "#9c5bff",
+      orange: "#ff9a3c",
     },
     worldClasses: {
       playground: "playground",
@@ -137,8 +150,13 @@
     audioConfig: {
       menu: "./sfx/Kailua_Breeze.mp3",
       worlds: {
-        playground: ["./sfx/playgound.mp3", "./sfx/playground.mp3"],
+        playground: "./sfx/playground.mp3",
         "olivia-room": "./sfx/olivias-room.mp3",
+      },
+      sfxClips: {
+        welcomeToCuppyland: "./sfx/welcome-to-cuppyland.mp3",
+        myNameIsOlivia: "./sfx/my-name-is-olivia.mp3",
+        hi: "./sfx/hi.mp3",
       },
       transitions: {
         fadeOutMs: 220,
