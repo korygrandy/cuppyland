@@ -195,3 +195,12 @@ These logs should be retained alongside each deployment attempt so the latest bu
 - APK install link works on a real tablet.
 - Device log reviewed for runtime issues after install.
 - Download page is hosted under `/cupplandapp/` and references the signed APK.
+
+## 9) Current live deployment status (as of last release)
+- Browser app URL: `https://www.kgenterprises.com/cuppyland/`
+- APK download page: `https://www.kgenterprises.com/cuppylandapp/`
+- APK file: `https://www.kgenterprises.com/cuppylandapp/app-release.apk`
+- Hosting split: `/cuppyland/` for the web app, `/cuppylandapp/` for the APK and download page.
+- Build artifacts: `/logs/web-build.log`, `/logs/android-release.log`, `/logs/device-log.txt`.
+- Review method: `Get-Content ... -Tail 80` in PowerShell for the latest log output.
+- Current known state: no formal automated test suite is committed; deployment validation relies on build logs and live smoke tests on the tablet.
