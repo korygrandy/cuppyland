@@ -35,6 +35,13 @@
     const anchors = gameplayConfig?.anchors || {};
     const dragMovementThreshold = gameplayConfig?.dragMovementThreshold ?? 8;
 
+    function setSleeveDragForeground(cupElement, isActive) {
+      if (!cupElement) {
+        return;
+      }
+      cupElement.classList.toggle("is-dragging-sleeve", Boolean(isActive));
+    }
+
     function onCupPointerDown(event) {
       const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
       const cupState = resolveCupStateForElement(cupElement);
@@ -301,6 +308,7 @@
       }
 
       showTrashCan("sleeve");
+      setSleeveDragForeground(cupElement, true);
       event.preventDefault();
       event.stopPropagation();
       const parentRect = cupElement.getBoundingClientRect();
@@ -321,11 +329,14 @@
       }
 
       if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
+        setSleeveDragForeground(cupElement, false);
         cupState.sleeveVisible = false;
         cupState.faceVisible = false;
         renderWorldCups();
         return;
       }
+
+      bringCupElementToFront(cupElement);
 
       const parentRect = cupElement.getBoundingClientRect();
       const localX = event.clientX - parentRect.left;
@@ -357,12 +368,14 @@
       }
 
       if (isPointerOverTrashCan(event.clientX, event.clientY)) {
+        setSleeveDragForeground(cupElement, false);
         removeSelectedObject();
       } else if (isSleeveNearCup(cupElement)) {
         cupState.sleeveDetached = false;
         cupState.sleeveOffsetX = defaultCupState?.sleeveOffsetX ?? 32;
         cupState.sleeveOffsetY = defaultCupState?.sleeveOffsetY ?? 160;
       }
+      setSleeveDragForeground(cupElement, false);
 
       trashCanBtn.classList.remove("highlight");
       sleeveDragState.active = false;

@@ -287,6 +287,10 @@ body {
   display: none;
 }
 
+.cup-character.is-dragging-sleeve {
+  z-index: 9999 !important;
+}
+
 .trash-can {
   position: absolute;
   right: 26px;
@@ -368,6 +372,10 @@ body {
   transform-origin: center center;
 }
 
+.cup-character.is-dragging-sleeve .cup-sleeve {
+  z-index: 120;
+}
+
 .cup-hairstyle {
   position: absolute;
   z-index: 4;
@@ -401,6 +409,10 @@ body {
   background-position: center;
   transform: scale(0.8);
   transform-origin: center center;
+}
+
+.cup-character.is-dragging-sleeve .cup-face {
+  z-index: 121;
 }
 
 .drop-zone {
