@@ -1,6 +1,6 @@
 (function () {
   const game = window.CuppyLandGame;
-  const { palette, sleeveTypes, colorMap, expressionTypes, hairstyleTypes, friendTypes } = game;
+  const { palette, colorMap, expressionTypes, hairstyleTypes, friendTypes } = game;
   const thumbnailImageCache = new Map();
   let activeColorTarget = "lid";
 
@@ -89,27 +89,6 @@
     return item;
   }
 
-  function createSleeveItem(sleeve) {
-    const item = document.createElement("button");
-    item.type = "button";
-    item.className = "inventory-item sleeve";
-    item.dataset.itemType = "sleeve";
-    item.dataset.value = sleeve;
-    item.setAttribute("aria-label", `sleeve ${sleeve}`);
-
-    const thumb = document.createElement("span");
-    thumb.className = "inventory-sleeve-thumb";
-    thumb.style.backgroundImage = `url("${game.sleeveAssetMap[sleeve] || './assets/sleeve-child.png'}")`;
-
-    const face = document.createElement("span");
-    face.className = "inventory-sleeve-face";
-    face.style.backgroundImage = `url("${game.faceAssetMap?.[sleeve]?.happy || './assets/happy-facial-expression.png'}")`;
-
-    thumb.appendChild(face);
-    item.appendChild(thumb);
-    return item;
-  }
-
   function createExpressionItem(expressionName) {
     const item = document.createElement("button");
     item.type = "button";
@@ -120,7 +99,7 @@
 
     const thumb = document.createElement("span");
     thumb.className = "inventory-expression-thumb";
-    thumb.style.backgroundImage = `url("${game.faceAssetMap?.[game.state.cup.sleeve]?.[expressionName] || './assets/happy-facial-expression.png'}")`;
+    thumb.style.backgroundImage = `url("${game.expressionAssetMap?.[expressionName] || game.expressionAssetMap?.happy || './assets/facial-expression-happy.png'}")`;
 
     const label = document.createElement("span");
     label.className = "inventory-expression-label";
@@ -187,13 +166,11 @@
   function buildInventoryItems() {
     const colorItems = document.getElementById("colorItems");
     const colorTargetToggle = document.getElementById("colorTargetToggle");
-    const sleeveItems = document.getElementById("sleeveItems");
     const expressionItems = document.getElementById("expressionItems");
     const hairstyleItems = document.getElementById("hairstyleItems");
     const friendsItems = document.getElementById("friendsItems");
 
     colorItems.innerHTML = "";
-    sleeveItems.innerHTML = "";
     expressionItems.innerHTML = "";
     hairstyleItems.innerHTML = "";
     friendsItems.innerHTML = "";
@@ -213,10 +190,6 @@
 
     palette.forEach((colorName) => {
       colorItems.appendChild(createColorItem(colorName));
-    });
-
-    sleeveTypes.forEach((sleeve) => {
-      sleeveItems.appendChild(createSleeveItem(sleeve));
     });
 
     expressionTypes.forEach((expressionName) => {
@@ -248,7 +221,6 @@
 
   window.CuppyLandInventory = {
     createColorItem,
-    createSleeveItem,
     createExpressionItem,
     createHairstyleItem,
     createFriendItem,

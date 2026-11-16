@@ -71,8 +71,9 @@
       setActiveCupInstance(selectedCup.id);
       const activeCupState = selectedCup.state;
       const isHairstyleDrop = itemType === "hairstyle" && (targetZone === "lid" || targetZone === "hairstyle");
+      const isExpressionDrop = itemType === "expression" && targetZone === "sleeve";
 
-      if (itemType !== targetZone && !isHairstyleDrop) {
+      if (itemType !== targetZone && !isHairstyleDrop && !isExpressionDrop) {
         return { valid: false, reason: "wrong-zone" };
       }
 

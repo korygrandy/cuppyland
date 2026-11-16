@@ -25,7 +25,6 @@ const cupLayer = document.getElementById("cupLayer");
 const hairstyleLayer = document.getElementById("hairstyleLayer");
 const sleeveLayer = document.getElementById("sleeveLayer");
 const faceLayer = document.getElementById("faceLayer");
-const sleeveItems = document.getElementById("sleeveItems");
 const dragGhost = document.getElementById("dragGhost");
 const trashCanBtn = document.getElementById("trashCanBtn");
 const dropZoneLid = document.getElementById("dropZoneLid");

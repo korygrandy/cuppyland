@@ -48,15 +48,23 @@
         return null;
       }
 
+      const hitElement = documentRef.elementFromPoint(x, y);
+      const hitDropZone = hitElement?.closest(".drop-zone");
+      if (hitDropZone?.dataset?.target) {
+        return hitDropZone.dataset.target;
+      }
+
       const zoneCandidates = Array.from(cupElement.querySelectorAll(".drop-zone"));
-      for (const zone of zoneCandidates) {
+      const orderedZones = [...zoneCandidates].sort((a, b) => {
+        const zonePriority = { sleeve: 3, lid: 2, hairstyle: 2, cup: 1 };
+        return (zonePriority[b.dataset.target] || 0) - (zonePriority[a.dataset.target] || 0);
+      });
+      for (const zone of orderedZones) {
         const rect = zone.getBoundingClientRect();
         if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
           return zone.dataset.target;
         }
       }
-
-      const hitElement = documentRef.elementFromPoint(x, y);
       if (!hitElement) {
         return null;
       }

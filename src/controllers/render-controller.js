@@ -171,7 +171,10 @@
 
       const activeSleeveAsset = sleeveAssetMap[cupState.sleeve] || defaultSleeveAsset;
       const activeFaceAsset =
-        gameConfig.faceAssetMap?.[cupState.sleeve]?.[cupState.expression || "happy"] || "./assets/mr-chocolate-milk-happy.jpg";
+        gameConfig.expressionAssetMap?.[cupState.expression || "happy"] ||
+        gameConfig.expressionAssetMap?.happy ||
+        gameConfig.faceAssetMap?.[cupState.sleeve]?.[cupState.expression || "happy"] ||
+        "./assets/facial-expression-happy.png";
       const activeHairstyleAsset = gameConfig.hairstyleAssetMap?.[cupState.hairstyle || "child"] || "./assets/hairstyle-grandpa.png";
 
       if (sleeveVisible) {

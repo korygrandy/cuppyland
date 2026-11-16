@@ -695,7 +695,6 @@ body {
   letter-spacing: 0.02em;
 }
 
-.inventory-item.sleeve,
 .inventory-item.expression,
 .inventory-item.hairstyle,
 .inventory-item.friend,
@@ -745,41 +744,23 @@ body {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
-.inventory-sleeve-thumb,
 .inventory-expression-thumb,
 .inventory-hairstyle-thumb {
   position: relative;
   width: 60px;
-  height: 42px;
+  height: 52px;
   border-radius: 12px;
   background-color: rgba(255, 255, 255, 0.08);
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
-.inventory-sleeve-face,
 .inventory-expression-thumb {
-  position: absolute;
-  inset: 0;
-  background-repeat: no-repeat;
-  background-position: center;
+  width: 52px;
+  height: 52px;
   background-size: contain;
-}
-
-.inventory-sleeve-face {
-  left: 10px;
-  right: 10px;
-  top: 8px;
-  bottom: 8px;
-}
-
-.inventory-expression-thumb {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background-size: cover;
 }
 
 .inventory-hairstyle-thumb {
