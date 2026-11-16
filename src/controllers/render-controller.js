@@ -186,7 +186,7 @@
       if (hairstyleVisible && hairstyleLayerElement) {
         hairstyleLayerElement.style.backgroundColor = "transparent";
         hairstyleLayerElement.style.backgroundImage = `url("${activeHairstyleAsset}")`;
-        hairstyleLayerElement.style.backgroundSize = "contain";
+        hairstyleLayerElement.style.backgroundSize = cupState.hairstyle === "summer-hat" ? "110% auto" : "contain";
         hairstyleLayerElement.style.backgroundPosition = "center";
         hairstyleLayerElement.style.backgroundRepeat = "no-repeat";
         hairstyleLayerElement.textContent = "";

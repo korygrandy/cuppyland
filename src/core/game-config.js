@@ -4,7 +4,7 @@
     cupColor: "red",
     sleeve: "child",
     expression: "happy",
-    hairstyle: "child",
+    hairstyle: null,
     worldX: 920,
     worldY: 430,
     zIndex: 1,
@@ -22,7 +22,7 @@
     hairstyleDetached: false,
     hairstyleOffsetX: 17,
     hairstyleOffsetY: -22,
-    hairstyleVisible: true,
+    hairstyleVisible: false,
   };
 
   const gameConfig = {
@@ -61,8 +61,18 @@
       grandparent: "./assets/sleeve-grandparent.png",
     },
     expressionTypes: ["happy", "scared", "loved"],
-    hairstyleTypes: ["child", "grandpa", "hat"],
-    friendTypes: ["heart-women", "heart-man", "tricerotops-bead-craft", "rocketman-craft", "furball-guy", "hairy-guy"],
+    hairstyleTypes: ["child", "grandpa", "hat", "bow", "summer-hat", "tiara"],
+    friendTypes: [
+      "heart-women",
+      "heart-man",
+      "tricerotops-bead-craft",
+      "rocketman-craft",
+      "furball-guy",
+      "hairy-guy",
+      "spongebob-stuffy",
+      "pizza-man-craft",
+      "chocolate-milk",
+    ],
     expressionAssetMap: {
       happy: "./assets/facial-expression-happy.png",
       scared: "./assets/facial-expression-scared.png",
@@ -106,6 +116,9 @@
       child: "./assets/hairstyle-child.svg",
       grandpa: "./assets/hairstyle-grandpa.png",
       hat: "./assets/hairstyle-hat.svg",
+      bow: "./assets/hairstyle-bow.png",
+      "summer-hat": "./assets/hairstyle-summer-hat.png",
+      tiara: "./assets/hairstyle-tiara.png",
     },
     friendAssetMap: {
       "heart-women": "./assets/heart-woman.png",
@@ -114,6 +127,9 @@
       "rocketman-craft": "./assets/rocketman-craft.png",
       "furball-guy": "./assets/furball-guy-drawing.png",
       "hairy-guy": "./assets/hairy-guy-drawing.png",
+      "spongebob-stuffy": "./assets/spongebob-stuffy.png",
+      "pizza-man-craft": "./assets/pizza-man-craft.png",
+      "chocolate-milk": "./assets/chocolate-milk.png",
     },
     colorMap: {
       red: "#ff3c3c",
@@ -159,6 +175,7 @@
         welcomeToCuppyland: "./sfx/welcome-to-cuppyland.mp3",
         myNameIsOlivia: "./sfx/my-name-is-olivia.mp3",
         hi: "./sfx/hi.mp3",
+        rocketship: "./sfx/rocketship.mp3",
       },
       transitions: {
         fadeOutMs: 220,
