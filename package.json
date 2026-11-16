@@ -1,0 +1,29 @@
+{
+  "name": "cuppy-land",
+  "version": "1.0.0",
+  "description": "Olivia's World tablet game",
+  "main": "index.js",
+  "scripts": {
+    "prepare:web": "powershell -ExecutionPolicy Bypass -File .\\scripts\\prepare-web.ps1",
+    "cap:copy": "npm run prepare:web && npx cap copy android",
+    "cap:sync": "npm run prepare:web && npx cap sync android"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/korygrandy/cuppyland.git"
+  },
+  "keywords": [],
+  "author": "Kory Grandy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/korygrandy/cuppyland/issues"
+  },
+  "homepage": "https://github.com/korygrandy/cuppyland#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/core": "^8.6.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.6.2"
+  }
+}
