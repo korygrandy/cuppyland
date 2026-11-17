@@ -143,6 +143,74 @@
       return getWorldFriendList(worldId).find((friend) => friend.id === friendId) || null;
     }
 
+    function isBarbieFriend(friendState) {
+      return Boolean(friendState && (friendState.type === "barbie-blonde" || friendState.type === "barbie-blonde-baby"));
+    }
+
+    function getBarbieAnchorZones(worldId = state.activeWorld) {
+      return window.CuppyLandGame?.barbieActivationAnchors?.[worldId] || [];
+    }
+
+    function startBarbieActivationSequence(friendState) {
+      if (!friendState || !isBarbieFriend(friendState)) {
+        return;
+      }
+
+      if (friendState.barbieActivationTimer) {
+        clearTimeout(friendState.barbieActivationTimer);
+      }
+
+      friendState.activated = true;
+      updateFriendElementAsset(friendState.id);
+
+      if (friendState.type === "barbie-blonde") {
+        playSfxClip("barbieBlondeSnap");
+      } else if (friendState.type === "barbie-blonde-baby") {
+        playSfxClip("barbieBlondeBabySnap");
+      }
+
+      const durationMs = window.CuppyLandGame?.barbieActivationAnchors?.durationMs ?? 2000;
+      friendState.barbieActivationTimer = setTimeout(() => {
+        const activeFriend = findFriendById(friendState.id);
+        if (!activeFriend) {
+          return;
+        }
+        activeFriend.activated = false;
+        activeFriend.barbieActivationTimer = null;
+        updateFriendElementAsset(activeFriend.id);
+      }, durationMs);
+    }
+
+    function syncBarbieActivationState(friendState) {
+      if (!isBarbieFriend(friendState)) {
+        return false;
+      }
+
+      const anchorZones = getBarbieAnchorZones(state.activeWorld);
+      const centerX = (Number.isFinite(friendState.worldX) ? friendState.worldX : 0) + 75;
+      const centerY = (Number.isFinite(friendState.worldY) ? friendState.worldY : 0) + 75;
+      const matchedZone = anchorZones.some((zone) => (
+        centerX >= zone.x
+        && centerX <= zone.x + zone.width
+        && centerY >= zone.y
+        && centerY <= zone.y + zone.height
+      ));
+
+      const wasInAnchorZone = Boolean(friendState.inBarbieActivationZone);
+      friendState.inBarbieActivationZone = matchedZone;
+      if (matchedZone && !wasInAnchorZone) {
+        startBarbieActivationSequence(friendState);
+      } else if (!matchedZone) {
+        friendState.activated = false;
+        if (friendState.barbieActivationTimer) {
+          clearTimeout(friendState.barbieActivationTimer);
+          friendState.barbieActivationTimer = null;
+        }
+        updateFriendElementAsset(friendState.id);
+      }
+      return matchedZone;
+    }
+
     function resolveFriendStateForElement(friendElement) {
       const friendId = friendElement?.dataset?.friendId;
       if (!friendId) {
@@ -195,6 +263,10 @@
       if (friendState?.lavaLampSequenceTimer) {
         clearTimeout(friendState.lavaLampSequenceTimer);
         friendState.lavaLampSequenceTimer = null;
+      }
+      if (friendState?.barbieActivationTimer) {
+        clearTimeout(friendState.barbieActivationTimer);
+        friendState.barbieActivationTimer = null;
       }
       stopChocolateMilkSequence(friendId);
       worldFriends.splice(friendIndex, 1);
@@ -320,6 +392,9 @@
               startLavaLampSequence(friendState);
             }
           }
+          if (isBarbieFriend(friendState)) {
+            syncBarbieActivationState(friendState);
+          }
           worldCanvas.appendChild(createFriendElement(friendState));
         });
       onRefreshChocolateMilkSequences();
@@ -329,6 +404,7 @@
       resolveFriendAsset,
       updateFriendElementAsset,
       resolveFriendStateForElement,
+      syncBarbieActivationState,
       syncAttachedFriendPosition,
       removeFriendInstance,
       triggerTurkeyAnimation,

@@ -277,6 +277,8 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   stopChocolateMilkSequence: (friendId) => chocolateMilkSequenceController.stop(friendId),
   bringFriendElementToFront,
   triggerTurkeyAnimation: (friendId) => friendWorldController?.triggerTurkeyAnimation?.(friendId),
+  syncBarbieActivationState: (friendState) => friendWorldController?.syncBarbieActivationState?.(friendState),
+  updateFriendElementAsset: (friendId) => friendWorldController?.updateFriendElementAsset?.(friendId),
   onChocolateMilkFillStart,
   onChocolateMilkFillTick,
   onChocolateMilkFillCancel,
@@ -595,7 +597,9 @@ function ensureWorldCupState(worldId) {
 function openWorld(worldId) {
   screenWorldController.openWorld(worldId);
   showWorldHeadlineOverlay(worldId);
-  if (worldId === "olivia-room") {
+  if (worldId === "playground") {
+    window.CuppyLandAudio?.playSfxClip?.("playgroundIntroFx");
+  } else if (worldId === "olivia-room") {
     window.CuppyLandAudio?.playSfxClip?.("myNameIsOlivia");
   }
 }

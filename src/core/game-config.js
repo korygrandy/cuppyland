@@ -189,6 +189,18 @@
         "olivia-room": "./assets/olivia-room-headline.png",
       },
     },
+    barbieActivationAnchors: {
+      durationMs: 2000,
+      playground: [
+        { id: "swing-left", label: "Swing Left", x: 3475, y: 345, width: 220, height: 185 },
+        { id: "swing-right", label: "Swing Right", x: 5661, y: 325, width: 220, height: 185 },
+        { id: "trampoline", label: "Trampoline", x: 325, y: 295, width: 220, height: 185 },
+        { id: "merry-go-round-right", label: "Merry-Go-Round Right", x: 5249, y: 565, width: 220, height: 185 },
+      ],
+      "olivia-room": [
+        { id: "window-sill", label: "Window Sill", x: 520, y: 240, width: 360, height: 120 },
+      ],
+    },
     tintAssetConfig: {
       lid: "./assets/lid-grayscale.png",
       cup: "./assets/cup-grayscale.png",
@@ -220,6 +232,7 @@
       sfxClips: {
         welcomeToCuppyland: "./sfx/welcome-to-cuppyland.mp3",
         myNameIsOlivia: "./sfx/my-name-is-olivia.mp3",
+        playgroundIntroFx: "./sfx/playground-intro-fx.ogg",
         hi: "./sfx/hi.mp3",
         rocketship: "./sfx/rocketship-snap.ogg",
         spongebob: "./sfx/spongebob-snap.ogg",
@@ -227,6 +240,8 @@
         furballGuy: "./sfx/name-is-scary-varity.ogg",
         barbieBlonde: "./sfx/barbie-blonde.ogg",
         barbieBlondeBaby: "./sfx/barbie-blonde-baby.ogg",
+        barbieBlondeSnap: "./sfx/barbie-blonde-snap.ogg",
+        barbieBlondeBabySnap: "./sfx/barbie-blonde-baby-snap.ogg",
         turkeyGobble: "./sfx/turkey-gobble-doubleclick.ogg",
         cupRemoved: "./sfx/goodbye.ogg",
         defaultObjectRemoved: "./sfx/default-object-removed.ogg",
