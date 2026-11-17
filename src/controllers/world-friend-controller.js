@@ -287,6 +287,7 @@
       const friendElement = document.createElement("div");
       friendElement.className = "friend-character";
       friendElement.dataset.friendId = friendState.id;
+      friendElement.dataset.friendType = friendState.type;
       friendElement.style.left = `${friendState.worldX || 0}px`;
       friendElement.style.top = `${friendState.worldY || 0}px`;
       friendElement.style.zIndex = String(Number.isFinite(friendState.zIndex) ? friendState.zIndex : 90);

@@ -62,6 +62,7 @@
           ? defaultPanelCenterY
           : fallbackWorldY;
 
+      const isBarbie = friendType === "barbie-blonde" || friendType === "barbie-blonde-baby";
       worldFriends.push({
         id: `friend-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
         type: friendType,
@@ -71,6 +72,7 @@
         attachedCupId,
         attachedOffsetX,
         attachedOffsetY,
+        activated: isBarbie && Boolean(attachedCupId),
         sequenceCompleted: false,
       });
       renderWorldCups();
@@ -86,6 +88,12 @@
       if (friendType === "furball-guy") {
         window.CuppyLandAudio?.playSfxClip?.("furballGuy");
       }
+      if (friendType === "barbie-blonde") {
+        window.CuppyLandAudio?.playSfxClip?.("barbieBlonde");
+      }
+      if (friendType === "barbie-blonde-baby") {
+        window.CuppyLandAudio?.playSfxClip?.("barbieBlondeBaby");
+      }
       return true;
     }
 
@@ -95,6 +103,11 @@
       }
 
       if (itemType === "friend") {
+        const friendIsBarbie = value === "barbie-blonde" || value === "barbie-blonde-baby";
+        const friendCupTargetId = friendIsBarbie && targetCupId ? targetCupId : null;
+        if (friendCupTargetId) {
+          return addFriendToWorld(value, dropPoint, { attachedCupId: friendCupTargetId }) ? { valid: true } : { valid: false, reason: "no-world" };
+        }
         return addFriendToWorld(value, dropPoint) ? { valid: true } : { valid: false, reason: "no-world" };
       }
 

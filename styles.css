@@ -546,6 +546,12 @@ body {
   touch-action: none;
 }
 
+.friend-character[data-friend-type="barbie-blonde"],
+.friend-character[data-friend-type="barbie-blonde-activated"] {
+  width: 150px;
+  height: 150px;
+}
+
 .friend-character-art {
   display: block;
   width: 100%;
