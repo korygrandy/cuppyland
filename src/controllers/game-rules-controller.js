@@ -67,6 +67,9 @@
       if (friendType === "hairy-guy") {
         window.CuppyLandAudio?.playSfxClip?.("hairyGuy");
       }
+      if (friendType === "furball-guy") {
+        window.CuppyLandAudio?.playSfxClip?.("furballGuy");
+      }
       return true;
     }
 
