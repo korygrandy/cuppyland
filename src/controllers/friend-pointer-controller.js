@@ -17,6 +17,8 @@
       stopChocolateMilkSequence,
       bringFriendElementToFront,
       triggerTurkeyAnimation,
+      syncBarbieActivationState,
+      updateFriendElementAsset,
       onChocolateMilkFillStart,
       onChocolateMilkFillTick,
       onChocolateMilkFillCancel,
@@ -316,6 +318,12 @@
       friendState.worldY = Math.max(0, Math.min(worldCanvas.offsetHeight - friendElement.offsetHeight, nextY));
       friendElement.style.left = `${friendState.worldX}px`;
       friendElement.style.top = `${friendState.worldY}px`;
+      if (typeof syncBarbieActivationState === "function") {
+        syncBarbieActivationState(friendState);
+      }
+      if (typeof updateFriendElementAsset === "function") {
+        updateFriendElementAsset(friendState.id);
+      }
       updateChocolateMilkFill(friendElement, friendState, event.clientX, event.clientY);
     }
 
@@ -327,6 +335,13 @@
       const friendElement = event.currentTarget.closest(".friend-character");
       const friendState = resolveFriendStateForElement(friendElement);
       setFriendDragVisual(friendElement, friendState, false);
+
+      if (typeof syncBarbieActivationState === "function") {
+        syncBarbieActivationState(friendState);
+      }
+      if (typeof updateFriendElementAsset === "function") {
+        updateFriendElementAsset(friendState?.id);
+      }
 
       if (friendElement && friendState?.type === "chocolate-milk") {
         const previousPointerEvents = friendElement.style.pointerEvents || "";

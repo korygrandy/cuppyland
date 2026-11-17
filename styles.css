@@ -554,12 +554,27 @@ body {
   height: 150px;
 }
 
+.friend-character[data-friend-type="barbie-blonde-baby"],
+.friend-character[data-friend-type="barbie-blonde-baby-activated"] {
+  width: 86px;
+  height: 140px;
+}
+
+.friend-character[data-friend-type="barbie-blonde"],
+.friend-character[data-friend-type="barbie-blonde-activated"],
+.friend-character[data-friend-type="barbie-blonde-baby"],
+.friend-character[data-friend-type="barbie-blonde-baby-activated"] {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
 .friend-character-art {
   display: block;
   width: 100%;
   height: 100%;
   background-repeat: no-repeat;
-  background-position: center;
+  background-position: center bottom;
   background-size: contain;
 }
 
