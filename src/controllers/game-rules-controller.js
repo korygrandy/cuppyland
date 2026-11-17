@@ -62,17 +62,16 @@
           ? defaultPanelCenterY
           : fallbackWorldY;
 
-      const isBarbie = friendType === "barbie-blonde" || friendType === "barbie-blonde-baby";
       worldFriends.push({
         id: `friend-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
         type: friendType,
         worldX,
         worldY,
         zIndex: typeof getNextWorldZIndex === "function" ? getNextWorldZIndex(state.activeWorld) : (90 + fallbackIndex),
-        attachedCupId,
-        attachedOffsetX,
-        attachedOffsetY,
-        activated: isBarbie && Boolean(attachedCupId),
+        attachedCupId: null,
+        attachedOffsetX: 0,
+        attachedOffsetY: 0,
+        activated: false,
         sequenceCompleted: false,
       });
       renderWorldCups();
@@ -103,11 +102,6 @@
       }
 
       if (itemType === "friend") {
-        const friendIsBarbie = value === "barbie-blonde" || value === "barbie-blonde-baby";
-        const friendCupTargetId = friendIsBarbie && targetCupId ? targetCupId : null;
-        if (friendCupTargetId) {
-          return addFriendToWorld(value, dropPoint, { attachedCupId: friendCupTargetId }) ? { valid: true } : { valid: false, reason: "no-world" };
-        }
         return addFriendToWorld(value, dropPoint) ? { valid: true } : { valid: false, reason: "no-world" };
       }
 

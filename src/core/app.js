@@ -259,6 +259,7 @@ const worldHeadlineController = window.CuppyLandWorldHeadlineController.createCo
   overlay: worldHeadlineOverlay,
   config: worldHeadlineConfig,
 });
+worldHeadlineController.syncCardHeadlines();
 const friendPointerController = window.CuppyLandFriendPointerController.createController({
   state,
   worldCanvas,
