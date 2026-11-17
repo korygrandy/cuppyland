@@ -93,6 +93,23 @@ body {
   animation: pulse 1.35s ease-in-out infinite;
 }
 
+.splash-version {
+  position: absolute;
+  right: 24px;
+  bottom: 18px;
+  z-index: 2;
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: rgba(16, 24, 43, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  pointer-events: none;
+}
+
 @keyframes pulse {
   0%,
   100% {

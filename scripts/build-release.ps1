@@ -39,10 +39,10 @@ Write-Host "Using JAVA_HOME=$env:JAVA_HOME"
 
 Push-Location $repoRoot
 try {
-  npm run prepare:web
+  npm run cap:copy
   Push-Location $androidRoot
   try {
-    .\gradlew.bat assembleRelease
+    .\gradlew.bat clean assembleRelease
   }
   finally {
     Pop-Location
