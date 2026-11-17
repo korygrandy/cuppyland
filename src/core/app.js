@@ -272,6 +272,7 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   removeFriendInstance,
   stopChocolateMilkSequence: (friendId) => chocolateMilkSequenceController.stop(friendId),
   bringFriendElementToFront,
+  triggerTurkeyAnimation: (friendId) => friendWorldController?.triggerTurkeyAnimation?.(friendId),
   onChocolateMilkFillStart,
   onChocolateMilkFillTick,
   onChocolateMilkFillCancel,

@@ -16,6 +16,7 @@
       removeFriendInstance,
       stopChocolateMilkSequence,
       bringFriendElementToFront,
+      triggerTurkeyAnimation,
       onChocolateMilkFillStart,
       onChocolateMilkFillTick,
       onChocolateMilkFillCancel,
@@ -243,6 +244,20 @@
       const friendState = resolveFriendStateForElement(friendElement);
       if (!friendElement || !friendState) {
         return;
+      }
+
+      if (friendState.type === "turkey") {
+        const nowMs = Date.now();
+        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
+        if (lastTapAtMs && nowMs - lastTapAtMs <= 320) {
+          friendState.lastTapAtMs = nowMs;
+          window.CuppyLandAudio?.playSfxClip?.("turkeyGobble");
+          if (typeof triggerTurkeyAnimation === "function") {
+            triggerTurkeyAnimation(friendState.id);
+          }
+          return;
+        }
+        friendState.lastTapAtMs = nowMs;
       }
 
       resetChocolateMilkFill("new-drag");
