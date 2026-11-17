@@ -4,7 +4,6 @@
       state,
       cupCharacter,
       worldCanvas,
-      trashCanBtn,
       cupDragState,
       lidDragState,
       hairstyleDragState,
@@ -12,13 +11,10 @@
       safeClosest,
       trySetPointerCapture,
       isPointerOutsideWorldCanvas,
-      isPointerOverTrashCan,
       setActiveCupInstance,
       bringCupElementToFront,
       resolveCupStateForElement,
-      showTrashCan,
       removeCupInstance,
-      removeSelectedObject,
       renderWorldCups,
       syncCupWorldPosition,
       syncLidPosition,
@@ -79,7 +75,6 @@
 
       event.preventDefault();
       event.stopPropagation();
-      showTrashCan("cup");
       cupDragState.active = true;
       cupDragState.pointerId = event.pointerId;
       cupDragState.startClientX = event.clientX;
@@ -131,23 +126,11 @@
       cupState.worldY = nextY;
       syncCupWorldPosition(cupElement);
 
-      if (isPointerOverTrashCan(event.clientX, event.clientY)) {
-        trashCanBtn.classList.add("highlight");
-      } else if (trashCanBtn) {
-        trashCanBtn.classList.remove("highlight");
-      }
     }
 
     function onCupPointerUp(event) {
       if (!cupDragState.active || event.pointerId !== cupDragState.pointerId) {
         return;
-      }
-
-      const pointerIsOverTrash = isPointerOverTrashCan(event.clientX, event.clientY);
-      if (pointerIsOverTrash) {
-        removeSelectedObject();
-      } else {
-        trashCanBtn.classList.remove("highlight");
       }
 
       cupDragState.active = false;
@@ -167,7 +150,6 @@
         bringCupElementToFront(cupElement);
       }
 
-      showTrashCan("lid");
       setLidDragForeground(cupElement, true);
       event.preventDefault();
       event.stopPropagation();
@@ -236,10 +218,7 @@
         return;
       }
 
-      if (isPointerOverTrashCan(event.clientX, event.clientY)) {
-        setLidDragForeground(cupElement, false);
-        removeSelectedObject();
-      } else if (isLidNearCup(cupElement)) {
+      if (isLidNearCup(cupElement)) {
         const wasDetachedBeforeSnap = cupState.lidDetached === true;
         cupState.lidDetached = false;
         cupState.lidOffsetX = defaultCupState?.lidOffsetX ?? 17;
@@ -250,7 +229,6 @@
       }
       setLidDragForeground(cupElement, false);
 
-      trashCanBtn.classList.remove("highlight");
       lidDragState.active = false;
       lidDragState.pointerId = null;
       lidDragState.wasDetachedAtStart = false;
@@ -270,7 +248,6 @@
         bringCupElementToFront(cupElement);
       }
 
-      showTrashCan("hairstyle");
       setHairstyleDragForeground(cupElement, true);
       event.preventDefault();
       event.stopPropagation();
@@ -339,10 +316,7 @@
         return;
       }
 
-      if (isPointerOverTrashCan(event.clientX, event.clientY)) {
-        setHairstyleDragForeground(cupElement, false);
-        removeSelectedObject();
-      } else if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
+      if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
         setHairstyleDragForeground(cupElement, false);
         const shouldPlayRemovedSfx = cupState.hairstyleVisible;
         cupState.hairstyleVisible = false;
@@ -359,7 +333,6 @@
       }
       setHairstyleDragForeground(cupElement, false);
 
-      trashCanBtn.classList.remove("highlight");
       hairstyleDragState.active = false;
       hairstyleDragState.pointerId = null;
       hairstyleDragState.moved = false;
@@ -378,7 +351,6 @@
         bringCupElementToFront(cupElement);
       }
 
-      showTrashCan("sleeve");
       setSleeveDragForeground(cupElement, true);
       event.preventDefault();
       event.stopPropagation();
@@ -448,10 +420,7 @@
         return;
       }
 
-      if (isPointerOverTrashCan(event.clientX, event.clientY)) {
-        setSleeveDragForeground(cupElement, false);
-        removeSelectedObject();
-      } else if (isSleeveNearCup(cupElement)) {
+      if (isSleeveNearCup(cupElement)) {
         const wasDetachedBeforeSnap = cupState.sleeveDetached === true;
         cupState.sleeveDetached = false;
         cupState.sleeveOffsetX = defaultCupState?.sleeveOffsetX ?? 32;
@@ -462,7 +431,6 @@
       }
       setSleeveDragForeground(cupElement, false);
 
-      trashCanBtn.classList.remove("highlight");
       sleeveDragState.active = false;
       sleeveDragState.pointerId = null;
       sleeveDragState.wasDetachedAtStart = false;

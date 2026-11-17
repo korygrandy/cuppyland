@@ -41,7 +41,6 @@ const hairstyleLayer = document.getElementById("hairstyleLayer");
 const sleeveLayer = document.getElementById("sleeveLayer");
 const faceLayer = document.getElementById("faceLayer");
 const dragGhost = document.getElementById("dragGhost");
-const trashCanBtn = document.getElementById("trashCanBtn");
 const dropZoneLid = document.getElementById("dropZoneLid");
 const dropZoneCup = document.getElementById("dropZoneCup");
 const dropZoneSleeve = document.getElementById("dropZoneSleeve");
@@ -138,7 +137,6 @@ const worldLayerController = window.CuppyLandWorldLayerController.createControll
 const interactionHelpers = window.CuppyLandInteraction.createHelpers({
   documentRef: document,
   worldViewport,
-  trashCanBtn,
   gameplayConfig,
   dropZones: [dropZoneLid, dropZoneCup, dropZoneSleeve],
   onHoveredCup: (cupId) => {
@@ -176,7 +174,6 @@ const cupPointerController = window.CuppyLandCupPointerController.createControll
   state,
   cupCharacter,
   worldCanvas,
-  trashCanBtn,
   cupDragState,
   lidDragState,
   hairstyleDragState,
@@ -703,7 +700,6 @@ const bootstrapController = window.CuppyLandBootstrapController.createController
     musicMuteBtn,
     sfxMuteBtn,
     worldCanvas,
-    trashCanBtn,
   },
   handlers: {
     onCupPointerDown: cupPointerController.onCupPointerDown,
