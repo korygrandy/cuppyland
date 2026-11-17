@@ -108,8 +108,11 @@ const trashState = {
 const cupStateStore = window.CuppyLandCupState.createStore({
   gameConfig: window.CuppyLandGame,
   state,
+  worldCanvas,
+  worldViewport,
 });
 const worldCoordinateController = window.CuppyLandWorldCoordinateController.createController({
+  state,
   worldCanvas,
   worldViewport,
 });
@@ -476,6 +479,7 @@ const screenWorldController = window.CuppyLandScreenWorldController.createContro
   state,
   screenEls,
   worldBackground,
+  worldCanvas,
   worldViewport,
   closeModal,
   rotatePrompt,

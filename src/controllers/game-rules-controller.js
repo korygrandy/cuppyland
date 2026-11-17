@@ -38,14 +38,31 @@
       const worldFriends = getWorldFriendList(state.activeWorld);
       const fallbackIndex = worldFriends.length;
       const attachedCupId = options.attachedCupId || null;
-      const attachedOffsetX = Number.isFinite(options.attachedOffsetX) ? options.attachedOffsetX : 70;
-      const attachedOffsetY = Number.isFinite(options.attachedOffsetY) ? options.attachedOffsetY : 64;
+      const attachedOffsetX = Number.isFinite(options.attachedOffsetX) ? options.attachedOffsetX : 52;
+      const attachedOffsetY = Number.isFinite(options.attachedOffsetY) ? options.attachedOffsetY : 48;
       const attachedCup = attachedCupId ? getWorldCupList(state.activeWorld).find((cup) => cup.id === attachedCupId) : null;
-      const fallbackWorldX = Number.isFinite(dropPoint?.worldX) ? dropPoint.worldX : 900 + (fallbackIndex % 3) * 120;
-      const fallbackWorldY = Number.isFinite(dropPoint?.worldY) ? dropPoint.worldY : 360 + Math.floor(fallbackIndex / 3) * 110;
-      const worldX = attachedCup ? attachedCup.state.worldX + attachedOffsetX : fallbackWorldX;
-      const worldY = attachedCup ? attachedCup.state.worldY + attachedOffsetY : fallbackWorldY;
+      const defaultPanelCenterX = state.activeWorld === "playground" ? 5300 : 900;
+      const defaultPanelCenterY = state.activeWorld === "playground" ? 420 : 360;
+      const fallbackWorldX = Number.isFinite(dropPoint?.worldX)
+        ? dropPoint.worldX
+        : state.activeWorld === "playground"
+          ? defaultPanelCenterX + ((fallbackIndex % 3) - 1) * 45
+          : defaultPanelCenterX + (fallbackIndex % 3) * 70 - 70;
+      const fallbackWorldY = Number.isFinite(dropPoint?.worldY)
+        ? dropPoint.worldY
+        : defaultPanelCenterY + Math.floor(fallbackIndex / 3) * 80;
+      const worldX = attachedCup
+        ? attachedCup.state.worldX + attachedOffsetX
+        : state.activeWorld === "playground" && !Number.isFinite(dropPoint?.worldX)
+          ? defaultPanelCenterX + ((fallbackIndex % 3) - 1) * 45
+          : fallbackWorldX;
+      const worldY = attachedCup
+        ? attachedCup.state.worldY + attachedOffsetY
+        : state.activeWorld === "playground" && !Number.isFinite(dropPoint?.worldY)
+          ? defaultPanelCenterY
+          : fallbackWorldY;
 
+      const isBarbie = friendType === "barbie-blonde" || friendType === "barbie-blonde-baby";
       worldFriends.push({
         id: `friend-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
         type: friendType,
@@ -55,6 +72,7 @@
         attachedCupId,
         attachedOffsetX,
         attachedOffsetY,
+        activated: isBarbie && Boolean(attachedCupId),
         sequenceCompleted: false,
       });
       renderWorldCups();
@@ -70,6 +88,12 @@
       if (friendType === "furball-guy") {
         window.CuppyLandAudio?.playSfxClip?.("furballGuy");
       }
+      if (friendType === "barbie-blonde") {
+        window.CuppyLandAudio?.playSfxClip?.("barbieBlonde");
+      }
+      if (friendType === "barbie-blonde-baby") {
+        window.CuppyLandAudio?.playSfxClip?.("barbieBlondeBaby");
+      }
       return true;
     }
 
@@ -79,6 +103,11 @@
       }
 
       if (itemType === "friend") {
+        const friendIsBarbie = value === "barbie-blonde" || value === "barbie-blonde-baby";
+        const friendCupTargetId = friendIsBarbie && targetCupId ? targetCupId : null;
+        if (friendCupTargetId) {
+          return addFriendToWorld(value, dropPoint, { attachedCupId: friendCupTargetId }) ? { valid: true } : { valid: false, reason: "no-world" };
+        }
         return addFriendToWorld(value, dropPoint) ? { valid: true } : { valid: false, reason: "no-world" };
       }
 

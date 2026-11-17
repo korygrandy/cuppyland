@@ -250,22 +250,78 @@ body {
   position: relative;
   width: 2200px;
   height: 100%;
+  transition: width 180ms ease;
+}
+
+.world-canvas.playground {
+  width: 6600px;
+}
+
+.world-canvas.olivia-room {
+  width: 2200px;
 }
 
 .world-bg {
   position: absolute;
   inset: 0;
-  background-size: auto 100%;
-  background-repeat: repeat-x;
-  background-position: left top;
+  overflow: hidden;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.world-bg-panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2200px;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  display: none;
+}
+
+.world-bg-panel-1 {
+  left: 0;
+}
+
+.world-bg-panel-2 {
+  left: 2199px;
+}
+
+.world-bg-panel-3 {
+  left: 4398px;
 }
 
 .world-bg.playground {
-  background-image: url("./assets/playground-bg.jpg");
+  background-image: none;
+}
+
+.world-bg.playground .world-bg-panel {
+  display: block;
+}
+
+.world-bg.playground .world-bg-panel-1 {
+  background-image: url("./assets/playground1-bg.png");
+}
+
+.world-bg.playground .world-bg-panel-2 {
+  background-image: url("./assets/playground2-bg.png");
+  transform: translateY(6px);
+}
+
+.world-bg.playground .world-bg-panel-3 {
+  background-image: url("./assets/playground3-bg.png");
+  transform: translateY(8px);
 }
 
 .world-bg.olivia-room {
   background-image: url("./assets/bg-olivia-room.jpg");
+  background-size: cover;
+}
+
+.world-bg:not(.playground) .world-bg-panel {
+  display: none;
 }
 
 .world-headline-overlay {
@@ -488,6 +544,12 @@ body {
   z-index: 90;
   cursor: grab;
   touch-action: none;
+}
+
+.friend-character[data-friend-type="barbie-blonde"],
+.friend-character[data-friend-type="barbie-blonde-activated"] {
+  width: 150px;
+  height: 150px;
 }
 
 .friend-character-art {

@@ -34,7 +34,15 @@
       inventoryOpen: false,
       worlds: {
         playground: {
-          cups: [{ id: "cup-playground-1", state: JSON.parse(JSON.stringify(defaultCupState)) }],
+          cups: [{
+            id: "cup-playground-1",
+            state: (() => {
+              const state = JSON.parse(JSON.stringify(defaultCupState));
+              state.worldX = 3300;
+              state.worldY = 420;
+              return state;
+            })(),
+          }],
           friends: [],
         },
         "olivia-room": {
@@ -74,6 +82,8 @@
       "spongebob-stuffy",
       "pizza-man-craft",
       "chocolate-milk",
+      "barbie-blonde",
+      "barbie-blonde-baby",
     ],
     expressionAssetMap: {
       happy: "./assets/facial-expression-happy.png",
@@ -138,6 +148,10 @@
       "spongebob-stuffy": "./assets/spongebob-stuffy.png",
       "pizza-man-craft": "./assets/pizza-man-craft.png",
       "chocolate-milk": "./assets/chocolate-milk.png",
+      "barbie-blonde": "./assets/barbie-blonde.png",
+      "barbie-blonde-activated": "./assets/barbie-blonde-activated.png",
+      "barbie-blonde-baby": "./assets/barbie-blonde-baby.png",
+      "barbie-blonde-baby-activated": "./assets/barbie-blonde-baby-activated.png",
     },
     chocolateMilkSequence: {
       durationMs: 5000,
@@ -210,6 +224,8 @@
         spongebob: "./sfx/spongebob-snap.ogg",
         hairyGuy: "./sfx/hairy-guy-drawing-snap.ogg",
         furballGuy: "./sfx/name-is-scary-varity.ogg",
+        barbieBlonde: "./sfx/barbie-blonde.ogg",
+        barbieBlondeBaby: "./sfx/barbie-blonde-baby.ogg",
         turkeyGobble: "./sfx/turkey-gobble-doubleclick.ogg",
         cupRemoved: "./sfx/goodbye.ogg",
         defaultObjectRemoved: "./sfx/default-object-removed.ogg",

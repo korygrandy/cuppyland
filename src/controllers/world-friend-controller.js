@@ -68,6 +68,19 @@
       return Promise.all(uniqueTargets.map((asset) => preloadImageAsset(asset)));
     }
 
+    function isBarbieActivated(friendState) {
+      if (!friendState) {
+        return false;
+      }
+
+      return Boolean(
+        friendState.activated
+        || friendState.attachedCupId
+        || friendState.sequenceFrame === 2
+        || friendState.sequenceFrame === "activated"
+      );
+    }
+
     function resolveFriendAsset(friendState) {
       if (!friendState) {
         return "";
@@ -102,6 +115,18 @@
         return getFriendAssetMap()?.["lavalamp-sequence-1"] || getFriendAssetMap()?.[friendState.type] || "";
       }
 
+      if (friendState.type === "barbie-blonde") {
+        const activatedAsset = getFriendAssetMap()?.["barbie-blonde-activated"] || getFriendAssetMap()?.[friendState.type] || "";
+        const defaultAsset = getFriendAssetMap()?.[friendState.type] || "";
+        return isBarbieActivated(friendState) ? activatedAsset : defaultAsset;
+      }
+
+      if (friendState.type === "barbie-blonde-baby") {
+        const activatedAsset = getFriendAssetMap()?.["barbie-blonde-baby-activated"] || getFriendAssetMap()?.[friendState.type] || "";
+        const defaultAsset = getFriendAssetMap()?.[friendState.type] || "";
+        return isBarbieActivated(friendState) ? activatedAsset : defaultAsset;
+      }
+
       return getFriendAssetMap()?.[friendState.type] || "";
     }
 
@@ -129,6 +154,9 @@
 
     function syncAttachedFriendPosition(friendState, friendElement = null) {
       if (!friendState?.attachedCupId) {
+        if (friendState && (friendState.type === "barbie-blonde" || friendState.type === "barbie-blonde-baby")) {
+          friendState.activated = false;
+        }
         return;
       }
 
@@ -140,6 +168,7 @@
 
       const offsetX = Number.isFinite(friendState.attachedOffsetX) ? friendState.attachedOffsetX : 70;
       const offsetY = Number.isFinite(friendState.attachedOffsetY) ? friendState.attachedOffsetY : 64;
+      friendState.activated = Boolean(friendState.attachedCupId);
       friendState.worldX = attachedCup.state.worldX + offsetX;
       friendState.worldY = attachedCup.state.worldY + offsetY;
       if (friendElement) {
@@ -258,6 +287,7 @@
       const friendElement = document.createElement("div");
       friendElement.className = "friend-character";
       friendElement.dataset.friendId = friendState.id;
+      friendElement.dataset.friendType = friendState.type;
       friendElement.style.left = `${friendState.worldX || 0}px`;
       friendElement.style.top = `${friendState.worldY || 0}px`;
       friendElement.style.zIndex = String(Number.isFinite(friendState.zIndex) ? friendState.zIndex : 90);
