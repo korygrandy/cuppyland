@@ -177,7 +177,7 @@ body {
 
 .world-card[data-world="olivia-room"] {
   background-image: linear-gradient(180deg, rgba(79, 12, 55, 0.02), rgba(79, 12, 55, 0.24)),
-    url("./assets/bg-olivia-room.jpg");
+    url("./assets/olivias-room-bg.jpg");
 }
 
 .world-card-headline {
@@ -335,7 +335,7 @@ body {
 }
 
 .world-bg.olivia-room {
-  background-image: url("./assets/bg-olivia-room.jpg");
+  background-image: url("./assets/olivias-room-bg.jpg");
   background-size: cover;
 }
 
