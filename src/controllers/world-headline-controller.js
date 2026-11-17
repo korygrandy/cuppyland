@@ -3,6 +3,7 @@
     const {
       overlay,
       config = {},
+      cardHeadlineSelector = ".world-card-headline",
       setTimer = window.setTimeout.bind(window),
       clearTimer = window.clearTimeout.bind(window),
     } = options;
@@ -21,6 +22,25 @@
       }
     }
 
+    function getHeadlineAsset(worldId) {
+      return config?.assets?.[worldId] || "";
+    }
+
+    function syncCardHeadlines() {
+      const headlines = Array.from(document.querySelectorAll(cardHeadlineSelector));
+      headlines.forEach((headline) => {
+        const worldCard = headline.closest(".world-card");
+        if (!worldCard) {
+          headline.style.backgroundImage = "";
+          return;
+        }
+
+        const worldId = worldCard.dataset.world;
+        const asset = getHeadlineAsset(worldId);
+        headline.style.backgroundImage = asset ? `url("${asset}")` : "";
+      });
+    }
+
     function hide() {
       if (!overlay) {
         return;
@@ -36,7 +56,7 @@
       }
 
       hide();
-      const headlineAsset = config?.assets?.[worldId] || "";
+      const headlineAsset = getHeadlineAsset(worldId);
       if (!headlineAsset) {
         return;
       }
@@ -56,6 +76,8 @@
     }
 
     return {
+      getHeadlineAsset,
+      syncCardHeadlines,
       show,
       hide,
       clearTimers,

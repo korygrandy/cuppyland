@@ -328,28 +328,6 @@
       const friendState = resolveFriendStateForElement(friendElement);
       setFriendDragVisual(friendElement, friendState, false);
 
-      const hoveredCup = getCupElementAtPoint(event.clientX, event.clientY);
-      const hoveredCupId = hoveredCup?.dataset?.cupId || null;
-      const isBarbieFriend = friendState?.type === "barbie-blonde" || friendState?.type === "barbie-blonde-baby";
-
-      if (isBarbieFriend) {
-        if (hoveredCupId) {
-          friendState.attachedCupId = hoveredCupId;
-          friendState.activated = true;
-          friendState.attachedOffsetX = Number.isFinite(friendState.attachedOffsetX) ? friendState.attachedOffsetX : 52;
-          friendState.attachedOffsetY = Number.isFinite(friendState.attachedOffsetY) ? friendState.attachedOffsetY : 48;
-          if (friendState.type === "barbie-blonde") {
-            window.CuppyLandAudio?.playSfxClip?.("barbieBlonde");
-          }
-          if (friendState.type === "barbie-blonde-baby") {
-            window.CuppyLandAudio?.playSfxClip?.("barbieBlondeBaby");
-          }
-        } else {
-          friendState.attachedCupId = null;
-          friendState.activated = false;
-        }
-      }
-
       if (friendElement && friendState?.type === "chocolate-milk") {
         const previousPointerEvents = friendElement.style.pointerEvents || "";
         friendElement.style.pointerEvents = "none";

@@ -185,6 +185,7 @@
       durationMs: 3000,
       fadeOutMs: 700,
       assets: {
+        playground: "./assets/playground-headline.png",
         "olivia-room": "./assets/olivia-room-headline.png",
       },
     },
