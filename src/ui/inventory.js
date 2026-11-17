@@ -168,11 +168,15 @@
     const colorTargetToggle = document.getElementById("colorTargetToggle");
     const expressionItems = document.getElementById("expressionItems");
     const hairstyleItems = document.getElementById("hairstyleItems");
+    const accessoriesItems = document.getElementById("accessoriesItems");
     const friendsItems = document.getElementById("friendsItems");
+
+    const accessoryTypes = new Set(["lavalamp", "chocolate-milk"]);
 
     colorItems.innerHTML = "";
     expressionItems.innerHTML = "";
     hairstyleItems.innerHTML = "";
+    accessoriesItems.innerHTML = "";
     friendsItems.innerHTML = "";
 
     colorTargetToggle.querySelectorAll(".color-target-btn").forEach((button) => {
@@ -200,9 +204,17 @@
       hairstyleItems.appendChild(createHairstyleItem(hairstyleName));
     });
 
-    friendTypes.forEach((friendName) => {
-      friendsItems.appendChild(createFriendItem(friendName));
-    });
+    friendTypes
+      .filter((friendName) => accessoryTypes.has(friendName))
+      .forEach((friendName) => {
+        accessoriesItems.appendChild(createFriendItem(friendName));
+      });
+
+    friendTypes
+      .filter((friendName) => !accessoryTypes.has(friendName))
+      .forEach((friendName) => {
+        friendsItems.appendChild(createFriendItem(friendName));
+      });
 
     const addCupGroup = document.createElement("div");
     addCupGroup.className = "inventory-group";
