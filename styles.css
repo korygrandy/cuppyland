@@ -393,34 +393,6 @@ body {
   z-index: 1100 !important;
 }
 
-.trash-can {
-  position: absolute;
-  right: 26px;
-  bottom: 22px;
-  z-index: 40;
-  width: 62px;
-  height: 62px;
-  border-radius: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  background: rgba(23, 31, 52, 0.9);
-  color: white;
-  font-size: 2rem;
-  line-height: 1;
-  display: grid;
-  place-items: center;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.24);
-}
-
-.trash-can.hidden {
-  display: none;
-}
-
-.trash-can.highlight {
-  border-color: rgba(255, 127, 127, 0.95);
-  background: rgba(145, 32, 48, 0.9);
-  transform: scale(1.05);
-}
-
 .cup-lid {
   position: absolute;
   z-index: 3;

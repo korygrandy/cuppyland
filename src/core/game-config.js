@@ -198,7 +198,8 @@
         { id: "merry-go-round-right", label: "Merry-Go-Round Right", x: 5249, y: 565, width: 220, height: 185 },
       ],
       "olivia-room": [
-        { id: "window-sill", label: "Window Sill", x: 520, y: 240, width: 360, height: 120 },
+        { id: "window-sill", label: "Window Sill", x: 1030, y: 60, width: 170, height: 300 },
+        { id: "bed", label: "Bed", x: 1240, y: 290, width: 160, height: 120 }
       ],
     },
     tintAssetConfig: {

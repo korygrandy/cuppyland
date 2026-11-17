@@ -99,20 +99,6 @@
       ui.musicMuteBtn.addEventListener("click", audio.toggleMusicMute);
       ui.sfxMuteBtn.addEventListener("click", audio.toggleSfxMute);
 
-      ui.worldCanvas.addEventListener("pointerdown", (event) => {
-        if (
-          !actions.safeClosest(event.target, "#trashCanBtn") &&
-          !actions.safeClosest(event.target, ".cup-lid") &&
-          !actions.safeClosest(event.target, ".cup-sleeve") &&
-          !actions.safeClosest(event.target, ".cup-character")
-        ) {
-          actions.hideTrashCan();
-        }
-      });
-
-      ui.trashCanBtn.addEventListener("click", () => {
-        actions.removeSelectedObject();
-      });
     }
 
     function init() {
