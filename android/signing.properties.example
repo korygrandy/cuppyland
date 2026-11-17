@@ -1,0 +1,6 @@
+# Copy this file to android/signing.properties and fill in the values for your local release keystore.
+# This file is intentionally not committed to source control.
+storeFile=./keystore/cuppyland-release.keystore
+storePassword=CHANGE_ME
+keyAlias=cuppyland
+keyPassword=CHANGE_ME

@@ -1,5 +1,11 @@
 apply plugin: 'com.android.application'
 
+def signingPropertiesFile = file("${rootDir}/signing.properties")
+def signingProperties = new Properties()
+if (signingPropertiesFile.exists()) {
+    signingPropertiesFile.withInputStream { signingProperties.load(it) }
+}
+
 android {
     namespace = "com.oliviaworld.game"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -16,10 +22,27 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            if (signingPropertiesFile.exists()) {
+                def configuredStoreFile = signingProperties.getProperty('storeFile')
+                if (configuredStoreFile && !configuredStoreFile.startsWith('/') && !configuredStoreFile.matches(/^([A-Za-z]:)?[\\/]/)) {
+                    configuredStoreFile = "${rootDir}/${configuredStoreFile.replace('\\', '/')}"
+                }
+                storeFile file(configuredStoreFile)
+                storePassword signingProperties.getProperty('storePassword')
+                keyAlias signingProperties.getProperty('keyAlias')
+                keyPassword signingProperties.getProperty('keyPassword')
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (signingPropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }
