@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Barbie blonde doll">
+  <defs>
+    <linearGradient id="dressGrad" x1="0" x2="1">
+      <stop offset="0%" stop-color="#ff9ec8"/>
+      <stop offset="100%" stop-color="#ff5ea8"/>
+    </linearGradient>
+    <linearGradient id="hairGrad" x1="0" x2="1">
+      <stop offset="0%" stop-color="#ffe7a6"/>
+      <stop offset="100%" stop-color="#f2c86d"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(12 8)">
+    <circle cx="108" cy="58" r="48" fill="#f6d4b7"/>
+    <path d="M62 48c8-38 76-48 96 2 6 17-18 34-46 34S62 70 62 48Z" fill="url(#hairGrad)"/>
+    <path d="M82 54c6-10 18-16 28-16 16 0 30 8 36 20-10-3-19-4-32-4-14 0-24 1-32 0Z" fill="#f4c56a" opacity="0.8"/>
+    <circle cx="90" cy="58" r="4" fill="#2c1d1f"/>
+    <circle cx="122" cy="58" r="4" fill="#2c1d1f"/>
+    <path d="M95 76c9 10 19 10 28 0" fill="none" stroke="#d67f9d" stroke-width="4" stroke-linecap="round"/>
+    <path d="M76 104h64c14 0 26 11 26 24v32H50v-32c0-13 12-24 26-24Z" fill="url(#dressGrad)"/>
+    <path d="M83 107l-20 34h25l14-33z" fill="#ffd8e8" opacity="0.8"/>
+    <path d="M133 107l20 34h-25l-14-33z" fill="#ffd8e8" opacity="0.8"/>
+    <path d="M48 151c18 14 30 16 40 16 12 0 21-2 34-16v16c-15 22-34 26-52 26-22 0-34-9-44-26z" fill="#ff79b3"/>
+    <path d="M108 141v72" stroke="#f7d9ac" stroke-width="8" stroke-linecap="round"/>
+    <path d="M82 182l-16 28" stroke="#f7d9ac" stroke-width="8" stroke-linecap="round"/>
+    <path d="M135 182l16 28" stroke="#f7d9ac" stroke-width="8" stroke-linecap="round"/>
+    <path d="M68 147l-18 20" stroke="#f7d9ac" stroke-width="8" stroke-linecap="round"/>
+    <path d="M146 147l18 20" stroke="#f7d9ac" stroke-width="8" stroke-linecap="round"/>
+  </g>
+</svg>

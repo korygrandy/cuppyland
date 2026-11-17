@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Barbie blonde baby doll">
+  <defs>
+    <linearGradient id="babyDress" x1="0" x2="1">
+      <stop offset="0%" stop-color="#f9b5d0"/>
+      <stop offset="100%" stop-color="#ee7bb4"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(10 8)">
+    <circle cx="110" cy="68" r="42" fill="#f8d8bb"/>
+    <path d="M64 62c8-34 60-45 90-2 16 23-8 38-40 42-28 4-58-12-50-40Z" fill="#f6d980"/>
+    <circle cx="92" cy="70" r="4" fill="#2d1f20"/>
+    <circle cx="126" cy="70" r="4" fill="#2d1f20"/>
+    <path d="M96 88c8 8 16 8 22 0" fill="none" stroke="#d08ca1" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="110" cy="96" r="72" fill="url(#babyDress)" opacity="0.7"/>
+    <path d="M82 124c16-8 28-10 54-8 16 2 29 12 40 34v28H48v-26c0-6 5-22 34-28Z" fill="url(#babyDress)"/>
+    <path d="M98 128c10 12 20 12 30 0" fill="none" stroke="#f9e3f0" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="64" cy="142" r="12" fill="#ffcadb"/>
+    <circle cx="156" cy="142" r="12" fill="#ffcadb"/>
+    <path d="M92 170l-22 28" stroke="#f9d2b1" stroke-width="8" stroke-linecap="round"/>
+    <path d="M128 170l22 28" stroke="#f9d2b1" stroke-width="8" stroke-linecap="round"/>
+    <path d="M110 146v58" stroke="#f9d2b1" stroke-width="8" stroke-linecap="round"/>
+    <path d="M72 145l-22 20" stroke="#f9d2b1" stroke-width="8" stroke-linecap="round"/>
+    <path d="M150 145l22 20" stroke="#f9d2b1" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="45" cy="115" r="8" fill="#ffc3dc"/>
+    <circle cx="175" cy="115" r="8" fill="#ffc3dc"/>
+  </g>
+</svg>

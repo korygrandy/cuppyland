@@ -4,6 +4,7 @@
       state,
       screenEls,
       worldBackground,
+      worldCanvas,
       worldViewport,
       closeModal,
       rotatePrompt,
@@ -27,8 +28,14 @@
 
     function updateWorldBackground() {
       worldBackground.classList.remove("playground", "olivia-room");
+      worldCanvas.classList.remove("playground", "olivia-room");
       if (state.activeWorld) {
         worldBackground.classList.add(worldClasses[state.activeWorld]);
+        worldCanvas.classList.add(worldClasses[state.activeWorld]);
+        const worldWidth = state.activeWorld === "playground" ? 6600 : 2200;
+        worldCanvas.style.width = `${worldWidth}px`;
+      } else {
+        worldCanvas.style.width = "2200px";
       }
     }
 
@@ -42,7 +49,8 @@
       showScreen("world");
       toggleInventory(false);
       closeModal.classList.add("hidden");
-      worldViewport.scrollLeft = Math.floor((2200 - worldViewport.clientWidth) / 2);
+      const totalWidth = worldCanvas.offsetWidth || 2200;
+      worldViewport.scrollLeft = Math.floor((totalWidth - worldViewport.clientWidth) / 2);
     }
 
     function closeWorld() {

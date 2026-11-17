@@ -31,8 +31,28 @@
     return JSON.parse(JSON.stringify(value));
   }
 
-  function createStore({ gameConfig, state }) {
+  function createStore({ gameConfig, state, worldCanvas = null, worldViewport = null }) {
     let cupLayerOrderCounter = 1;
+
+    function getViewportSpawnPoint(instanceIndex = 0) {
+      const fallbackX = state?.activeWorld === "playground" ? 3300 : 920;
+      const fallbackY = state?.activeWorld === "playground" ? 420 : 430;
+      if (!worldCanvas || !worldViewport) {
+        return { worldX: fallbackX, worldY: fallbackY };
+      }
+
+      const visibleCenterX = (worldViewport.scrollLeft ?? 0) + (worldViewport.clientWidth ?? 1280) * 0.52;
+      const visibleCenterY = (worldViewport.clientHeight ?? 800) * 0.58;
+      const offsetX = (instanceIndex % 3) * 120 - 120;
+      const offsetY = (instanceIndex % 2 === 0 ? 0 : 80) + Math.floor(instanceIndex / 2) * 14;
+      const maxX = Math.max(220, worldCanvas.offsetWidth - 260);
+      const maxY = Math.max(200, worldCanvas.offsetHeight - 180);
+
+      return {
+        worldX: Math.min(Math.max(220, visibleCenterX + offsetX), maxX),
+        worldY: Math.min(Math.max(200, visibleCenterY + offsetY), maxY),
+      };
+    }
 
     function createDefaultCupState() {
       const template = gameConfig?.defaultCupState || createFallbackDefaultCupState();
@@ -158,6 +178,11 @@
         ];
       }
 
+      if (worldId === "playground" && state.worlds[worldId].cups[0]) {
+        state.worlds[worldId].cups[0].state.worldX = 3300;
+        state.worlds[worldId].cups[0].state.worldY = 420;
+      }
+
       return state.worlds[worldId];
     }
 
@@ -172,8 +197,9 @@
       const nextId = `cup-${state.activeWorld}-${worldCups.length + 1}`;
       const cupState = createDefaultCupState();
       const newCup = { id: nextId, state: cupState };
-      newCup.state.worldX = 900 + (worldCups.length * 90);
-      newCup.state.worldY = 430 + (worldCups.length % 2) * 30;
+      const viewportSpawn = getViewportSpawnPoint(worldCups.length);
+      newCup.state.worldX = viewportSpawn.worldX;
+      newCup.state.worldY = viewportSpawn.worldY;
       bringCupToFront(newCup.state);
       worldCups.push(newCup);
       state.activeCupId = nextId;
