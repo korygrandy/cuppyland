@@ -61,8 +61,64 @@
       window.setTimeout(() => sparkle.remove(), 1300);
     }
 
+    function triggerFriendSparkle(friendState, friendElement) {
+      if (!friendState || !friendElement) {
+        return;
+      }
+
+      playSfxClip("shimmer");
+
+      const flowerArt = friendElement.querySelector(".friend-character-art");
+      if (friendState.type === "flower-bead-craft" && flowerArt) {
+        const flippedScale = friendState.flipped ? -1 : 1;
+        flowerArt.style.transition = "transform 1300ms cubic-bezier(0.18, 0.78, 0.24, 1)";
+        flowerArt.style.transform = `scaleX(${flippedScale}) scaleY(0.006)`;
+        flowerArt.style.transformOrigin = "center bottom";
+        flowerArt.offsetHeight;
+        window.setTimeout(() => {
+          flowerArt.style.transform = `scaleX(${flippedScale}) scaleY(1)`;
+        }, 40);
+        window.setTimeout(() => {
+          flowerArt.style.transition = "";
+        }, 1380);
+      }
+
+      const elementCenterX = friendState.worldX + (friendElement.offsetWidth / 2);
+      const elementCenterY = friendState.worldY + (friendElement.offsetHeight / 2);
+
+      const sparkle = document.createElement("div");
+      sparkle.className = "cup-sparkle-burst flower-sparkle-burst";
+      sparkle.style.left = `${elementCenterX}px`;
+      sparkle.style.top = `${elementCenterY}px`;
+
+      const particleCount = 14 + Math.floor(Math.random() * 7);
+      for (let index = 0; index < particleCount; index += 1) {
+        const glint = document.createElement("span");
+        glint.className = index % 3 === 0 ? "flower-twinkle flower-twinkle-star" : "flower-twinkle";
+
+        const angle = (Math.PI * 2 * index) / particleCount + (Math.random() * 0.35);
+        const distance = 24 + Math.floor(Math.random() * 46);
+        const x = Math.cos(angle) * distance;
+        const y = Math.sin(angle) * distance;
+        glint.style.setProperty("--twinkle-x", `${x}px`);
+        glint.style.setProperty("--twinkle-y", `${y}px`);
+        glint.style.setProperty("--twinkle-mid-x", `${x * 0.25}px`);
+        glint.style.setProperty("--twinkle-mid-y", `${y * 0.25}px`);
+        glint.style.setProperty("--twinkle-far-x", `${x * 1.12}px`);
+        glint.style.setProperty("--twinkle-far-y", `${y * 1.12}px`);
+        glint.style.setProperty("--twinkle-delay", `${Math.floor(Math.random() * 520)}ms`);
+        glint.style.setProperty("--twinkle-duration", `${850 + Math.floor(Math.random() * 700)}ms`);
+        glint.style.setProperty("--twinkle-scale", `${0.7 + (Math.random() * 0.8)}`);
+        sparkle.appendChild(glint);
+      }
+
+      worldCanvas.appendChild(sparkle);
+      window.setTimeout(() => sparkle.remove(), 1300);
+    }
+
     return {
       triggerCupSparkle,
+      triggerFriendSparkle,
     };
   }
 

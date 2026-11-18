@@ -300,6 +300,7 @@ friendWorldController = window.CuppyLandWorldFriendController.createController({
   stopChocolateMilkSequence: (friendId) => chocolateMilkSequenceController.stop(friendId),
   onRenderWorldCups: () => renderWorldCups(),
   onRefreshChocolateMilkSequences: () => refreshChocolateMilkSequences(),
+  onFlowerPlaced: (friendState, friendElement) => sparkleEffectController.triggerFriendSparkle(friendState, friendElement),
 });
 
 function syncAudioForCurrentScreen() {
