@@ -237,10 +237,10 @@
         "olivia-room": "./sfx/theme-olivias-room.ogg",
       },
       sfxClips: {
-        welcomeToCuppyland: "./sfx/welcome-to-cuppyland.mp3",
-        myNameIsOlivia: "./sfx/my-name-is-olivia.mp3",
+        welcomeToCuppyland: "./sfx/welcome-to-cuppyland.ogg",
+        myNameIsOlivia: "./sfx/my-name-is-olivia.ogg",
         playgroundIntroFx: "./sfx/playground-intro-fx.ogg",
-        hi: "./sfx/hi.mp3",
+        hi: "./sfx/hi.ogg",
         rocketship: "./sfx/rocketship-snap.ogg",
         spongebob: "./sfx/spongebob-snap.ogg",
         hairyGuy: "./sfx/hairy-guy-drawing-snap.ogg",
