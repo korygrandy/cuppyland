@@ -104,10 +104,22 @@
       return null;
     }
 
-    function setZoneHighlight(pointX, pointY) {
+    function setZoneHighlight(pointX, pointY, itemType = null) {
       dropZones.forEach((zone) => zone.classList.remove("highlight"));
       const zoneName = zoneForPoint(pointX, pointY);
       if (!zoneName) {
+        return;
+      }
+
+      if (itemType === "hairstyle") {
+        if (zoneName !== "lid") {
+          return;
+        }
+      } else if (itemType === "expression") {
+        if (zoneName !== "sleeve") {
+          return;
+        }
+      } else if (itemType && zoneName !== itemType) {
         return;
       }
 

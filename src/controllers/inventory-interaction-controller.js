@@ -289,7 +289,7 @@
       dragState.startY = event.clientY;
       trySetPointerCapture(target, event.pointerId);
       showDragGhost(event.clientX, event.clientY, target, dragState.type, dragState.value);
-      setZoneHighlight(event.clientX, event.clientY);
+      setZoneHighlight(event.clientX, event.clientY, dragState.type);
     }
 
     function onClick(event) {
@@ -320,7 +320,7 @@
         dragState.moved = true;
       }
       moveDragGhost(event.clientX, event.clientY);
-      setZoneHighlight(event.clientX, event.clientY);
+      setZoneHighlight(event.clientX, event.clientY, dragState.type);
       updateChocolateMilkFill(event.clientX, event.clientY);
     }
 
