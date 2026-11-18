@@ -569,7 +569,7 @@ body {
   transform-origin: center bottom;
 }
 
-.friend-character[data-friend-type="tricerotops-bead-craft"] .friend-character-art {
+.friend-character[data-friend-type="triceratops-bead-craft"] .friend-character-art {
   transition: transform 120ms linear;
   transform-origin: center bottom;
 }

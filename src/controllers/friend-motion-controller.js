@@ -128,7 +128,7 @@
 
     function stopTriceratopsAnimation(friendId) {
       const friendState = findFriendById(friendId);
-      if (!friendState || friendState.type !== "tricerotops-bead-craft") {
+      if (!friendState || friendState.type !== "triceratops-bead-craft") {
         return;
       }
 
@@ -146,7 +146,7 @@
 
     function startTriceratopsAnimation(friendId) {
       const friendState = findFriendById(friendId);
-      if (!friendState || friendState.type !== "tricerotops-bead-craft") {
+      if (!friendState || friendState.type !== "triceratops-bead-craft") {
         return;
       }
 
@@ -210,7 +210,7 @@
           activeFriend.triceratopsAnimationTimer = setTimeout(() => {
             const eatingFriend = findFriendById(friendId);
             const eatingElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"]`);
-            if (!eatingFriend || eatingFriend.type !== "tricerotops-bead-craft" || !eatingElement) {
+            if (!eatingFriend || eatingFriend.type !== "triceratops-bead-craft" || !eatingElement) {
               return;
             }
 
@@ -225,7 +225,7 @@
             eatingFriend.triceratopsAnimationTimer = setTimeout(() => {
               const standingFriend = findFriendById(friendId);
               const standingArt = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"] .friend-character-art`);
-              if (!standingFriend || standingFriend.type !== "tricerotops-bead-craft") {
+              if (!standingFriend || standingFriend.type !== "triceratops-bead-craft") {
                 return;
               }
               if (standingArt) {

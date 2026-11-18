@@ -411,7 +411,7 @@
           if (friendState.type === "rabbit-bead-craft") {
             motionController?.startRabbitAnimation?.(friendState.id);
           }
-          if (friendState.type === "tricerotops-bead-craft") {
+          if (friendState.type === "triceratops-bead-craft") {
             motionController?.startTriceratopsAnimation?.(friendState.id);
           }
         });
