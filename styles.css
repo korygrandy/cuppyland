@@ -559,6 +559,11 @@ body {
   height: 132px;
 }
 
+.friend-character[data-friend-type="flower-bead-craft"] {
+  width: 96px;
+  height: 176px;
+}
+
 .friend-character[data-friend-type="rabbit-bead-craft"] .friend-character-art {
   transition: transform 180ms ease-in-out;
   transform-origin: center bottom;
@@ -609,6 +614,64 @@ body {
   margin-top: -70px;
   pointer-events: none;
   z-index: 1350;
+}
+
+.flower-sparkle-burst::before,
+.flower-sparkle-burst .cup-sparkle-ray {
+  display: none;
+}
+
+.flower-twinkle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  margin-top: -2.5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 0 5px rgba(255, 255, 255, 0.95),
+    0 0 10px rgba(255, 221, 130, 0.75);
+  opacity: 0;
+  animation: flowerTwinkle var(--twinkle-duration, 1200ms) ease-in-out forwards;
+  animation-delay: var(--twinkle-delay, 0ms);
+  transform: scale(var(--twinkle-scale, 1));
+}
+
+.flower-twinkle-star {
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  margin-top: -5px;
+  border-radius: 1px;
+  background: linear-gradient(45deg, transparent 42%, rgba(255, 255, 255, 0.98) 43%, rgba(255, 255, 255, 0.98) 57%, transparent 58%),
+    linear-gradient(-45deg, transparent 42%, rgba(255, 248, 184, 0.95) 43%, rgba(255, 248, 184, 0.95) 57%, transparent 58%);
+  box-shadow:
+    0 0 7px rgba(255, 255, 255, 0.95),
+    0 0 14px rgba(255, 216, 112, 0.7);
+}
+
+@keyframes flowerTwinkle {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.2);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(var(--twinkle-mid-x, 0px), var(--twinkle-mid-y, 0px))
+      scale(var(--twinkle-scale, 1));
+  }
+  58% {
+    opacity: 0.9;
+    transform: translate(var(--twinkle-x, 0px), var(--twinkle-y, 0px)) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--twinkle-far-x, 0px), var(--twinkle-far-y, 0px))
+      scale(0.25);
+  }
 }
 
 .cup-sparkle-burst::before {

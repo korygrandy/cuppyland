@@ -73,6 +73,8 @@
         attachedOffsetY: 0,
         activated: false,
         sequenceCompleted: false,
+        flipped: friendType === "flower-bead-craft" ? Math.random() < 0.5 : false,
+        flowerCelebrationPending: friendType === "flower-bead-craft",
       });
       renderWorldCups();
       if (friendType === "rocketman-craft") {

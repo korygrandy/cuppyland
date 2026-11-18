@@ -14,6 +14,7 @@
       stopChocolateMilkSequence = () => {},
       onRenderWorldCups = () => {},
       onRefreshChocolateMilkSequences = () => {},
+      onFlowerPlaced = () => {},
     } = options;
 
     const imagePreloadCache = new Map();
@@ -616,11 +617,20 @@
       const art = document.createElement("span");
       art.className = "friend-character-art";
       art.style.backgroundImage = `url("${resolveFriendAsset(friendState)}")`;
+      if (friendState.type === "flower-bead-craft") {
+        art.style.transform = `scaleX(${friendState.flipped ? -1 : 1})`;
+        art.style.transformOrigin = "center bottom";
+      }
       friendElement.appendChild(art);
       friendElement.addEventListener("pointerdown", onFriendPointerDown);
       friendElement.addEventListener("pointermove", onFriendPointerMove);
       friendElement.addEventListener("pointerup", onFriendPointerUp);
       friendElement.addEventListener("pointercancel", onFriendPointerUp);
+
+      if (friendState.type === "flower-bead-craft" && friendState.flowerCelebrationPending) {
+        friendState.flowerCelebrationPending = false;
+        window.setTimeout(() => onFlowerPlaced(friendState, friendElement), 0);
+      }
       return friendElement;
     }
 
