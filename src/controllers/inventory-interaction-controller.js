@@ -113,6 +113,9 @@
         const friend = document.createElement("span");
         friend.className = "drag-ghost-object drag-ghost-friend";
         friend.style.backgroundImage = `url("${game.friendAssetMap?.[value] || ""}")`;
+        if (value === "uke") {
+          friend.className = "drag-ghost-object drag-ghost-friend drag-ghost-uke";
+        }
         if (value === "chocolate-milk") {
           friend.style.transform = "rotate(-45deg)";
         }

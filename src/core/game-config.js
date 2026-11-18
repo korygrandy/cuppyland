@@ -84,6 +84,8 @@
       "chocolate-milk",
       "barbie-blonde",
       "barbie-blonde-baby",
+      "uke",
+      "rabbit-bead-craft",
     ],
     expressionAssetMap: {
       happy: "./assets/facial-expression-happy.png",
@@ -152,6 +154,8 @@
       "barbie-blonde-activated": "./assets/barbie-blonde-activated.png",
       "barbie-blonde-baby": "./assets/barbie-blonde-baby.png",
       "barbie-blonde-baby-activated": "./assets/barbie-blonde-baby-activated.png",
+      "uke": "./assets/uke.png",
+      "rabbit-bead-craft": "./assets/rabbit-bead-craft.png",
     },
     chocolateMilkSequence: {
       durationMs: 5000,
