@@ -257,6 +257,11 @@ const worldHeadlineController = window.CuppyLandWorldHeadlineController.createCo
   config: worldHeadlineConfig,
 });
 worldHeadlineController.syncCardHeadlines();
+const friendMotionController = window.CuppyLandFriendMotionController.createController({
+  state,
+  worldCanvas,
+  findFriendById: (friendId) => findFriendById(friendId, state.activeWorld),
+});
 const friendPointerController = window.CuppyLandFriendPointerController.createController({
   state,
   worldCanvas,
@@ -274,10 +279,10 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   stopChocolateMilkSequence: (friendId) => chocolateMilkSequenceController.stop(friendId),
   bringFriendElementToFront,
   triggerTurkeyAnimation: (friendId) => friendWorldController?.triggerTurkeyAnimation?.(friendId),
-  startRabbitAnimation: (friendId) => friendWorldController?.startRabbitAnimation?.(friendId),
-  stopRabbitAnimation: (friendId) => friendWorldController?.stopRabbitAnimation?.(friendId),
-  startTriceratopsAnimation: (friendId) => friendWorldController?.startTriceratopsAnimation?.(friendId),
-  stopTriceratopsAnimation: (friendId) => friendWorldController?.stopTriceratopsAnimation?.(friendId),
+  startRabbitAnimation: (friendId) => friendMotionController.startRabbitAnimation(friendId),
+  stopRabbitAnimation: (friendId) => friendMotionController.stopRabbitAnimation(friendId),
+  startTriceratopsAnimation: (friendId) => friendMotionController.startTriceratopsAnimation(friendId),
+  stopTriceratopsAnimation: (friendId) => friendMotionController.stopTriceratopsAnimation(friendId),
   syncBarbieActivationState: (friendState) => friendWorldController?.syncBarbieActivationState?.(friendState),
   updateFriendElementAsset: (friendId) => friendWorldController?.updateFriendElementAsset?.(friendId),
   onChocolateMilkFillStart,
@@ -301,6 +306,7 @@ friendWorldController = window.CuppyLandWorldFriendController.createController({
   onRenderWorldCups: () => renderWorldCups(),
   onRefreshChocolateMilkSequences: () => refreshChocolateMilkSequences(),
   onFlowerPlaced: (friendState, friendElement) => sparkleEffectController.triggerFriendSparkle(friendState, friendElement),
+  motionController: friendMotionController,
 });
 
 function syncAudioForCurrentScreen() {
