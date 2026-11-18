@@ -2,7 +2,6 @@
   function createController(options) {
     const {
       state,
-      trashState,
       cupCharacter,
       lidLayer,
       sleeveLayer,
@@ -15,7 +14,6 @@
       getActiveCupInstance,
       setActiveCupInstance,
       renderWorldCups,
-      hideTrashCan,
       defaultCupState,
       getNextWorldZIndex,
     } = options;
@@ -226,60 +224,6 @@
       return true;
     }
 
-    function removeSelectedObject() {
-      if (!trashState.target) {
-        return;
-      }
-
-      const selectedCup = getActiveCupInstance();
-      let objectRemoved = false;
-
-      if (trashState.target === "cup") {
-        if (selectedCup) {
-          objectRemoved = removeCupInstance(selectedCup.id);
-        } else {
-          cupCharacter.classList.add("hidden-object");
-          objectRemoved = true;
-          window.CuppyLandAudio?.playSfxClip?.("cupRemoved");
-        }
-        return;
-      }
-
-      if (trashState.target === "lid") {
-        if (selectedCup) {
-          objectRemoved = selectedCup.state.lidVisible || selectedCup.state.hairstyleVisible;
-          selectedCup.state.lidVisible = false;
-          selectedCup.state.hairstyleVisible = false;
-        }
-        lidLayer.style.display = "none";
-        hairstyleLayer.style.display = "none";
-      }
-
-      if (trashState.target === "sleeve") {
-        if (selectedCup) {
-          objectRemoved = selectedCup.state.sleeveVisible || selectedCup.state.faceVisible;
-          selectedCup.state.sleeveVisible = false;
-          selectedCup.state.faceVisible = false;
-        }
-        sleeveLayer.style.display = "none";
-        faceLayer.style.display = "none";
-      }
-
-      if (trashState.target === "hairstyle") {
-        if (selectedCup) {
-          objectRemoved = selectedCup.state.hairstyleVisible;
-          selectedCup.state.hairstyleVisible = false;
-        }
-        hairstyleLayer.style.display = "none";
-      }
-
-      if (objectRemoved) {
-        window.CuppyLandAudio?.playSfxClip?.("defaultObjectRemoved");
-      }
-      hideTrashCan();
-      renderWorldCups();
-    }
-
     return {
       addCupToWorld,
       addFriendToWorld,
@@ -287,7 +231,6 @@
       applyInventorySelection,
       showInvalidFeedback,
       removeCupInstance,
-      removeSelectedObject,
     };
   }
 

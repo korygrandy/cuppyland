@@ -3,7 +3,6 @@
     const {
       documentRef,
       worldViewport,
-      trashCanBtn,
       gameplayConfig,
       dropZones = [],
       onHoveredCup = () => {},
@@ -122,38 +121,6 @@
       dropZones.forEach((zone) => zone.classList.remove("highlight"));
     }
 
-    function showTrashCan(target, trashState) {
-      if (!trashCanBtn) {
-        return;
-      }
-
-      trashState.active = true;
-      trashState.target = target;
-      trashCanBtn.classList.remove("hidden");
-      trashCanBtn.setAttribute("data-target", target);
-    }
-
-    function hideTrashCan(trashState) {
-      if (!trashCanBtn) {
-        return;
-      }
-
-      trashState.active = false;
-      trashState.target = null;
-      trashCanBtn.classList.add("hidden");
-      trashCanBtn.removeAttribute("data-target");
-      trashCanBtn.classList.remove("highlight");
-    }
-
-    function isPointerOverTrashCan(x, y) {
-      if (!trashCanBtn || trashCanBtn.classList.contains("hidden")) {
-        return false;
-      }
-
-      const rect = trashCanBtn.getBoundingClientRect();
-      return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
-    }
-
     function isPointerOutsideWorldCanvas(x, y, padding = gameplayConfig?.dragOutsidePadding ?? 12) {
       const bounds = worldViewport.getBoundingClientRect();
       return x < bounds.left - padding || x > bounds.right + padding || y < bounds.top - padding || y > bounds.bottom + padding;
@@ -166,9 +133,6 @@
       zoneForPoint,
       setZoneHighlight,
       clearZoneHighlights,
-      showTrashCan,
-      hideTrashCan,
-      isPointerOverTrashCan,
       isPointerOutsideWorldCanvas,
     };
   }
