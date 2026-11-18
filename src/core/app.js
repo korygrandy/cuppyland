@@ -52,58 +52,16 @@ const musicMuteBtn = document.getElementById("musicMuteBtn");
 const sfxMuteBtn = document.getElementById("sfxMuteBtn");
 const { defaultSleeveAsset } = window.CuppyLandGame;
 
-const dragState = {
-  active: false,
-  type: "",
-  value: "",
-  pointerId: null,
-};
-const lidDragState = {
-  active: false,
-  pointerId: null,
-  initialLeft: 17,
-  initialTop: 0,
-  anchorX: 0,
-  anchorY: 0,
-};
-const sleeveDragState = {
-  active: false,
-  pointerId: null,
-  initialLeft: 30,
-  initialTop: 164,
-  anchorX: 0,
-  anchorY: 0,
-};
-const hairstyleDragState = {
-  active: false,
-  pointerId: null,
-  initialLeft: 17,
-  initialTop: -22,
-  anchorX: 0,
-  anchorY: 0,
-  moved: false,
-};
-const cupDragState = {
-  active: false,
-  pointerId: null,
-  startClientX: 0,
-  startClientY: 0,
-  startWorldX: 0,
-  startWorldY: 0,
-};
-const friendDragState = {
-  active: false,
-  pointerId: null,
-  friendId: null,
-  pointerOffsetX: 0,
-  pointerOffsetY: 0,
-};
+const {
+  dragState,
+  lidDragState,
+  sleeveDragState,
+  hairstyleDragState,
+  cupDragState,
+  friendDragState,
+} = window.CuppyLandDragState.createDragStates();
 let friendWorldController = null;
 let worldCupController = null;
-const trashState = {
-  active: false,
-  target: null,
-};
 const cupStateStore = window.CuppyLandCupState.createStore({
   gameConfig: window.CuppyLandGame,
   state,
@@ -152,9 +110,6 @@ const {
   zoneForPoint,
   setZoneHighlight,
   clearZoneHighlights,
-  showTrashCan: showTrashCanBase,
-  hideTrashCan: hideTrashCanBase,
-  isPointerOverTrashCan,
   isPointerOutsideWorldCanvas,
 } = interactionHelpers;
 const cupDragHelpers = window.CuppyLandCupDrag.createHelpers({
@@ -181,13 +136,10 @@ const cupPointerController = window.CuppyLandCupPointerController.createControll
   safeClosest,
   trySetPointerCapture,
   isPointerOutsideWorldCanvas,
-  isPointerOverTrashCan,
   setActiveCupInstance,
   bringCupElementToFront,
   resolveCupStateForElement,
-  showTrashCan,
   removeCupInstance,
-  removeSelectedObject,
   renderWorldCups,
   syncCupWorldPosition,
   syncLidPosition,
@@ -638,7 +590,6 @@ function updateGameViewportScale() {
 
 const gameRulesController = window.CuppyLandGameRulesController.createController({
   state,
-  trashState,
   cupCharacter,
   lidLayer,
   sleeveLayer,
@@ -651,7 +602,6 @@ const gameRulesController = window.CuppyLandGameRulesController.createController
   getActiveCupInstance,
   setActiveCupInstance,
   renderWorldCups,
-  hideTrashCan,
   defaultCupState,
   getNextWorldZIndex,
 });
@@ -672,20 +622,8 @@ function showInvalidFeedback() {
   gameRulesController.showInvalidFeedback();
 }
 
-function showTrashCan(target) {
-  showTrashCanBase(target, trashState);
-}
-
-function hideTrashCan() {
-  hideTrashCanBase(trashState);
-}
-
 function removeCupInstance(cupId) {
   gameRulesController.removeCupInstance(cupId);
-}
-
-function removeSelectedObject() {
-  gameRulesController.removeSelectedObject();
 }
 
 const bootstrapController = window.CuppyLandBootstrapController.createController({
@@ -743,8 +681,6 @@ const bootstrapController = window.CuppyLandBootstrapController.createController
     renderCup,
     loadTintAssets,
     safeClosest,
-    hideTrashCan,
-    removeSelectedObject,
   },
 });
 
