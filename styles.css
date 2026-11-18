@@ -343,6 +343,49 @@ body {
   display: none;
 }
 
+.world-background-objects {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.world-background-object {
+  position: absolute;
+  border: 2px dashed rgba(255, 255, 255, 0.92);
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 1px rgba(44, 69, 98, 0.28);
+}
+
+.world-background-object::before {
+  content: attr(data-label);
+  position: absolute;
+  left: 8px;
+  top: 6px;
+  z-index: 2;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: white;
+  background: rgba(27, 48, 75, 0.72);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.world-background-object-art {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.world-background-object.active .world-background-object-art {
+  opacity: 1;
+}
+
 .world-headline-overlay {
   position: absolute;
   left: 50%;

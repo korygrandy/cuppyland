@@ -13,7 +13,24 @@
     ],
   };
 
+  const backgroundObjectAnchors = {
+    playground: [
+      {
+        id: "drinking-fountain",
+        label: "Drinking Fountain",
+        x: 3575,
+        y: 345,
+        width: 248,
+        height: 248,
+        activatedAsset: "./assets/drinking-fountain-activated.png",
+        activatedSfx: "drinkingFountainActivated",
+      },
+    ],
+    "olivia-room": [],
+  };
+
   window.CuppyLandWorldAnchors = {
     barbieActivationAnchors,
+    backgroundObjectAnchors,
   };
 })();

@@ -16,6 +16,8 @@
       onRefreshChocolateMilkSequences = () => {},
       onFlowerPlaced = () => {},
       motionController = null,
+      syncBackgroundObjectActivation = () => {},
+      removeBackgroundObjectActivation = () => {},
     } = options;
 
     const imagePreloadCache = new Map();
@@ -271,6 +273,7 @@
         friendState.barbieActivationTimer = null;
       }
       motionController?.stopForFriend?.(friendId);
+      removeBackgroundObjectActivation(friendId);
       stopChocolateMilkSequence(friendId);
       worldFriends.splice(friendIndex, 1);
       if (playRemovedSfx) {
@@ -414,6 +417,8 @@
           if (friendState.type === "triceratops-bead-craft") {
             motionController?.startTriceratopsAnimation?.(friendState.id);
           }
+          const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`);
+          syncBackgroundObjectActivation(friendState, friendElement);
         });
       onRefreshChocolateMilkSequences();
     }
