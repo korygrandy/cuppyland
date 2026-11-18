@@ -286,7 +286,7 @@
         friendState.rabbitAnchorWorldX = friendState.worldX;
         friendState.rabbitAnchorWorldY = friendState.worldY;
       }
-      if (friendState.type === "tricerotops-bead-craft" && typeof stopTriceratopsAnimation === "function") {
+      if (friendState.type === "triceratops-bead-craft" && typeof stopTriceratopsAnimation === "function") {
         stopTriceratopsAnimation(friendState.id);
       }
       if (friendState.type === "chocolate-milk") {
@@ -361,7 +361,7 @@
           startRabbitAnimation(friendState.id);
         }
       }
-      if (friendState?.type === "tricerotops-bead-craft") {
+      if (friendState?.type === "triceratops-bead-craft") {
         friendState.triceratopsAnchorWorldX = friendState.worldX;
         if (typeof startTriceratopsAnimation === "function") {
           startTriceratopsAnimation(friendState.id);

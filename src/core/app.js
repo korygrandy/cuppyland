@@ -14,42 +14,40 @@ const {
   chocolateMilkSequence,
 } = window.CuppyLandGame;
 
-const screenEls = {
-  splash: document.getElementById("splashScreen"),
-  worldSelect: document.getElementById("worldSelectScreen"),
-  world: document.getElementById("worldScreen"),
-};
-
-const playBtn = document.getElementById("playBtn");
-const backToSplashBtn = document.getElementById("backToSplashBtn");
-const worldButtons = Array.from(document.querySelectorAll(".world-card"));
-const closeWorldBtn = document.getElementById("closeWorldBtn");
-const inventoryToggleBtn = document.getElementById("inventoryToggleBtn");
-const inventoryPanel = document.getElementById("inventoryPanel");
-const worldBackground = document.getElementById("worldBackground");
-const worldHeadlineOverlay = document.getElementById("worldHeadlineOverlay");
-const worldViewport = document.getElementById("worldViewport");
-const closeModal = document.getElementById("closeModal");
-const confirmCloseBtn = document.getElementById("confirmCloseBtn");
-const cancelCloseBtn = document.getElementById("cancelCloseBtn");
-const rotatePrompt = document.getElementById("rotatePrompt");
-const worldCanvas = document.getElementById("worldCanvas");
-const cupCharacter = document.getElementById("cupCharacter");
-const lidLayer = document.getElementById("lidLayer");
-const cupLayer = document.getElementById("cupLayer");
-const hairstyleLayer = document.getElementById("hairstyleLayer");
-const sleeveLayer = document.getElementById("sleeveLayer");
-const faceLayer = document.getElementById("faceLayer");
-const dragGhost = document.getElementById("dragGhost");
-const dropZoneLid = document.getElementById("dropZoneLid");
-const dropZoneCup = document.getElementById("dropZoneCup");
-const dropZoneSleeve = document.getElementById("dropZoneSleeve");
-const musicVolumeInput = document.getElementById("musicVolumeInput");
-const sfxVolumeInput = document.getElementById("sfxVolumeInput");
-const musicVolumeValue = document.getElementById("musicVolumeValue");
-const sfxVolumeValue = document.getElementById("sfxVolumeValue");
-const musicMuteBtn = document.getElementById("musicMuteBtn");
-const sfxMuteBtn = document.getElementById("sfxMuteBtn");
+const dom = window.CuppyLandDomElements.createDomElements(document);
+const {
+  screenEls,
+  playBtn,
+  backToSplashBtn,
+  worldButtons,
+  closeWorldBtn,
+  inventoryToggleBtn,
+  inventoryPanel,
+  worldBackground,
+  worldHeadlineOverlay,
+  worldViewport,
+  closeModal,
+  confirmCloseBtn,
+  cancelCloseBtn,
+  rotatePrompt,
+  worldCanvas,
+  cupCharacter,
+  lidLayer,
+  cupLayer,
+  hairstyleLayer,
+  sleeveLayer,
+  faceLayer,
+  dragGhost,
+  dropZoneLid,
+  dropZoneCup,
+  dropZoneSleeve,
+  musicVolumeInput,
+  sfxVolumeInput,
+  musicVolumeValue,
+  sfxVolumeValue,
+  musicMuteBtn,
+  sfxMuteBtn,
+} = dom;
 const { defaultSleeveAsset } = window.CuppyLandGame;
 
 const {

@@ -124,7 +124,7 @@ Analysis basis:
 | `sleeve-grandparent.png` | 1073x1061 | 0.53 MB | **400x240 PNG/WebP** | Sleeve rendered ~200x110 |
 | `heart-man.png` | 1090x922 | 0.50 MB | **384x384 PNG/WebP** | Friend rendered 132x132 |
 | `hairstyle-grandpa.png` | 889x746 | 0.32 MB | **512x320 PNG/WebP** | Display region ~220x128 |
-| `tricerotops-bead-craft.png` | 616x428 | 0.30 MB | **320x240 PNG/WebP** | Moderate cut |
+| `triceratops-bead-craft.png` | 616x428 | 0.30 MB | **320x240 PNG/WebP** | Moderate cut |
 | `playground-bg.jpg` | 1024x1024 | 0.20 MB | **1024x1024 JPG/WebP** | Already acceptable |
 | `olivia-room-headline.png` | 640x294 | 0.15 MB | **640x320 PNG/WebP** | Keep roughly as-is |
 | `rocketman-craft.png` | 380x450 | 0.06 MB | **320x384 PNG/WebP** | Small cut optional |
