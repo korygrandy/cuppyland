@@ -66,23 +66,20 @@
         return;
       }
 
-      playSfxClip("shimmer");
-
       const flowerArt = friendElement.querySelector(".friend-character-art");
       if (friendState.type === "flower-bead-craft" && flowerArt) {
         const flippedScale = friendState.flipped ? -1 : 1;
-        flowerArt.style.transition = "transform 1300ms cubic-bezier(0.18, 0.78, 0.24, 1)";
-        flowerArt.style.transform = `scaleX(${flippedScale}) scaleY(0.006)`;
         flowerArt.style.transformOrigin = "center bottom";
-        flowerArt.offsetHeight;
-        window.setTimeout(() => {
-          flowerArt.style.transform = `scaleX(${flippedScale}) scaleY(1)`;
-        }, 40);
-        window.setTimeout(() => {
-          flowerArt.style.transition = "";
-        }, 1380);
+        flowerArt.style.transform = `scaleX(${flippedScale}) scaleY(1)`;
+        playSfxClip("shimmer");
+        triggerFlowerTwinkle(friendState, friendElement);
+        return;
       }
 
+      triggerFlowerTwinkle(friendState, friendElement);
+    }
+
+    function triggerFlowerTwinkle(friendState, friendElement) {
       const elementCenterX = friendState.worldX + (friendElement.offsetWidth / 2);
       const elementCenterY = friendState.worldY + (friendElement.offsetHeight / 2);
 
@@ -113,7 +110,7 @@
       }
 
       worldCanvas.appendChild(sparkle);
-      window.setTimeout(() => sparkle.remove(), 1300);
+      window.setTimeout(() => sparkle.remove(), 2000);
     }
 
     return {

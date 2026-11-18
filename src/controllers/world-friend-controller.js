@@ -618,7 +618,7 @@
       art.className = "friend-character-art";
       art.style.backgroundImage = `url("${resolveFriendAsset(friendState)}")`;
       if (friendState.type === "flower-bead-craft") {
-        art.style.transform = `scaleX(${friendState.flipped ? -1 : 1})`;
+        art.style.transform = `scaleX(${friendState.flipped ? -1 : 1}) scaleY(1)`;
         art.style.transformOrigin = "center bottom";
       }
       friendElement.appendChild(art);
