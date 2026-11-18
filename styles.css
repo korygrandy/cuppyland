@@ -549,6 +549,26 @@ body {
   height: 140px;
 }
 
+.friend-character[data-friend-type="uke"] {
+  width: 72px;
+  height: 220px;
+}
+
+.friend-character[data-friend-type="rabbit-bead-craft"] {
+  width: 132px;
+  height: 132px;
+}
+
+.friend-character[data-friend-type="rabbit-bead-craft"] .friend-character-art {
+  transition: transform 180ms ease-in-out;
+  transform-origin: center bottom;
+}
+
+.friend-character[data-friend-type="tricerotops-bead-craft"] .friend-character-art {
+  transition: transform 120ms linear;
+  transform-origin: center bottom;
+}
+
 .friend-character[data-friend-type="barbie-blonde"],
 .friend-character[data-friend-type="barbie-blonde-activated"],
 .friend-character[data-friend-type="barbie-blonde-baby"],
@@ -1109,6 +1129,14 @@ body {
 .drag-ghost-friend {
   width: 132px;
   height: 132px;
+}
+
+.drag-ghost-uke {
+  width: 72px;
+  height: 220px;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .drag-ghost.hidden {

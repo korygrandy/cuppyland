@@ -17,6 +17,10 @@
       stopChocolateMilkSequence,
       bringFriendElementToFront,
       triggerTurkeyAnimation,
+      startRabbitAnimation,
+      stopRabbitAnimation,
+      startTriceratopsAnimation,
+      stopTriceratopsAnimation,
       syncBarbieActivationState,
       updateFriendElementAsset,
       onChocolateMilkFillStart,
@@ -277,6 +281,14 @@
       friendDragState.currentClientX = event.clientX;
       friendDragState.currentClientY = event.clientY;
       friendDragState.dragStartedAtMs = Date.now();
+      if (friendState.type === "rabbit-bead-craft" && typeof stopRabbitAnimation === "function") {
+        stopRabbitAnimation(friendState.id);
+        friendState.rabbitAnchorWorldX = friendState.worldX;
+        friendState.rabbitAnchorWorldY = friendState.worldY;
+      }
+      if (friendState.type === "tricerotops-bead-craft" && typeof stopTriceratopsAnimation === "function") {
+        stopTriceratopsAnimation(friendState.id);
+      }
       if (friendState.type === "chocolate-milk") {
         friendState.attachedCupId = null;
         friendState.sequenceCompleted = false;
@@ -341,6 +353,19 @@
       }
       if (typeof updateFriendElementAsset === "function") {
         updateFriendElementAsset(friendState?.id);
+      }
+      if (friendState?.type === "rabbit-bead-craft") {
+        friendState.rabbitAnchorWorldX = friendState.worldX;
+        friendState.rabbitAnchorWorldY = friendState.worldY;
+        if (typeof startRabbitAnimation === "function") {
+          startRabbitAnimation(friendState.id);
+        }
+      }
+      if (friendState?.type === "tricerotops-bead-craft") {
+        friendState.triceratopsAnchorWorldX = friendState.worldX;
+        if (typeof startTriceratopsAnimation === "function") {
+          startTriceratopsAnimation(friendState.id);
+        }
       }
 
       if (friendElement && friendState?.type === "chocolate-milk") {
