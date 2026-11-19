@@ -626,7 +626,7 @@ body {
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  transition: opacity 1000ms ease-in-out;
+  transition: opacity 500ms ease-in-out;
   pointer-events: none;
 }
 
