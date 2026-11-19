@@ -454,6 +454,41 @@
       scheduleNext();
     }
 
+    function toggleFishbowlSequence(friendId) {
+      const friendState = findFriendById(friendId);
+      if (!friendState || friendState.type !== "fishbowl") {
+        return false;
+      }
+
+      const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"]`);
+      if (!friendElement) {
+        return false;
+      }
+
+      const art1 = friendElement.querySelector(".fishbowl-sequence-a");
+      const art2 = friendElement.querySelector(".fishbowl-sequence-b");
+      if (!art1 || !art2) {
+        return false;
+      }
+
+      if (!Number.isFinite(friendState.fishbowlSequenceFrame)) {
+        friendState.fishbowlSequenceFrame = 1;
+      }
+
+      if (friendState.fishbowlSequenceFrame === 1) {
+        art1.style.opacity = "0";
+        art2.style.opacity = "1";
+        friendState.fishbowlSequenceFrame = 2;
+      } else {
+        art2.style.opacity = "0";
+        art1.style.opacity = "1";
+        friendState.fishbowlSequenceFrame = 1;
+      }
+
+      startFishbowlSequence(friendId);
+      return true;
+    }
+
     function syncAttachedFriendPosition(friendState, friendElement = null) {
       if (!friendState?.attachedCupId) {
         if (friendState && (friendState.type === "barbie-blonde" || friendState.type === "barbie-blonde-baby")) {
@@ -723,6 +758,7 @@
       cancelPuppyExtraction,
       pauseFishbowlSequence,
       startFishbowlSequence,
+      toggleFishbowlSequence,
       renderWorldFriends,
     };
   }

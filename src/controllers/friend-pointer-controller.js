@@ -32,6 +32,7 @@
       triggerRocketManAnimation,
       pauseFishbowlSequence,
       resumeFishbowlSequence,
+      toggleFishbowlSequence,
       onChocolateMilkFillStart,
       onChocolateMilkFillTick,
       onChocolateMilkFillCancel,
@@ -279,6 +280,22 @@
           window.CuppyLandAudio?.playSfxClip?.("turkeyGobble");
           if (typeof triggerTurkeyAnimation === "function") {
             triggerTurkeyAnimation(friendState.id);
+          }
+          return;
+        }
+        friendState.lastTapAtMs = nowMs;
+      }
+
+      if (friendState.type === "fishbowl") {
+        const nowMs = Date.now();
+        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
+        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
+          friendState.lastTapAtMs = nowMs;
+          resetFriendDragState();
+          event.preventDefault();
+          event.stopPropagation();
+          if (typeof toggleFishbowlSequence === "function") {
+            toggleFishbowlSequence(friendState.id);
           }
           return;
         }

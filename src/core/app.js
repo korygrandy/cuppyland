@@ -252,6 +252,7 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   cancelPuppyExtraction: (puppyState) => friendWorldController?.cancelPuppyExtraction?.(puppyState),
   pauseFishbowlSequence: (friendId) => friendWorldController?.pauseFishbowlSequence?.(friendId),
   resumeFishbowlSequence: (friendId) => friendWorldController?.startFishbowlSequence?.(friendId),
+  toggleFishbowlSequence: (friendId) => friendWorldController?.toggleFishbowlSequence?.(friendId),
   onChocolateMilkFillStart,
   onChocolateMilkFillTick,
   onChocolateMilkFillCancel,
