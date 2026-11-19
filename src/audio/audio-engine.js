@@ -22,6 +22,7 @@
     let masterGainNode = null;
     let musicBusGainNode = null;
     let sfxBusGainNode = null;
+    const activeSfxNodes = new Set();
 
     function getAudioContext() {
       if (audioContext) {
@@ -249,9 +250,26 @@
 
         oscillator.connect(gainNode);
         gainNode.connect(sfxBusGainNode);
+        activeSfxNodes.add(oscillator);
+        oscillator.addEventListener("ended", () => {
+          activeSfxNodes.delete(oscillator);
+          oscillator.disconnect();
+          gainNode.disconnect();
+        });
         oscillator.start(startAt);
         oscillator.stop(endAt + 0.01);
       });
+    }
+
+    function stopAllSfx() {
+      activeSfxNodes.forEach((oscillator) => {
+        try {
+          oscillator.stop();
+        } catch (error) {
+          // Oscillator may have already ended.
+        }
+      });
+      activeSfxNodes.clear();
     }
 
     function unlock() {
@@ -287,6 +305,7 @@
       playMusic,
       stopAllMusic,
       playSfx,
+      stopAllSfx,
       unlock,
     };
   }

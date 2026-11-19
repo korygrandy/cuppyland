@@ -373,8 +373,18 @@
     audioState.activeTrack = null;
   }
 
+  function pauseAllSfx() {
+    Object.values(sfxClipPlayers).forEach((clip) => {
+      clip.pause();
+      clip.currentTime = 0;
+      clip.loop = false;
+    });
+    audioEngine.stopAllSfx();
+  }
+
   function handleAppVisibilityChange() {
-    if (document.hidden) {
+    if (document.hidden || !document.hasFocus()) {
+      pauseAllSfx();
       pauseAllAudio();
       return;
     }
@@ -406,6 +416,7 @@
     playLoopingSfxClip,
     stopSfxClip,
     pauseAllAudio,
+    pauseAllSfx,
     handleAppVisibilityChange,
     playAudioTrack,
     unlockAudio,
