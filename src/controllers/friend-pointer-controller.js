@@ -297,6 +297,7 @@
           if (typeof toggleFishbowlSequence === "function") {
             toggleFishbowlSequence(friendState.id);
           }
+          friendState.fishbowlSuppressPointerDrag = true;
           return;
         }
         friendState.lastTapAtMs = nowMs;
@@ -426,6 +427,11 @@
 
       if (friendState?.type === "fishbowl") {
         friendElement.dataset.dragging = "false";
+        if (friendState.fishbowlSuppressPointerDrag) {
+          friendState.fishbowlSuppressPointerDrag = false;
+          resetFriendDragState();
+          return;
+        }
         if (typeof resumeFishbowlSequence === "function") {
           resumeFishbowlSequence(friendState.id);
         }
