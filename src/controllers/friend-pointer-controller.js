@@ -285,7 +285,7 @@
       friendDragState.currentClientY = event.clientY;
       friendDragState.dragStartedAtMs = Date.now();
       if (friendState.type === "golden-puppy") {
-        friendState.puppyAttachmentPending = true;
+        friendState.puppyAttachmentPending = friendState.activated !== true;
       }
       if (friendState.type === "rabbit-bead-craft" && typeof stopRabbitAnimation === "function") {
         stopRabbitAnimation(friendState.id);

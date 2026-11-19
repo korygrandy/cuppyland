@@ -315,7 +315,10 @@
           const draggedPuppyMatches = Boolean(draggedFriendState && puppyState?.id === draggedFriendState.id);
           const occupied = Boolean(
             puppyState
-            && (puppyState.puppyAttachmentPending || (commitAttachment && draggedPuppyMatches))
+            && (
+              (!puppyState.activated && puppyState.puppyAttachmentPending)
+              || (commitAttachment && draggedPuppyMatches)
+            )
           );
 
           if (occupied && puppyState) {
