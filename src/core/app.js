@@ -216,6 +216,7 @@ const friendMotionController = window.CuppyLandFriendMotionController.createCont
   state,
   worldCanvas,
   findFriendById: (friendId) => findFriendById(friendId, state.activeWorld),
+  playSfxClip: (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName),
 });
 const friendPointerController = window.CuppyLandFriendPointerController.createController({
   state,

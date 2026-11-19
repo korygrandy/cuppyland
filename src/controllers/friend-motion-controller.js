@@ -4,6 +4,7 @@
       state,
       worldCanvas,
       findFriendById,
+      playSfxClip = () => {},
     } = options;
 
     function stopRabbitAnimation(friendId) {
@@ -324,6 +325,7 @@
         const returnDurationMs = 3200;
         const launchStartedAt = performance.now();
 
+        playSfxClip("rocketmanActivated");
         if (art) {
           art.style.transformOrigin = "center bottom";
         }

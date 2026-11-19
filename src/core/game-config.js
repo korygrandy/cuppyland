@@ -241,6 +241,7 @@
         playgroundIntroFx: "./sfx/playground-intro-fx.ogg",
         hi: "./sfx/hi.ogg",
         rocketship: "./sfx/rocketship-snap.ogg",
+        rocketmanActivated: "./sfx/rocketman-activated.ogg",
         spongebob: "./sfx/spongebob-snap.ogg",
         hairyGuy: "./sfx/hairy-guy-drawing-snap.ogg",
         furballGuy: "./sfx/name-is-scary-varity.ogg",
