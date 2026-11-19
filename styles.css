@@ -343,6 +343,40 @@ body {
   display: none;
 }
 
+.world-background-objects {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.world-background-object {
+  position: absolute;
+}
+
+.world-background-object::before {
+  content: none;
+}
+
+.world-background-object-art {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  transition: opacity 1000ms ease;
+}
+
+.world-background-object.active .world-background-object-art {
+  opacity: 1;
+}
+
+.world-background-object.fading .world-background-object-art {
+  opacity: 0;
+  transition-duration: 450ms;
+}
+
 .world-headline-overlay {
   position: absolute;
   left: 50%;

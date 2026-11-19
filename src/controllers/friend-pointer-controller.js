@@ -23,6 +23,7 @@
       stopTriceratopsAnimation,
       syncBarbieActivationState,
       updateFriendElementAsset,
+      syncBackgroundObjectActivation,
       onChocolateMilkFillStart,
       onChocolateMilkFillTick,
       onChocolateMilkFillCancel,
@@ -336,6 +337,9 @@
       if (typeof updateFriendElementAsset === "function") {
         updateFriendElementAsset(friendState.id);
       }
+      if (typeof syncBackgroundObjectActivation === "function") {
+        syncBackgroundObjectActivation(friendState, friendElement);
+      }
       updateChocolateMilkFill(friendElement, friendState, event.clientX, event.clientY);
     }
 
@@ -353,6 +357,9 @@
       }
       if (typeof updateFriendElementAsset === "function") {
         updateFriendElementAsset(friendState?.id);
+      }
+      if (typeof syncBackgroundObjectActivation === "function") {
+        syncBackgroundObjectActivation(friendState, friendElement);
       }
       if (friendState?.type === "rabbit-bead-craft") {
         friendState.rabbitAnchorWorldX = friendState.worldX;

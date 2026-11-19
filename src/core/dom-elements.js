@@ -13,6 +13,7 @@
       inventoryToggleBtn: documentRef.getElementById("inventoryToggleBtn"),
       inventoryPanel: documentRef.getElementById("inventoryPanel"),
       worldBackground: documentRef.getElementById("worldBackground"),
+      worldBackgroundObjects: documentRef.getElementById("worldBackgroundObjects"),
       worldHeadlineOverlay: documentRef.getElementById("worldHeadlineOverlay"),
       worldViewport: documentRef.getElementById("worldViewport"),
       closeModal: documentRef.getElementById("closeModal"),

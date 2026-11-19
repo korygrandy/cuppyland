@@ -239,21 +239,42 @@
     audioEngine.playSfx(profile);
   }
 
-  function playSfxClip(clipName) {
+  function playSfxClip(clipName, onEnded = null) {
     if (audioState.sfxVolume <= 0) {
+      if (typeof onEnded === "function") {
+        onEnded();
+      }
       return;
     }
     const clip = sfxClipPlayers[clipName];
     if (!clip) {
+      if (typeof onEnded === "function") {
+        onEnded();
+      }
       return;
     }
 
+    let endedCallbackActive = typeof onEnded === "function";
+    const finish = () => {
+      if (!endedCallbackActive) {
+        return;
+      }
+      endedCallbackActive = false;
+      clip.removeEventListener("ended", finish);
+      clip.removeEventListener("error", finish);
+      onEnded();
+    };
+    if (endedCallbackActive) {
+      clip.addEventListener("ended", finish);
+      clip.addEventListener("error", finish);
+    }
     clip.volume = audioState.sfxVolume;
     clip.currentTime = 0;
     const playPromise = clip.play();
     if (playPromise && typeof playPromise.catch === "function") {
       playPromise.catch((error) => {
         console.warn(`Unable to play sfx clip "${clipName}".`, error);
+        finish();
       });
     }
   }

@@ -196,6 +196,7 @@
       },
     },
     barbieActivationAnchors: window.CuppyLandWorldAnchors.barbieActivationAnchors,
+    backgroundObjectAnchors: window.CuppyLandWorldAnchors.backgroundObjectAnchors,
     tintAssetConfig: {
       lid: "./assets/lid-grayscale.png",
       cup: "./assets/cup-grayscale.png",
@@ -242,6 +243,7 @@
         defaultObjectRemoved: "./sfx/default-object-removed.ogg",
         milkPour: "./sfx/milk-pour.ogg",
         shimmer: "./sfx/shimmer.ogg",
+        drinkingFountainActivated: "./sfx/drinking-fountain-activated.ogg",
         lidSnapOn: "./sfx/lid-snap-on.ogg",
         lidSnapOff: "./sfx/lid-snap-off.ogg",
         sleeveSnapOn: "./sfx/sleeve-snap-on.ogg",

@@ -24,6 +24,7 @@ const {
   inventoryToggleBtn,
   inventoryPanel,
   worldBackground,
+  worldBackgroundObjects,
   worldHeadlineOverlay,
   worldViewport,
   closeModal,
@@ -207,6 +208,10 @@ const worldHeadlineController = window.CuppyLandWorldHeadlineController.createCo
   config: worldHeadlineConfig,
 });
 worldHeadlineController.syncCardHeadlines();
+const backgroundObjectController = window.CuppyLandBackgroundObjectController.createController({
+  container: worldBackgroundObjects,
+  playSfxClip: (clipName, onEnded) => window.CuppyLandAudio?.playSfxClip?.(clipName, onEnded),
+});
 const friendMotionController = window.CuppyLandFriendMotionController.createController({
   state,
   worldCanvas,
@@ -235,6 +240,7 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   stopTriceratopsAnimation: (friendId) => friendMotionController.stopTriceratopsAnimation(friendId),
   syncBarbieActivationState: (friendState) => friendWorldController?.syncBarbieActivationState?.(friendState),
   updateFriendElementAsset: (friendId) => friendWorldController?.updateFriendElementAsset?.(friendId),
+  syncBackgroundObjectActivation: (friendState, friendElement) => backgroundObjectController.syncFriend(friendState, friendElement),
   onChocolateMilkFillStart,
   onChocolateMilkFillTick,
   onChocolateMilkFillCancel,
@@ -257,6 +263,8 @@ friendWorldController = window.CuppyLandWorldFriendController.createController({
   onRefreshChocolateMilkSequences: () => refreshChocolateMilkSequences(),
   onFlowerPlaced: (friendState, friendElement) => sparkleEffectController.triggerFriendSparkle(friendState, friendElement),
   motionController: friendMotionController,
+  syncBackgroundObjectActivation: (friendState, friendElement) => backgroundObjectController.syncFriend(friendState, friendElement),
+  removeBackgroundObjectActivation: (friendId) => backgroundObjectController.removeFriend(friendId),
 });
 
 function syncAudioForCurrentScreen() {
@@ -553,6 +561,7 @@ function ensureWorldCupState(worldId) {
 }
 
 function openWorld(worldId) {
+  backgroundObjectController.render(worldId);
   screenWorldController.openWorld(worldId);
   showWorldHeadlineOverlay(worldId);
   if (worldId === "playground") {
