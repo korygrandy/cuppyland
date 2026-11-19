@@ -43,8 +43,8 @@
         label: "Merry-Go-Round",
         x: 3056,
         y: 539,
-        width: 248,
-        height: 154,
+        width: 273,
+        height: 169,
         activatedAsset: "./assets/merry-go-round-animated.gif",
         activatorTypes: [
           "heart-women",
