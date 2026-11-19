@@ -30,6 +30,9 @@
       syncDoghouseActivations,
       cancelPuppyExtraction,
       triggerRocketManAnimation,
+      pauseFishbowlSequence,
+      resumeFishbowlSequence,
+      toggleFishbowlSequence,
       onChocolateMilkFillStart,
       onChocolateMilkFillTick,
       onChocolateMilkFillCancel,
@@ -69,6 +72,13 @@
         const friendState = resolveFriendStateForElement(friendElement);
         if (!friendElement || !friendState) {
           return;
+        }
+
+        if (friendState.type === "fishbowl") {
+          friendElement.dataset.dragging = "true";
+          if (typeof pauseFishbowlSequence === "function") {
+            pauseFishbowlSequence(friendState.id);
+          }
         }
 
         updateChocolateMilkFill(friendElement, friendState, pointerX, pointerY);
@@ -276,6 +286,22 @@
         friendState.lastTapAtMs = nowMs;
       }
 
+      if (friendState.type === "fishbowl") {
+        const nowMs = Date.now();
+        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
+        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
+          friendState.lastTapAtMs = nowMs;
+          resetFriendDragState();
+          event.preventDefault();
+          event.stopPropagation();
+          if (typeof toggleFishbowlSequence === "function") {
+            toggleFishbowlSequence(friendState.id);
+          }
+          return;
+        }
+        friendState.lastTapAtMs = nowMs;
+      }
+
       if (friendState.type === "rocketman-craft") {
         const nowMs = Date.now();
         const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
@@ -397,6 +423,13 @@
       const friendElement = event.currentTarget.closest(".friend-character");
       const friendState = resolveFriendStateForElement(friendElement);
       setFriendDragVisual(friendElement, friendState, false);
+
+      if (friendState?.type === "fishbowl") {
+        friendElement.dataset.dragging = "false";
+        if (typeof resumeFishbowlSequence === "function") {
+          resumeFishbowlSequence(friendState.id);
+        }
+      }
 
       if (friendState?.type === "golden-puppy" && friendState.extractedFromDoghouseId && !friendDragState.moved) {
         if (typeof cancelPuppyExtraction === "function") {

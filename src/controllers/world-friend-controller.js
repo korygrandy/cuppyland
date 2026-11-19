@@ -145,6 +145,10 @@
         return friendState.activated ? activatedAsset : sittingAsset;
       }
 
+      if (friendState.type === "fishbowl") {
+        return getFriendAssetMap()?.["fishbowl-sequence-1"] || "";
+      }
+
       if (friendState.type === "doghouse") {
         const activeAsset = getFriendAssetMap()?.["doghouse-with-dog"] || getFriendAssetMap()?.[friendState.type] || "";
         const defaultAsset = getFriendAssetMap()?.[friendState.type] || "";
@@ -391,6 +395,100 @@
       onRenderWorldCups();
     }
 
+    function pauseFishbowlSequence(friendId) {
+      const friendState = findFriendById(friendId);
+      if (!friendState || friendState.type !== "fishbowl") {
+        return;
+      }
+      if (friendState.fishbowlSequenceTimer) {
+        clearTimeout(friendState.fishbowlSequenceTimer);
+        friendState.fishbowlSequenceTimer = null;
+      }
+    }
+
+    function startFishbowlSequence(friendId) {
+      const friendState = findFriendById(friendId);
+      if (!friendState || friendState.type !== "fishbowl") {
+        return;
+      }
+
+      pauseFishbowlSequence(friendId);
+      if (!Number.isFinite(friendState.fishbowlSequenceFrame)) {
+        friendState.fishbowlSequenceFrame = 1;
+      }
+
+      const scheduleNext = () => {
+        friendState.fishbowlSequenceTimer = setTimeout(() => {
+          const stillExists = findFriendById(friendId);
+          if (!stillExists) {
+            friendState.fishbowlSequenceTimer = null;
+            return;
+          }
+
+          const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"]`);
+          if (!friendElement || friendElement.dataset.dragging === "true") {
+            scheduleNext();
+            return;
+          }
+
+          const art1 = friendElement.querySelector(".fishbowl-sequence-a");
+          const art2 = friendElement.querySelector(".fishbowl-sequence-b");
+          if (!art1 || !art2) {
+            scheduleNext();
+            return;
+          }
+
+          if (friendState.fishbowlSequenceFrame === 1) {
+            art1.style.opacity = "0";
+            art2.style.opacity = "1";
+            friendState.fishbowlSequenceFrame = 2;
+          } else {
+            art2.style.opacity = "0";
+            art1.style.opacity = "1";
+            friendState.fishbowlSequenceFrame = 1;
+          }
+          scheduleNext();
+        }, 45000);
+      };
+
+      scheduleNext();
+    }
+
+    function toggleFishbowlSequence(friendId) {
+      const friendState = findFriendById(friendId);
+      if (!friendState || friendState.type !== "fishbowl") {
+        return false;
+      }
+
+      const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"]`);
+      if (!friendElement) {
+        return false;
+      }
+
+      const art1 = friendElement.querySelector(".fishbowl-sequence-a");
+      const art2 = friendElement.querySelector(".fishbowl-sequence-b");
+      if (!art1 || !art2) {
+        return false;
+      }
+
+      if (!Number.isFinite(friendState.fishbowlSequenceFrame)) {
+        friendState.fishbowlSequenceFrame = 1;
+      }
+
+      if (friendState.fishbowlSequenceFrame === 1) {
+        art1.style.opacity = "0";
+        art2.style.opacity = "1";
+        friendState.fishbowlSequenceFrame = 2;
+      } else {
+        art2.style.opacity = "0";
+        art1.style.opacity = "1";
+        friendState.fishbowlSequenceFrame = 1;
+      }
+
+      startFishbowlSequence(friendId);
+      return true;
+    }
+
     function syncAttachedFriendPosition(friendState, friendElement = null) {
       if (!friendState?.attachedCupId) {
         if (friendState && (friendState.type === "barbie-blonde" || friendState.type === "barbie-blonde-baby")) {
@@ -438,6 +536,10 @@
       if (friendState?.barbieActivationTimer) {
         clearTimeout(friendState.barbieActivationTimer);
         friendState.barbieActivationTimer = null;
+      }
+      if (friendState?.fishbowlSequenceTimer) {
+        clearTimeout(friendState.fishbowlSequenceTimer);
+        friendState.fishbowlSequenceTimer = null;
       }
       motionController?.stopForFriend?.(friendId);
       removeBackgroundObjectActivation(friendId);
@@ -548,6 +650,26 @@
         art.style.transformOrigin = "center bottom";
       }
       friendElement.appendChild(art);
+      if (friendState.type === "fishbowl") {
+        art.style.display = "none";
+        const art1 = document.createElement("span");
+        art1.className = "friend-character-art fishbowl-sequence-a";
+        art1.style.position = "absolute";
+        art1.style.inset = "0";
+        art1.style.backgroundImage = `url("${getFriendAssetMap()?.["fishbowl-sequence-1"] || ""}")`;
+        art1.style.opacity = "1";
+
+        const art2 = document.createElement("span");
+        art2.className = "friend-character-art fishbowl-sequence-b";
+        art2.style.position = "absolute";
+        art2.style.inset = "0";
+        art2.style.backgroundImage = `url("${getFriendAssetMap()?.["fishbowl-sequence-2"] || ""}")`;
+        art2.style.opacity = "0";
+
+        friendElement.appendChild(art1);
+        friendElement.appendChild(art2);
+        startFishbowlSequence(friendState.id);
+      }
       if (friendState.type === "doghouse" && friendState.activated) {
         const extractionZone = document.createElement("span");
         extractionZone.className = "doghouse-extraction-zone";
@@ -605,6 +727,9 @@
           if (friendState.type === "rocketman-craft") {
             motionController?.startRocketManAnimation?.(friendState.id);
           }
+          if (friendState.type === "fishbowl") {
+            startFishbowlSequence(friendState.id);
+          }
           syncBackgroundObjectActivation(friendState, friendElement);
         });
       syncMerryGoRoundActivations();
@@ -631,6 +756,9 @@
       syncDoghouseActivations,
       extractPuppyFromDoghouse,
       cancelPuppyExtraction,
+      pauseFishbowlSequence,
+      startFishbowlSequence,
+      toggleFishbowlSequence,
       renderWorldFriends,
     };
   }

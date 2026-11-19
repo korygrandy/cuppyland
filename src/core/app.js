@@ -250,6 +250,9 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
     friendWorldController?.syncDoghouseActivations?.(commitAttachment, draggedFriendState)
   ),
   cancelPuppyExtraction: (puppyState) => friendWorldController?.cancelPuppyExtraction?.(puppyState),
+  pauseFishbowlSequence: (friendId) => friendWorldController?.pauseFishbowlSequence?.(friendId),
+  resumeFishbowlSequence: (friendId) => friendWorldController?.startFishbowlSequence?.(friendId),
+  toggleFishbowlSequence: (friendId) => friendWorldController?.toggleFishbowlSequence?.(friendId),
   onChocolateMilkFillStart,
   onChocolateMilkFillTick,
   onChocolateMilkFillCancel,
@@ -280,6 +283,7 @@ friendWorldController = window.CuppyLandWorldFriendController.createController({
     if (!puppyState) {
       return;
     }
+    window.CuppyLandAudio?.playSfxClip?.("goldenPuppyActivated");
     requestAnimationFrame(() => {
       const puppyElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${puppyState.id}"]`);
       if (puppyElement) {

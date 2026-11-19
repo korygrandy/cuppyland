@@ -358,6 +358,7 @@ body {
   content: none;
 }
 
+
 .world-background-object-art {
   position: absolute;
   inset: 0;
@@ -599,8 +600,8 @@ body {
 }
 
 .friend-character[data-friend-type="merry-go-round"] {
-  width: 248px;
-  height: 154px;
+  width: 259px;
+  height: 161px;
 }
 
 .friend-character[data-friend-type="doghouse"] {
@@ -612,6 +613,24 @@ body {
   width: 120px;
   height: 120px;
 }
+
+.friend-character[data-friend-type="fishbowl"] {
+  width: 180px;
+  height: 173px;
+}
+
+.friend-character[data-friend-type="fishbowl"] .fishbowl-sequence-a,
+.friend-character[data-friend-type="fishbowl"] .fishbowl-sequence-b {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  transition: opacity 500ms ease-in-out;
+  pointer-events: none;
+}
+
 
 .rocketman-flame {
   position: absolute;
