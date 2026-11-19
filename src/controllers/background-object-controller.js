@@ -72,6 +72,9 @@
         activeFriendsByObject.set(objectConfig.id, activeFriends);
         const isActive = activeFriends.size > 0;
         const anchor = container.querySelector(`[data-object-id="${objectConfig.id}"]`);
+        if (!objectConfig.activatedSfx) {
+          anchor?.classList.toggle("active", isActive);
+        }
 
         if (!wasActive && isActive && objectConfig.activatedSfx) {
           const previousTimer = fadeTimers.get(objectConfig.id);
@@ -103,6 +106,11 @@
 
       activeFriendsByObject.forEach((activeFriends, objectId) => {
         activeFriends.delete(friendId);
+        const anchor = container.querySelector(`[data-object-id="${objectId}"]`);
+        const objectConfig = getObjects().find((candidate) => candidate.id === objectId);
+        if (!objectConfig?.activatedSfx) {
+          anchor?.classList.toggle("active", activeFriends.size > 0);
+        }
       });
     }
 
