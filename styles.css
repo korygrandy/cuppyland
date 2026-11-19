@@ -613,6 +613,24 @@ body {
   height: 120px;
 }
 
+.friend-character[data-friend-type="fishbowl"] {
+  width: 180px;
+  height: 173px;
+}
+
+.friend-character[data-friend-type="fishbowl"] .fishbowl-sequence-a,
+.friend-character[data-friend-type="fishbowl"] .fishbowl-sequence-b {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  transition: opacity 1000ms ease-in-out;
+  pointer-events: none;
+}
+
+
 .rocketman-flame {
   position: absolute;
   left: 58%;

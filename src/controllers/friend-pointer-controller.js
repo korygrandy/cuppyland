@@ -30,6 +30,8 @@
       syncDoghouseActivations,
       cancelPuppyExtraction,
       triggerRocketManAnimation,
+      pauseFishbowlSequence,
+      resumeFishbowlSequence,
       onChocolateMilkFillStart,
       onChocolateMilkFillTick,
       onChocolateMilkFillCancel,
@@ -69,6 +71,13 @@
         const friendState = resolveFriendStateForElement(friendElement);
         if (!friendElement || !friendState) {
           return;
+        }
+
+        if (friendState.type === "fishbowl") {
+          friendElement.dataset.dragging = "true";
+          if (typeof pauseFishbowlSequence === "function") {
+            pauseFishbowlSequence(friendState.id);
+          }
         }
 
         updateChocolateMilkFill(friendElement, friendState, pointerX, pointerY);
@@ -397,6 +406,13 @@
       const friendElement = event.currentTarget.closest(".friend-character");
       const friendState = resolveFriendStateForElement(friendElement);
       setFriendDragVisual(friendElement, friendState, false);
+
+      if (friendState?.type === "fishbowl") {
+        friendElement.dataset.dragging = "false";
+        if (typeof resumeFishbowlSequence === "function") {
+          resumeFishbowlSequence(friendState.id);
+        }
+      }
 
       if (friendState?.type === "golden-puppy" && friendState.extractedFromDoghouseId && !friendDragState.moved) {
         if (typeof cancelPuppyExtraction === "function") {

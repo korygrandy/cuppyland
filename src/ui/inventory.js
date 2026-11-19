@@ -173,7 +173,7 @@
     const friendsItems = document.getElementById("friendsItems");
 
     const accessoryTypes = new Set(["lavalamp", "chocolate-milk", "uke", "rabbit-bead-craft", "flower-bead-craft", "merry-go-round"]);
-    const petTypes = new Set(["golden-puppy", "doghouse"]);
+    const petTypes = new Set(["golden-puppy", "doghouse", "fishbowl"]);
 
     colorItems.innerHTML = "";
     expressionItems.innerHTML = "";

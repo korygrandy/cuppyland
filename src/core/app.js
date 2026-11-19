@@ -250,6 +250,8 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
     friendWorldController?.syncDoghouseActivations?.(commitAttachment, draggedFriendState)
   ),
   cancelPuppyExtraction: (puppyState) => friendWorldController?.cancelPuppyExtraction?.(puppyState),
+  pauseFishbowlSequence: (friendId) => friendWorldController?.pauseFishbowlSequence?.(friendId),
+  resumeFishbowlSequence: (friendId) => friendWorldController?.startFishbowlSequence?.(friendId),
   onChocolateMilkFillStart,
   onChocolateMilkFillTick,
   onChocolateMilkFillCancel,

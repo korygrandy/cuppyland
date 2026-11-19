@@ -90,6 +90,7 @@
       "merry-go-round",
       "golden-puppy",
       "doghouse",
+      "fishbowl",
     ],
     expressionAssetMap: {
       happy: "./assets/facial-expression-happy.png",
@@ -168,6 +169,9 @@
       "golden-puppy-sitting": "./assets/golden-puppy-sitting.png",
       "doghouse": "./assets/doghouse.png",
       "doghouse-with-dog": "./assets/doghouse-with-dog.png",
+      "fishbowl": "./assets/fishbowl-sequence1.png",
+      "fishbowl-sequence-1": "./assets/fishbowl-sequence1.png",
+      "fishbowl-sequence-2": "./assets/fishbowl-sequence2.png",
     },
     chocolateMilkSequence: {
       durationMs: 5000,
