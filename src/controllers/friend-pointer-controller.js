@@ -26,6 +26,7 @@
       syncBackgroundObjectActivation,
       syncMerryGoRoundActivations,
       syncDoghouseActivations,
+      cancelPuppyExtraction,
       onChocolateMilkFillStart,
       onChocolateMilkFillTick,
       onChocolateMilkFillCancel,
@@ -93,6 +94,9 @@
       friendDragState.pointerOffsetY = 0;
       friendDragState.currentClientX = null;
       friendDragState.currentClientY = null;
+      friendDragState.startClientX = 0;
+      friendDragState.startClientY = 0;
+      friendDragState.moved = false;
       friendDragState.dragStartedAtMs = 0;
       clearHoverMonitor();
     }
@@ -283,6 +287,9 @@
       friendDragState.pointerOffsetY = localPointerY;
       friendDragState.currentClientX = event.clientX;
       friendDragState.currentClientY = event.clientY;
+      friendDragState.startClientX = event.clientX;
+      friendDragState.startClientY = event.clientY;
+      friendDragState.moved = false;
       friendDragState.dragStartedAtMs = Date.now();
       if (friendState.type === "golden-puppy") {
         friendState.puppyAttachmentPending = friendState.activated !== true;
@@ -330,6 +337,12 @@
       const { worldX, worldY } = getWorldPointFromClient(event.clientX, event.clientY);
       friendDragState.currentClientX = event.clientX;
       friendDragState.currentClientY = event.clientY;
+      if (
+        Math.abs(event.clientX - friendDragState.startClientX) > 6
+        || Math.abs(event.clientY - friendDragState.startClientY) > 6
+      ) {
+        friendDragState.moved = true;
+      }
       const nextX = worldX - friendDragState.pointerOffsetX;
       const nextY = worldY - friendDragState.pointerOffsetY;
       friendState.worldX = Math.max(0, Math.min(worldCanvas.offsetWidth - friendElement.offsetWidth, nextX));
@@ -363,6 +376,15 @@
       const friendState = resolveFriendStateForElement(friendElement);
       setFriendDragVisual(friendElement, friendState, false);
 
+      if (friendState?.type === "golden-puppy" && friendState.extractedFromDoghouseId && !friendDragState.moved) {
+        if (typeof cancelPuppyExtraction === "function") {
+          cancelPuppyExtraction(friendState);
+        }
+        resetChocolateMilkFill("pointer-end");
+        resetFriendDragState();
+        return;
+      }
+
       if (typeof syncBarbieActivationState === "function") {
         syncBarbieActivationState(friendState);
       }
@@ -377,7 +399,10 @@
       }
       if (typeof syncDoghouseActivations === "function") {
         syncDoghouseActivations(true, friendState);
-        friendState.activated = false;
+        if (friendState?.type === "golden-puppy") {
+          friendState.activated = false;
+          friendState.extractedFromDoghouseId = null;
+        }
         if (typeof updateFriendElementAsset === "function" && friendState?.type === "golden-puppy") {
           updateFriendElementAsset(friendState.id);
         }

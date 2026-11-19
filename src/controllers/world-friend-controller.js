@@ -360,6 +360,7 @@
       puppyState.doghouseId = null;
       puppyState.attached = false;
       puppyState.activated = true;
+      puppyState.extractedFromDoghouseId = doghouseState.id;
       puppyState.puppyAttachmentPending = false;
       puppyState.worldX = Math.max(0, point.worldX - 60);
       puppyState.worldY = Math.max(0, point.worldY - 60);
@@ -367,6 +368,27 @@
       doghouseState.activated = false;
       onRenderWorldCups();
       return puppyState;
+    }
+
+    function cancelPuppyExtraction(puppyState) {
+      const doghouseId = puppyState?.extractedFromDoghouseId;
+      if (!doghouseId) {
+        return;
+      }
+
+      const doghouseState = getWorldFriendList(state.activeWorld).find((friend) => friend.id === doghouseId);
+      if (!doghouseState) {
+        return;
+      }
+
+      puppyState.doghouseId = doghouseId;
+      puppyState.attached = true;
+      puppyState.activated = false;
+      puppyState.puppyAttachmentPending = false;
+      puppyState.extractedFromDoghouseId = null;
+      doghouseState.attachedPuppyId = puppyState.id;
+      doghouseState.activated = true;
+      onRenderWorldCups();
     }
 
     function syncAttachedFriendPosition(friendState, friendElement = null) {
@@ -603,6 +625,7 @@
       syncMerryGoRoundActivations,
       syncDoghouseActivations,
       extractPuppyFromDoghouse,
+      cancelPuppyExtraction,
       renderWorldFriends,
     };
   }

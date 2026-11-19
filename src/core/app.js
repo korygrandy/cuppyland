@@ -245,6 +245,7 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   syncDoghouseActivations: (commitAttachment, draggedFriendState) => (
     friendWorldController?.syncDoghouseActivations?.(commitAttachment, draggedFriendState)
   ),
+  cancelPuppyExtraction: (puppyState) => friendWorldController?.cancelPuppyExtraction?.(puppyState),
   onChocolateMilkFillStart,
   onChocolateMilkFillTick,
   onChocolateMilkFillCancel,
