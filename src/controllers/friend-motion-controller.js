@@ -6,6 +6,7 @@
       findFriendById,
       playSfxClip = () => {},
     } = options;
+    const rocketLaunchers = new Map();
 
     function stopRabbitAnimation(friendId) {
       const friendState = findFriendById(friendId);
@@ -274,6 +275,14 @@
 
       const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`);
       const art = friendElement?.querySelector(".friend-character-art");
+      if (Number.isFinite(friendState.rocketHomeWorldX)) {
+        friendState.worldX = friendState.rocketHomeWorldX;
+      }
+      if (Number.isFinite(friendState.rocketHomeWorldY)) {
+        friendState.worldY = friendState.rocketHomeWorldY;
+      }
+      friendState.rocketHomeWorldX = null;
+      friendState.rocketHomeWorldY = null;
       if (friendElement) {
         friendElement.style.left = `${friendState.worldX}px`;
         friendElement.style.top = `${friendState.worldY}px`;
@@ -283,7 +292,7 @@
       }
     }
 
-    function startRocketManAnimation(friendId, launchImmediately = false) {
+    function startRocketManAnimation(friendId) {
       const friendState = findFriendById(friendId);
       if (!friendState || friendState.type !== "rocketman-craft") {
         return;
@@ -309,11 +318,7 @@
         const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${activeFriendId}"]`);
         const art = friendElement?.querySelector(".friend-character-art");
         if (!friendElement) {
-          if (launchImmediately) {
-            launchRocket(friendId);
-          } else {
-            scheduleLaunch();
-          }
+          scheduleLaunch();
           return;
         }
 
@@ -381,7 +386,18 @@
         activeFriend.rocketAnimationFrameId = requestAnimationFrame(launchFrame);
       };
 
+      rocketLaunchers.set(friendId, launchRocket);
       scheduleLaunch();
+    }
+
+    function triggerRocketManAnimation(friendId) {
+      stopRocketManAnimation(friendId);
+      let launchRocket = rocketLaunchers.get(friendId);
+      if (!launchRocket) {
+        startRocketManAnimation(friendId);
+        launchRocket = rocketLaunchers.get(friendId);
+      }
+      launchRocket?.(friendId);
     }
 
     function stopForFriend(friendId) {
@@ -397,6 +413,7 @@
       stopTriceratopsAnimation,
       startRocketManAnimation,
       stopRocketManAnimation,
+      triggerRocketManAnimation,
       stopForFriend,
     };
   }

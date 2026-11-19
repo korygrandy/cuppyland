@@ -29,6 +29,7 @@
       syncMerryGoRoundActivations,
       syncDoghouseActivations,
       cancelPuppyExtraction,
+      triggerRocketManAnimation,
       onChocolateMilkFillStart,
       onChocolateMilkFillTick,
       onChocolateMilkFillCancel,
@@ -283,8 +284,8 @@
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
-          if (typeof startRocketManAnimation === "function") {
-            startRocketManAnimation(friendState.id, true);
+          if (typeof triggerRocketManAnimation === "function") {
+            triggerRocketManAnimation(friendState.id);
           }
           return;
         }
