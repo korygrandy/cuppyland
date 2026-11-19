@@ -30,6 +30,7 @@
       syncDoghouseActivations,
       cancelPuppyExtraction,
       triggerRocketManAnimation,
+      playGoldenPuppyWithBone,
       pauseFishbowlSequence,
       resumeFishbowlSequence,
       toggleFishbowlSequence,
@@ -297,9 +298,11 @@
           if (typeof toggleFishbowlSequence === "function") {
             toggleFishbowlSequence(friendState.id);
           }
+          friendState.fishbowlSuppressPointerDrag = true;
           return;
         }
         friendState.lastTapAtMs = nowMs;
+        friendState.fishbowlSuppressPointerDrag = false;
       }
 
       if (friendState.type === "rocketman-craft") {
@@ -424,12 +427,6 @@
       const friendState = resolveFriendStateForElement(friendElement);
       setFriendDragVisual(friendElement, friendState, false);
 
-      if (friendState?.type === "fishbowl") {
-        friendElement.dataset.dragging = "false";
-        if (typeof resumeFishbowlSequence === "function") {
-          resumeFishbowlSequence(friendState.id);
-        }
-      }
 
       if (friendState?.type === "golden-puppy" && friendState.extractedFromDoghouseId && !friendDragState.moved) {
         if (typeof cancelPuppyExtraction === "function") {
@@ -460,6 +457,27 @@
         }
         if (typeof updateFriendElementAsset === "function" && friendState?.type === "golden-puppy") {
           updateFriendElementAsset(friendState.id);
+        }
+      }
+      if (friendState?.type === "dogbone") {
+        const boneElement = friendElement;
+        const boneRect = boneElement.getBoundingClientRect();
+        const puppyElements = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="golden-puppy"]'));
+        const puppyElement = puppyElements.find((element) => {
+          const puppyRect = element.getBoundingClientRect();
+          return puppyRect.right >= boneRect.left
+            && puppyRect.left <= boneRect.right
+            && puppyRect.bottom >= boneRect.top
+            && puppyRect.top <= boneRect.bottom;
+        });
+        if (puppyElement) {
+          const puppyState = resolveFriendStateForElement(puppyElement);
+          if (puppyState) {
+            const removedBone = removeFriendInstance(friendState.id, { playRemovedSfx: false });
+            if (removedBone) {
+              playGoldenPuppyWithBone?.(puppyState.id);
+            }
+          }
         }
       }
       if (friendState?.type === "rabbit-bead-craft") {
