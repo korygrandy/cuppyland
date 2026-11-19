@@ -275,6 +275,19 @@
         friendState.lastTapAtMs = nowMs;
       }
 
+      if (friendState.type === "rocketman-craft") {
+        const nowMs = Date.now();
+        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
+        if (lastTapAtMs && nowMs - lastTapAtMs <= 320) {
+          friendState.lastTapAtMs = nowMs;
+          if (typeof startRocketManAnimation === "function") {
+            startRocketManAnimation(friendState.id, true);
+          }
+          return;
+        }
+        friendState.lastTapAtMs = nowMs;
+      }
+
       resetChocolateMilkFill("new-drag");
       event.preventDefault();
       event.stopPropagation();

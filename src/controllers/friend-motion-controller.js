@@ -283,7 +283,7 @@
       }
     }
 
-    function startRocketManAnimation(friendId) {
+    function startRocketManAnimation(friendId, launchImmediately = false) {
       const friendState = findFriendById(friendId);
       if (!friendState || friendState.type !== "rocketman-craft") {
         return;
@@ -309,7 +309,11 @@
         const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${activeFriendId}"]`);
         const art = friendElement?.querySelector(".friend-character-art");
         if (!friendElement) {
-          scheduleLaunch();
+          if (launchImmediately) {
+            launchRocket(friendId);
+          } else {
+            scheduleLaunch();
+          }
           return;
         }
 
