@@ -4,7 +4,9 @@
       state,
       worldCanvas,
       findFriendById,
+      playSfxClip = () => {},
     } = options;
+    const rocketLaunchers = new Map();
 
     function stopRabbitAnimation(friendId) {
       const friendState = findFriendById(friendId);
@@ -20,6 +22,14 @@
 
       const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`);
       const art = friendElement?.querySelector(".friend-character-art");
+      if (Number.isFinite(friendState.rocketHomeWorldX)) {
+        friendState.worldX = friendState.rocketHomeWorldX;
+      }
+      if (Number.isFinite(friendState.rocketHomeWorldY)) {
+        friendState.worldY = friendState.rocketHomeWorldY;
+      }
+      friendState.rocketHomeWorldX = null;
+      friendState.rocketHomeWorldY = null;
       if (art) {
         art.style.transform = "";
       }
@@ -244,9 +254,163 @@
       friendState.triceratopsAnimationTimer = setTimeout(crawl, 100);
     }
 
+    function getRocketLaunchDelayMs() {
+      return 60000 + Math.floor(Math.random() * 120001);
+    }
+
+    function stopRocketManAnimation(friendId) {
+      const friendState = findFriendById(friendId);
+      if (!friendState || friendState.type !== "rocketman-craft") {
+        return;
+      }
+
+      if (friendState.rocketAnimationFrameId) {
+        cancelAnimationFrame(friendState.rocketAnimationFrameId);
+        friendState.rocketAnimationFrameId = null;
+      }
+      if (friendState.rocketScheduleTimer) {
+        clearTimeout(friendState.rocketScheduleTimer);
+        friendState.rocketScheduleTimer = null;
+      }
+      if (friendState.rocketLaunchDelayTimer) {
+        clearTimeout(friendState.rocketLaunchDelayTimer);
+        friendState.rocketLaunchDelayTimer = null;
+      }
+
+      const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`);
+      const art = friendElement?.querySelector(".friend-character-art");
+      if (Number.isFinite(friendState.rocketHomeWorldX)) {
+        friendState.worldX = friendState.rocketHomeWorldX;
+      }
+      if (Number.isFinite(friendState.rocketHomeWorldY)) {
+        friendState.worldY = friendState.rocketHomeWorldY;
+      }
+      friendState.rocketHomeWorldX = null;
+      friendState.rocketHomeWorldY = null;
+      if (friendElement) {
+        friendElement.style.left = `${friendState.worldX}px`;
+        friendElement.style.top = `${friendState.worldY}px`;
+      }
+      if (art) {
+        art.style.transform = "";
+      }
+    }
+
+    function startRocketManAnimation(friendId) {
+      const friendState = findFriendById(friendId);
+      if (!friendState || friendState.type !== "rocketman-craft") {
+        return;
+      }
+      stopRocketManAnimation(friendId);
+
+      const scheduleLaunch = () => {
+        const activeFriend = findFriendById(friendId);
+        if (!activeFriend) {
+          return;
+        }
+
+        activeFriend.rocketScheduleTimer = setTimeout(() => {
+          launchRocket(activeFriend.id);
+        }, getRocketLaunchDelayMs());
+      };
+
+      const launchRocket = (activeFriendId) => {
+        const activeFriend = findFriendById(activeFriendId);
+        if (!activeFriend || activeFriend.type !== "rocketman-craft") {
+          return;
+        }
+        const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${activeFriendId}"]`);
+        const art = friendElement?.querySelector(".friend-character-art");
+        if (!friendElement) {
+          scheduleLaunch();
+          return;
+        }
+
+        const anchorX = activeFriend.worldX;
+        const anchorY = activeFriend.worldY;
+        activeFriend.rocketHomeWorldX = anchorX;
+        activeFriend.rocketHomeWorldY = anchorY;
+        const maxX = Math.max(0, worldCanvas.offsetWidth - friendElement.offsetWidth);
+        const maxY = Math.max(0, worldCanvas.offsetHeight - friendElement.offsetHeight);
+        const targetX = Math.max(0, Math.min(maxX, anchorX - 100));
+        const targetY = Math.max(0, Math.min(maxY, anchorY - 100));
+        const launchDelayMs = 2300;
+        const launchDurationMs = 2000;
+        const returnDurationMs = 5500;
+
+        playSfxClip("rocketmanActivated");
+        if (art) {
+          art.style.transformOrigin = "center bottom";
+        }
+
+        activeFriend.rocketLaunchDelayTimer = setTimeout(() => {
+          activeFriend.rocketLaunchDelayTimer = null;
+          const launchStartedAt = performance.now();
+          const launchFrame = (now) => {
+            const progress = Math.min(1, (now - launchStartedAt) / launchDurationMs);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            activeFriend.worldX = anchorX + ((targetX - anchorX) * eased);
+            activeFriend.worldY = anchorY + ((targetY - anchorY) * eased);
+            friendElement.style.left = `${activeFriend.worldX}px`;
+            friendElement.style.top = `${activeFriend.worldY}px`;
+            if (art) {
+              art.style.transform = `rotate(${(-8 * eased).toFixed(2)}deg)`;
+            }
+
+            if (progress < 1) {
+              activeFriend.rocketAnimationFrameId = requestAnimationFrame(launchFrame);
+              return;
+            }
+
+            const returnStartedAt = performance.now();
+            const returnFrame = (returnNow) => {
+              const returnProgress = Math.min(1, (returnNow - returnStartedAt) / returnDurationMs);
+              const easedReturn = returnProgress * returnProgress * (3 - (2 * returnProgress));
+              activeFriend.worldX = targetX + ((anchorX - targetX) * easedReturn);
+              activeFriend.worldY = targetY + ((anchorY - targetY) * easedReturn);
+              friendElement.style.left = `${activeFriend.worldX}px`;
+              friendElement.style.top = `${activeFriend.worldY}px`;
+              if (art) {
+                art.style.transform = `rotate(${(-8 * (1 - easedReturn)).toFixed(2)}deg)`;
+              }
+
+              if (returnProgress < 1) {
+                activeFriend.rocketAnimationFrameId = requestAnimationFrame(returnFrame);
+                return;
+              }
+
+              activeFriend.rocketAnimationFrameId = null;
+              activeFriend.rocketHomeWorldX = null;
+              activeFriend.rocketHomeWorldY = null;
+              if (art) {
+                art.style.transform = "";
+              }
+              scheduleLaunch();
+            };
+            activeFriend.rocketAnimationFrameId = requestAnimationFrame(returnFrame);
+          };
+          activeFriend.rocketAnimationFrameId = requestAnimationFrame(launchFrame);
+        }, launchDelayMs);
+      };
+
+      rocketLaunchers.set(friendId, launchRocket);
+      scheduleLaunch();
+    }
+
+    function triggerRocketManAnimation(friendId) {
+      stopRocketManAnimation(friendId);
+      let launchRocket = rocketLaunchers.get(friendId);
+      if (!launchRocket) {
+        startRocketManAnimation(friendId);
+        launchRocket = rocketLaunchers.get(friendId);
+      }
+      launchRocket?.(friendId);
+    }
+
     function stopForFriend(friendId) {
       stopRabbitAnimation(friendId);
       stopTriceratopsAnimation(friendId);
+      stopRocketManAnimation(friendId);
     }
 
     return {
@@ -254,6 +418,9 @@
       stopRabbitAnimation,
       startTriceratopsAnimation,
       stopTriceratopsAnimation,
+      startRocketManAnimation,
+      stopRocketManAnimation,
+      triggerRocketManAnimation,
       stopForFriend,
     };
   }

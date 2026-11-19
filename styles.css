@@ -603,6 +603,28 @@ body {
   height: 154px;
 }
 
+.friend-character[data-friend-type="doghouse"] {
+  width: 180px;
+  height: 140px;
+}
+
+.friend-character[data-friend-type="golden-puppy"] {
+  width: 120px;
+  height: 120px;
+}
+
+.doghouse-extraction-zone {
+  position: absolute;
+  left: 35%;
+  bottom: 8%;
+  width: 30%;
+  height: 24%;
+  z-index: 2;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: grab;
+}
+
 .friend-character[data-friend-type="rabbit-bead-craft"] .friend-character-art {
   transition: transform 180ms ease-in-out;
   transform-origin: center bottom;

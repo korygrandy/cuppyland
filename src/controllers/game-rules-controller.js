@@ -73,6 +73,7 @@
         sequenceCompleted: false,
         flipped: friendType === "flower-bead-craft" ? Math.random() < 0.5 : false,
         flowerCelebrationPending: friendType === "flower-bead-craft",
+        puppyAttachmentPending: friendType === "golden-puppy",
       });
       renderWorldCups();
       if (friendType === "rocketman-craft") {

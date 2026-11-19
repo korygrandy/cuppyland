@@ -216,6 +216,7 @@ const friendMotionController = window.CuppyLandFriendMotionController.createCont
   state,
   worldCanvas,
   findFriendById: (friendId) => findFriendById(friendId, state.activeWorld),
+  playSfxClip: (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName),
 });
 const friendPointerController = window.CuppyLandFriendPointerController.createController({
   state,
@@ -238,10 +239,17 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   stopRabbitAnimation: (friendId) => friendMotionController.stopRabbitAnimation(friendId),
   startTriceratopsAnimation: (friendId) => friendMotionController.startTriceratopsAnimation(friendId),
   stopTriceratopsAnimation: (friendId) => friendMotionController.stopTriceratopsAnimation(friendId),
+  startRocketManAnimation: (friendId) => friendMotionController.startRocketManAnimation(friendId),
+  stopRocketManAnimation: (friendId) => friendMotionController.stopRocketManAnimation(friendId),
+  triggerRocketManAnimation: (friendId) => friendMotionController.triggerRocketManAnimation(friendId),
   syncBarbieActivationState: (friendState) => friendWorldController?.syncBarbieActivationState?.(friendState),
   updateFriendElementAsset: (friendId) => friendWorldController?.updateFriendElementAsset?.(friendId),
   syncBackgroundObjectActivation: (friendState, friendElement) => backgroundObjectController.syncFriend(friendState, friendElement),
   syncMerryGoRoundActivations: () => friendWorldController?.syncMerryGoRoundActivations?.(),
+  syncDoghouseActivations: (commitAttachment, draggedFriendState) => (
+    friendWorldController?.syncDoghouseActivations?.(commitAttachment, draggedFriendState)
+  ),
+  cancelPuppyExtraction: (puppyState) => friendWorldController?.cancelPuppyExtraction?.(puppyState),
   onChocolateMilkFillStart,
   onChocolateMilkFillTick,
   onChocolateMilkFillCancel,
@@ -266,6 +274,19 @@ friendWorldController = window.CuppyLandWorldFriendController.createController({
   motionController: friendMotionController,
   syncBackgroundObjectActivation: (friendState, friendElement) => backgroundObjectController.syncFriend(friendState, friendElement),
   removeBackgroundObjectActivation: (friendId) => backgroundObjectController.removeFriend(friendId),
+  getWorldPointFromClient,
+  onDoghousePointerDown: (doghouseState, event) => {
+    const puppyState = friendWorldController.extractPuppyFromDoghouse(doghouseState, event);
+    if (!puppyState) {
+      return;
+    }
+    requestAnimationFrame(() => {
+      const puppyElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${puppyState.id}"]`);
+      if (puppyElement) {
+        friendPointerController.onPointerDown(event, { friendElement: puppyElement, friendState: puppyState });
+      }
+    });
+  },
 });
 
 function syncAudioForCurrentScreen() {

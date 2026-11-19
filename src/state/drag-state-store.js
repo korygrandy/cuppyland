@@ -46,6 +46,9 @@
         friendId: null,
         pointerOffsetX: 0,
         pointerOffsetY: 0,
+        startClientX: 0,
+        startClientY: 0,
+        moved: false,
       },
     };
   }

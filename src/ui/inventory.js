@@ -169,14 +169,17 @@
     const expressionItems = document.getElementById("expressionItems");
     const hairstyleItems = document.getElementById("hairstyleItems");
     const accessoriesItems = document.getElementById("accessoriesItems");
+    const petsItems = document.getElementById("petsItems");
     const friendsItems = document.getElementById("friendsItems");
 
     const accessoryTypes = new Set(["lavalamp", "chocolate-milk", "uke", "rabbit-bead-craft", "flower-bead-craft", "merry-go-round"]);
+    const petTypes = new Set(["golden-puppy", "doghouse"]);
 
     colorItems.innerHTML = "";
     expressionItems.innerHTML = "";
     hairstyleItems.innerHTML = "";
     accessoriesItems.innerHTML = "";
+    petsItems.innerHTML = "";
     friendsItems.innerHTML = "";
 
     colorTargetToggle.querySelectorAll(".color-target-btn").forEach((button) => {
@@ -211,7 +214,13 @@
       });
 
     friendTypes
-      .filter((friendName) => !accessoryTypes.has(friendName))
+      .filter((friendName) => petTypes.has(friendName))
+      .forEach((friendName) => {
+        petsItems.appendChild(createFriendItem(friendName));
+      });
+
+    friendTypes
+      .filter((friendName) => !accessoryTypes.has(friendName) && !petTypes.has(friendName))
       .forEach((friendName) => {
         friendsItems.appendChild(createFriendItem(friendName));
       });

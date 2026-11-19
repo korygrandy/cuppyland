@@ -21,10 +21,15 @@
       stopRabbitAnimation,
       startTriceratopsAnimation,
       stopTriceratopsAnimation,
+      stopRocketManAnimation,
+      startRocketManAnimation,
       syncBarbieActivationState,
       updateFriendElementAsset,
       syncBackgroundObjectActivation,
       syncMerryGoRoundActivations,
+      syncDoghouseActivations,
+      cancelPuppyExtraction,
+      triggerRocketManAnimation,
       onChocolateMilkFillStart,
       onChocolateMilkFillTick,
       onChocolateMilkFillCancel,
@@ -92,6 +97,9 @@
       friendDragState.pointerOffsetY = 0;
       friendDragState.currentClientX = null;
       friendDragState.currentClientY = null;
+      friendDragState.startClientX = 0;
+      friendDragState.startClientY = 0;
+      friendDragState.moved = false;
       friendDragState.dragStartedAtMs = 0;
       clearHoverMonitor();
     }
@@ -243,13 +251,13 @@
       }
     }
 
-    function onPointerDown(event) {
+    function onPointerDown(event, overrides = {}) {
       if (state.currentScreen !== "world") {
         return;
       }
 
-      const friendElement = event.currentTarget.closest(".friend-character");
-      const friendState = resolveFriendStateForElement(friendElement);
+      const friendElement = overrides.friendElement || event.currentTarget.closest(".friend-character");
+      const friendState = overrides.friendState || resolveFriendStateForElement(friendElement);
       if (!friendElement || !friendState) {
         return;
       }
@@ -262,6 +270,22 @@
           window.CuppyLandAudio?.playSfxClip?.("turkeyGobble");
           if (typeof triggerTurkeyAnimation === "function") {
             triggerTurkeyAnimation(friendState.id);
+          }
+          return;
+        }
+        friendState.lastTapAtMs = nowMs;
+      }
+
+      if (friendState.type === "rocketman-craft") {
+        const nowMs = Date.now();
+        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
+        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
+          friendState.lastTapAtMs = nowMs;
+          resetFriendDragState();
+          event.preventDefault();
+          event.stopPropagation();
+          if (typeof triggerRocketManAnimation === "function") {
+            triggerRocketManAnimation(friendState.id);
           }
           return;
         }
@@ -282,7 +306,13 @@
       friendDragState.pointerOffsetY = localPointerY;
       friendDragState.currentClientX = event.clientX;
       friendDragState.currentClientY = event.clientY;
+      friendDragState.startClientX = event.clientX;
+      friendDragState.startClientY = event.clientY;
+      friendDragState.moved = false;
       friendDragState.dragStartedAtMs = Date.now();
+      if (friendState.type === "golden-puppy") {
+        friendState.puppyAttachmentPending = friendState.activated !== true;
+      }
       if (friendState.type === "rabbit-bead-craft" && typeof stopRabbitAnimation === "function") {
         stopRabbitAnimation(friendState.id);
         friendState.rabbitAnchorWorldX = friendState.worldX;
@@ -290,6 +320,9 @@
       }
       if (friendState.type === "triceratops-bead-craft" && typeof stopTriceratopsAnimation === "function") {
         stopTriceratopsAnimation(friendState.id);
+      }
+      if (friendState.type === "rocketman-craft" && typeof stopRocketManAnimation === "function") {
+        stopRocketManAnimation(friendState.id);
       }
       if (friendState.type === "chocolate-milk") {
         friendState.attachedCupId = null;
@@ -326,6 +359,12 @@
       const { worldX, worldY } = getWorldPointFromClient(event.clientX, event.clientY);
       friendDragState.currentClientX = event.clientX;
       friendDragState.currentClientY = event.clientY;
+      if (
+        Math.abs(event.clientX - friendDragState.startClientX) > 6
+        || Math.abs(event.clientY - friendDragState.startClientY) > 6
+      ) {
+        friendDragState.moved = true;
+      }
       const nextX = worldX - friendDragState.pointerOffsetX;
       const nextY = worldY - friendDragState.pointerOffsetY;
       friendState.worldX = Math.max(0, Math.min(worldCanvas.offsetWidth - friendElement.offsetWidth, nextX));
@@ -344,6 +383,9 @@
       if (typeof syncMerryGoRoundActivations === "function") {
         syncMerryGoRoundActivations();
       }
+      if (typeof syncDoghouseActivations === "function") {
+        syncDoghouseActivations();
+      }
       updateChocolateMilkFill(friendElement, friendState, event.clientX, event.clientY);
     }
 
@@ -355,6 +397,15 @@
       const friendElement = event.currentTarget.closest(".friend-character");
       const friendState = resolveFriendStateForElement(friendElement);
       setFriendDragVisual(friendElement, friendState, false);
+
+      if (friendState?.type === "golden-puppy" && friendState.extractedFromDoghouseId && !friendDragState.moved) {
+        if (typeof cancelPuppyExtraction === "function") {
+          cancelPuppyExtraction(friendState);
+        }
+        resetChocolateMilkFill("pointer-end");
+        resetFriendDragState();
+        return;
+      }
 
       if (typeof syncBarbieActivationState === "function") {
         syncBarbieActivationState(friendState);
@@ -368,6 +419,16 @@
       if (typeof syncMerryGoRoundActivations === "function") {
         syncMerryGoRoundActivations();
       }
+      if (typeof syncDoghouseActivations === "function") {
+        syncDoghouseActivations(true, friendState);
+        if (friendState?.type === "golden-puppy") {
+          friendState.activated = false;
+          friendState.extractedFromDoghouseId = null;
+        }
+        if (typeof updateFriendElementAsset === "function" && friendState?.type === "golden-puppy") {
+          updateFriendElementAsset(friendState.id);
+        }
+      }
       if (friendState?.type === "rabbit-bead-craft") {
         friendState.rabbitAnchorWorldX = friendState.worldX;
         friendState.rabbitAnchorWorldY = friendState.worldY;
@@ -380,6 +441,9 @@
         if (typeof startTriceratopsAnimation === "function") {
           startTriceratopsAnimation(friendState.id);
         }
+      }
+      if (friendState?.type === "rocketman-craft" && typeof startRocketManAnimation === "function") {
+        startRocketManAnimation(friendState.id);
       }
 
       if (friendElement && friendState?.type === "chocolate-milk") {

@@ -88,6 +88,8 @@
       "rabbit-bead-craft",
       "flower-bead-craft",
       "merry-go-round",
+      "golden-puppy",
+      "doghouse",
     ],
     expressionAssetMap: {
       happy: "./assets/facial-expression-happy.png",
@@ -161,6 +163,11 @@
       "flower-bead-craft": "./assets/flower-bead-craft.png",
       "merry-go-round": "./assets/merry-go-round.png",
       "merry-go-round-animated": "./assets/merry-go-round-animated.gif",
+      "golden-puppy": "./assets/golden-puppy.png",
+      "golden-puppy-activated": "./assets/golden-puppy-activated.png",
+      "golden-puppy-sitting": "./assets/golden-puppy-sitting.png",
+      "doghouse": "./assets/doghouse.png",
+      "doghouse-with-dog": "./assets/doghouse-with-dog.png",
     },
     chocolateMilkSequence: {
       durationMs: 5000,
@@ -234,6 +241,7 @@
         playgroundIntroFx: "./sfx/playground-intro-fx.ogg",
         hi: "./sfx/hi.ogg",
         rocketship: "./sfx/rocketship-snap.ogg",
+        rocketmanActivated: "./sfx/rocketman-activated.ogg",
         spongebob: "./sfx/spongebob-snap.ogg",
         hairyGuy: "./sfx/hairy-guy-drawing-snap.ogg",
         furballGuy: "./sfx/name-is-scary-varity.ogg",
