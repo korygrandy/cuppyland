@@ -6,6 +6,85 @@
       findFriendById,
       playSfxClip = () => {},
     } = options;
+
+    function playGoldenPuppyWithBone(friendId) {
+      const friendState = findFriendById(friendId);
+      if (!friendState || friendState.type !== "golden-puppy") {
+        return false;
+      }
+
+      const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"]`);
+      if (!friendElement) {
+        return false;
+      }
+
+      const art = friendElement.querySelector(".friend-character-art");
+      if (!art) {
+        return false;
+      }
+
+      if (friendState.puppyPlayTimer) {
+        clearTimeout(friendState.puppyPlayTimer);
+      }
+
+      playSfxClip("goldenPuppyActivated");
+
+      const anchorX = Number.isFinite(friendState.worldX) ? friendState.worldX : 0;
+      const anchorY = Number.isFinite(friendState.worldY) ? friendState.worldY : 0;
+      const maxX = Math.max(0, worldCanvas.offsetWidth - friendElement.offsetWidth);
+      const maxY = Math.max(0, worldCanvas.offsetHeight - friendElement.offsetHeight);
+      art.style.backgroundImage = `url("${window.CuppyLandGame.friendAssetMap?.["golden-puppy-playing"] || ""}")`;
+
+      const poses = [
+        { x: -36, y: -18 },
+        { x: -72, y: -18 },
+        { x: -36, y: -18 },
+        { x: 0, y: 0 },
+      ];
+      let poseIndex = 0;
+
+      const applyPose = () => {
+        if (!findFriendById(friendId)) {
+          return;
+        }
+        const pose = poses[poseIndex];
+        if (poseIndex === 2) {
+          art.style.transform = "scaleX(-1)";
+          art.style.transformOrigin = "center center";
+        }
+        if (poseIndex === 3) {
+          art.style.transform = "";
+        }
+        friendState.worldX = Math.max(0, Math.min(maxX, anchorX + pose.x));
+        friendState.worldY = Math.max(0, Math.min(maxY, anchorY + pose.y));
+        friendElement.style.left = `${friendState.worldX}px`;
+        friendElement.style.top = `${friendState.worldY}px`;
+        poseIndex += 1;
+
+        if (poseIndex < poses.length) {
+          friendState.puppyPlayTimer = setTimeout(applyPose, 260);
+          return;
+        }
+
+        art.style.transition = "opacity 420ms ease";
+        art.style.opacity = "0";
+        friendState.puppyPlayTimer = setTimeout(() => {
+          friendState.hasBone = true;
+          friendState.activated = false;
+          art.style.transition = "";
+          art.style.opacity = "1";
+          art.style.backgroundImage = `url("${window.CuppyLandGame.friendAssetMap?.["golden-puppy-with-bone-sitting"] || window.CuppyLandGame.friendAssetMap?.["golden-puppy-sitting"] || ""}")`;
+          friendState.worldX = anchorX;
+          friendState.worldY = anchorY;
+          friendElement.style.left = `${anchorX}px`;
+          friendElement.style.top = `${anchorY}px`;
+          friendState.puppyPlayTimer = null;
+        }, 420);
+      };
+
+      applyPose();
+      return true;
+    }
     let rocketAutoScheduleTimer = null;
     const rocketLaunchers = new Map();
 
@@ -454,6 +533,7 @@
       startRocketManAnimation,
       stopRocketManAnimation,
       triggerRocketManAnimation,
+      playGoldenPuppyWithBone,
       stopForFriend,
     };
   }
