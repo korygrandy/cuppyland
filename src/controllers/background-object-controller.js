@@ -40,6 +40,10 @@
     }
 
     function friendIntersectsObject(friendState, friendElement, objectConfig) {
+      if (Array.isArray(objectConfig.activatorTypes) && !objectConfig.activatorTypes.includes(friendState.type)) {
+        return false;
+      }
+
       const friendLeft = Number.isFinite(friendState.worldX) ? friendState.worldX : 0;
       const friendTop = Number.isFinite(friendState.worldY) ? friendState.worldY : 0;
       const friendRight = friendLeft + (friendElement?.offsetWidth || 0);
