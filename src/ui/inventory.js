@@ -172,8 +172,8 @@
     const petsItems = document.getElementById("petsItems");
     const friendsItems = document.getElementById("friendsItems");
 
-    const accessoryTypes = new Set(["lavalamp", "chocolate-milk", "uke", "rabbit-bead-craft", "flower-bead-craft", "merry-go-round"]);
-    const petTypes = new Set(["golden-puppy", "doghouse", "fishbowl"]);
+    const accessoryTypes = new Set(["lavalamp", "chocolate-milk", "uke", "flower-bead-craft", "merry-go-round"]);
+    const petTypes = new Set(["golden-puppy", "doghouse", "fishbowl", "rabbit-bead-craft", "triceratops-bead-craft", "turkey"]);
 
     colorItems.innerHTML = "";
     expressionItems.innerHTML = "";

@@ -6,6 +6,7 @@
       findFriendById,
       playSfxClip = () => {},
     } = options;
+    let rocketAutoScheduleTimer = null;
     const rocketLaunchers = new Map();
 
     function stopRabbitAnimation(friendId) {
@@ -258,6 +259,33 @@
       return 60000 + Math.floor(Math.random() * 120001);
     }
 
+    function getRocketManInstances() {
+      if (!state?.activeWorld) {
+        return [];
+      }
+      return (state.worlds?.[state.activeWorld]?.friends || [])
+        .filter((friend) => friend.type === "rocketman-craft");
+    }
+
+    function launchRandomRocketMan() {
+      const rocketMen = getRocketManInstances();
+      if (!rocketMen.length) {
+        return;
+      }
+      const selected = rocketMen[Math.floor(Math.random() * rocketMen.length)];
+      triggerRocketManAnimation(selected.id);
+    }
+
+    function scheduleRandomRocketLaunch() {
+      if (rocketAutoScheduleTimer) {
+        clearTimeout(rocketAutoScheduleTimer);
+      }
+      rocketAutoScheduleTimer = setTimeout(() => {
+        rocketAutoScheduleTimer = null;
+        launchRandomRocketMan();
+      }, getRocketLaunchDelayMs());
+    }
+
     function stopRocketManAnimation(friendId) {
       const friendState = findFriendById(friendId);
       if (!friendState || friendState.type !== "rocketman-craft") {
@@ -304,17 +332,6 @@
       }
       stopRocketManAnimation(friendId);
 
-      const scheduleLaunch = () => {
-        const activeFriend = findFriendById(friendId);
-        if (!activeFriend) {
-          return;
-        }
-
-        activeFriend.rocketScheduleTimer = setTimeout(() => {
-          launchRocket(activeFriend.id);
-        }, getRocketLaunchDelayMs());
-      };
-
       const launchRocket = (activeFriendId) => {
         const activeFriend = findFriendById(activeFriendId);
         if (!activeFriend || activeFriend.type !== "rocketman-craft") {
@@ -323,7 +340,7 @@
         const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${activeFriendId}"]`);
         const art = friendElement?.querySelector(".friend-character-art");
         if (!friendElement) {
-          scheduleLaunch();
+          scheduleRandomRocketLaunch();
           return;
         }
 
@@ -401,7 +418,7 @@
               if (art) {
                 art.style.transform = "";
               }
-              scheduleLaunch();
+              scheduleRandomRocketLaunch();
             };
             activeFriend.rocketAnimationFrameId = requestAnimationFrame(returnFrame);
           };
@@ -410,7 +427,7 @@
       };
 
       rocketLaunchers.set(friendId, launchRocket);
-      scheduleLaunch();
+      scheduleRandomRocketLaunch();
     }
 
     function triggerRocketManAnimation(friendId) {
