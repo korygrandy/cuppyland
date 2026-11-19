@@ -625,7 +625,7 @@ body {
   box-shadow:
     0 4px 10px rgba(255, 83, 20, 0.68),
     0 8px 18px rgba(255, 38, 12, 0.32);
-  transform: rotate(215deg) scaleY(-1);
+  transform: rotate(-35deg);
   transform-origin: center top;
   pointer-events: none;
   animation: rocketFlameBurst 2000ms ease-out forwards;
@@ -647,24 +647,24 @@ body {
   0% {
     opacity: 0;
     height: 18px;
-    transform: rotate(215deg) scale(0.6, -1);
+    transform: rotate(-35deg) scaleX(0.6);
   }
   12% {
     opacity: 1;
   }
   35% {
     height: 84px;
-    transform: rotate(215deg) scale(1, -1);
+    transform: rotate(-35deg) scaleX(1);
   }
   68% {
     opacity: 0.9;
     height: 68px;
-    transform: rotate(215deg) scale(0.82, -1);
+    transform: rotate(-35deg) scaleX(0.82);
   }
   100% {
     opacity: 0;
     height: 20px;
-    transform: rotate(215deg) scale(0.35, -1);
+    transform: rotate(-35deg) scaleX(0.35);
   }
 }
 
