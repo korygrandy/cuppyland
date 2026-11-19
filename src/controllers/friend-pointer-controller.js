@@ -301,6 +301,7 @@
           return;
         }
         friendState.lastTapAtMs = nowMs;
+        friendState.fishbowlSuppressPointerDrag = false;
       }
 
       if (friendState.type === "rocketman-craft") {
@@ -425,17 +426,6 @@
       const friendState = resolveFriendStateForElement(friendElement);
       setFriendDragVisual(friendElement, friendState, false);
 
-      if (friendState?.type === "fishbowl") {
-        friendElement.dataset.dragging = "false";
-        if (friendState.fishbowlSuppressPointerDrag) {
-          friendState.fishbowlSuppressPointerDrag = false;
-          resetFriendDragState();
-          return;
-        }
-        if (typeof resumeFishbowlSequence === "function") {
-          resumeFishbowlSequence(friendState.id);
-        }
-      }
 
       if (friendState?.type === "golden-puppy" && friendState.extractedFromDoghouseId && !friendDragState.moved) {
         if (typeof cancelPuppyExtraction === "function") {
