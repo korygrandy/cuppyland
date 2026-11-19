@@ -334,7 +334,7 @@
         const maxY = Math.max(0, worldCanvas.offsetHeight - friendElement.offsetHeight);
         const targetX = Math.max(0, Math.min(maxX, anchorX - 100));
         const targetY = Math.max(0, Math.min(maxY, anchorY - 100));
-        const launchDelayMs = 2000;
+        const launchDelayMs = 3000;
         const launchDurationMs = 2000;
         const returnDurationMs = 5500;
 
