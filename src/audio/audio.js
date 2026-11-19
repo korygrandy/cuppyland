@@ -246,7 +246,10 @@
       }
       return;
     }
-    const clip = sfxClipPlayers[clipName];
+    let clip = sfxClipPlayers[clipName];
+    if (!clip && clipName === "goldenPuppyActivated") {
+      clip = sfxClipPlayers.shimmer || null;
+    }
     if (!clip) {
       if (typeof onEnded === "function") {
         onEnded();

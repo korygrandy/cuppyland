@@ -41,8 +41,8 @@
       {
         id: "merry-go-round",
         label: "Merry-Go-Round",
-        x: 3056,
-        y: 539,
+        x: 3050,
+        y: 598,
         width: 259,
         height: 161,
         activatedAsset: "./assets/merry-go-round-animated.gif",

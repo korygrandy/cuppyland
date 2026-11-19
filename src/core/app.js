@@ -283,6 +283,7 @@ friendWorldController = window.CuppyLandWorldFriendController.createController({
     if (!puppyState) {
       return;
     }
+    window.CuppyLandAudio?.playSfxClip?.("goldenPuppyActivated");
     requestAnimationFrame(() => {
       const puppyElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${puppyState.id}"]`);
       if (puppyElement) {

@@ -254,6 +254,7 @@
         barbieBlondeSnap: "./sfx/barbie-blonde-snap.ogg",
         barbieBlondeBabySnap: "./sfx/barbie-blonde-baby-snap.ogg",
         turkeyGobble: "./sfx/turkey-gobble-doubleclick.ogg",
+        goldenPuppyActivated: "./sfx/golden-puppy-activated.ogg",
         cupRemoved: "./sfx/goodbye.ogg",
         defaultObjectRemoved: "./sfx/default-object-removed.ogg",
         milkPour: "./sfx/milk-pour.ogg",
