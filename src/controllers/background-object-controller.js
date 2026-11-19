@@ -6,6 +6,7 @@
     } = options;
 
     const activeFriendsByObject = new Map();
+    const fadeTimers = new Map();
     let activeWorld = null;
 
     function getObjects(worldId = activeWorld) {
@@ -16,6 +17,8 @@
       activeWorld = worldId;
       container.innerHTML = "";
       activeFriendsByObject.clear();
+      fadeTimers.forEach((timerId) => clearTimeout(timerId));
+      fadeTimers.clear();
 
       getObjects(worldId).forEach((objectConfig) => {
         const anchor = document.createElement("div");
@@ -65,10 +68,26 @@
         activeFriendsByObject.set(objectConfig.id, activeFriends);
         const isActive = activeFriends.size > 0;
         const anchor = container.querySelector(`[data-object-id="${objectConfig.id}"]`);
-        anchor?.classList.toggle("active", isActive);
 
         if (!wasActive && isActive && objectConfig.activatedSfx) {
-          playSfxClip(objectConfig.activatedSfx);
+          const previousTimer = fadeTimers.get(objectConfig.id);
+          if (previousTimer) {
+            clearTimeout(previousTimer);
+          }
+          anchor?.classList.remove("fading");
+          anchor?.classList.add("active");
+          playSfxClip(objectConfig.activatedSfx, () => {
+            if (!anchor) {
+              return;
+            }
+            anchor.classList.remove("active");
+            anchor.classList.add("fading");
+            const fadeTimer = setTimeout(() => {
+              anchor.classList.remove("fading");
+              fadeTimers.delete(objectConfig.id);
+            }, objectConfig.fadeOutMs ?? 450);
+            fadeTimers.set(objectConfig.id, fadeTimer);
+          });
         }
       });
     }
@@ -80,8 +99,6 @@
 
       activeFriendsByObject.forEach((activeFriends, objectId) => {
         activeFriends.delete(friendId);
-        const anchor = container.querySelector(`[data-object-id="${objectId}"]`);
-        anchor?.classList.toggle("active", activeFriends.size > 0);
       });
     }
 

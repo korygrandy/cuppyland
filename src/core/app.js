@@ -210,7 +210,7 @@ const worldHeadlineController = window.CuppyLandWorldHeadlineController.createCo
 worldHeadlineController.syncCardHeadlines();
 const backgroundObjectController = window.CuppyLandBackgroundObjectController.createController({
   container: worldBackgroundObjects,
-  playSfxClip: (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName),
+  playSfxClip: (clipName, onEnded) => window.CuppyLandAudio?.playSfxClip?.(clipName, onEnded),
 });
 const friendMotionController = window.CuppyLandFriendMotionController.createController({
   state,
