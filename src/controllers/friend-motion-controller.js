@@ -349,7 +349,18 @@
           const flame = document.createElement("span");
           flame.className = "rocketman-flame";
           friendElement.prepend(flame);
-          setTimeout(() => flame.remove(), 2000);
+          setTimeout(() => {
+            flame.remove();
+            const smoke = document.createElement("span");
+            smoke.className = "rocketman-smoke";
+            for (let index = 0; index < 7; index += 1) {
+              const puff = document.createElement("span");
+              puff.className = "rocketman-smoke-puff";
+              smoke.appendChild(puff);
+            }
+            friendElement.appendChild(smoke);
+            setTimeout(() => smoke.remove(), 1400);
+          }, 2000);
           const launchStartedAt = performance.now();
           const launchFrame = (now) => {
             const progress = Math.min(1, (now - launchStartedAt) / launchDurationMs);

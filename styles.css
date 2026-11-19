@@ -668,6 +668,54 @@ body {
   }
 }
 
+.rocketman-smoke {
+  position: absolute;
+  left: 34%;
+  top: 56%;
+  z-index: 95;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.rocketman-smoke-puff {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 34px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #6f7479 0%, #363a3f 42%, #17191b 74%, rgba(12, 13, 14, 0) 100%);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.25);
+  animation: rocketSmokePuff 1200ms ease-out forwards;
+}
+
+.rocketman-smoke-puff:nth-child(2) { animation-delay: 50ms; margin-left: 17px; margin-top: -8px; }
+.rocketman-smoke-puff:nth-child(3) { animation-delay: 90ms; margin-left: -14px; margin-top: -14px; }
+.rocketman-smoke-puff:nth-child(4) { animation-delay: 130ms; margin-left: 26px; margin-top: 6px; }
+.rocketman-smoke-puff:nth-child(5) { animation-delay: 170ms; margin-left: -25px; margin-top: 9px; }
+.rocketman-smoke-puff:nth-child(6) { animation-delay: 210ms; margin-left: 10px; margin-top: -24px; }
+.rocketman-smoke-puff:nth-child(7) { animation-delay: 250ms; margin-left: -8px; margin-top: 18px; }
+
+@keyframes rocketSmokePuff {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  18% {
+    opacity: 0.9;
+  }
+  60% {
+    opacity: 0.62;
+    transform: translate(-50%, -50%) scale(1.25);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2);
+  }
+}
+
 .doghouse-extraction-zone {
   position: absolute;
   left: 35%;
