@@ -242,7 +242,9 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   updateFriendElementAsset: (friendId) => friendWorldController?.updateFriendElementAsset?.(friendId),
   syncBackgroundObjectActivation: (friendState, friendElement) => backgroundObjectController.syncFriend(friendState, friendElement),
   syncMerryGoRoundActivations: () => friendWorldController?.syncMerryGoRoundActivations?.(),
-  syncDoghouseActivations: () => friendWorldController?.syncDoghouseActivations?.(),
+  syncDoghouseActivations: (commitAttachment, draggedFriendState) => (
+    friendWorldController?.syncDoghouseActivations?.(commitAttachment, draggedFriendState)
+  ),
   onChocolateMilkFillStart,
   onChocolateMilkFillTick,
   onChocolateMilkFillCancel,

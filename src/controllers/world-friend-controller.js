@@ -284,7 +284,7 @@
         });
     }
 
-    function syncDoghouseActivations(commitAttachment = false) {
+    function syncDoghouseActivations(commitAttachment = false, draggedFriendState = null) {
       const worldFriends = getWorldFriendList(state.activeWorld);
       const friendElements = Array.from(worldCanvas.querySelectorAll(".friend-character"));
       const puppyElements = friendElements.filter((element) => element.dataset.friendType === "golden-puppy");
@@ -312,7 +312,11 @@
           const attachedPuppy = worldFriends.find((friend) => (
             friend.type === "golden-puppy" && friend.doghouseId === doghouseState.id
           ));
-          const occupied = Boolean(puppyState && (commitAttachment || puppyState.puppyAttachmentPending));
+          const draggedPuppyMatches = Boolean(draggedFriendState && puppyState?.id === draggedFriendState.id);
+          const occupied = Boolean(
+            puppyState
+            && (puppyState.puppyAttachmentPending || (commitAttachment && draggedPuppyMatches))
+          );
 
           if (occupied && puppyState) {
             puppyState.doghouseId = doghouseState.id;

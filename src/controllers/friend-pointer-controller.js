@@ -284,6 +284,9 @@
       friendDragState.currentClientX = event.clientX;
       friendDragState.currentClientY = event.clientY;
       friendDragState.dragStartedAtMs = Date.now();
+      if (friendState.type === "golden-puppy") {
+        friendState.puppyAttachmentPending = true;
+      }
       if (friendState.type === "rabbit-bead-craft" && typeof stopRabbitAnimation === "function") {
         stopRabbitAnimation(friendState.id);
         friendState.rabbitAnchorWorldX = friendState.worldX;
@@ -373,7 +376,7 @@
         syncMerryGoRoundActivations();
       }
       if (typeof syncDoghouseActivations === "function") {
-        syncDoghouseActivations(true);
+        syncDoghouseActivations(true, friendState);
         friendState.activated = false;
         if (typeof updateFriendElementAsset === "function" && friendState?.type === "golden-puppy") {
           updateFriendElementAsset(friendState.id);
