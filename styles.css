@@ -598,6 +598,11 @@ body {
   height: 176px;
 }
 
+.friend-character[data-friend-type="merry-go-round"] {
+  width: 248px;
+  height: 154px;
+}
+
 .friend-character[data-friend-type="rabbit-bead-craft"] .friend-character-art {
   transition: transform 180ms ease-in-out;
   transform-origin: center bottom;

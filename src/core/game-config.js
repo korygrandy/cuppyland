@@ -87,6 +87,7 @@
       "uke",
       "rabbit-bead-craft",
       "flower-bead-craft",
+      "merry-go-round",
     ],
     expressionAssetMap: {
       happy: "./assets/facial-expression-happy.png",
@@ -158,6 +159,8 @@
       "uke": "./assets/uke.png",
       "rabbit-bead-craft": "./assets/rabbit-bead-craft.png",
       "flower-bead-craft": "./assets/flower-bead-craft.png",
+      "merry-go-round": "./assets/merry-go-round.png",
+      "merry-go-round-animated": "./assets/merry-go-round-animated.gif",
     },
     chocolateMilkSequence: {
       durationMs: 5000,

@@ -171,7 +171,7 @@
     const accessoriesItems = document.getElementById("accessoriesItems");
     const friendsItems = document.getElementById("friendsItems");
 
-    const accessoryTypes = new Set(["lavalamp", "chocolate-milk", "uke", "rabbit-bead-craft", "flower-bead-craft"]);
+    const accessoryTypes = new Set(["lavalamp", "chocolate-milk", "uke", "rabbit-bead-craft", "flower-bead-craft", "merry-go-round"]);
 
     colorItems.innerHTML = "";
     expressionItems.innerHTML = "";
