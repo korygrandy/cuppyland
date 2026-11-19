@@ -21,6 +21,8 @@
       stopRabbitAnimation,
       startTriceratopsAnimation,
       stopTriceratopsAnimation,
+      stopRocketManAnimation,
+      startRocketManAnimation,
       syncBarbieActivationState,
       updateFriendElementAsset,
       syncBackgroundObjectActivation,
@@ -302,6 +304,9 @@
       if (friendState.type === "triceratops-bead-craft" && typeof stopTriceratopsAnimation === "function") {
         stopTriceratopsAnimation(friendState.id);
       }
+      if (friendState.type === "rocketman-craft" && typeof stopRocketManAnimation === "function") {
+        stopRocketManAnimation(friendState.id);
+      }
       if (friendState.type === "chocolate-milk") {
         friendState.attachedCupId = null;
         friendState.sequenceCompleted = false;
@@ -419,6 +424,9 @@
         if (typeof startTriceratopsAnimation === "function") {
           startTriceratopsAnimation(friendState.id);
         }
+      }
+      if (friendState?.type === "rocketman-craft" && typeof startRocketManAnimation === "function") {
+        startRocketManAnimation(friendState.id);
       }
 
       if (friendElement && friendState?.type === "chocolate-milk") {

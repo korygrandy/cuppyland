@@ -602,6 +602,9 @@
           if (friendState.type === "triceratops-bead-craft") {
             motionController?.startTriceratopsAnimation?.(friendState.id);
           }
+          if (friendState.type === "rocketman-craft") {
+            motionController?.startRocketManAnimation?.(friendState.id);
+          }
           syncBackgroundObjectActivation(friendState, friendElement);
         });
       syncMerryGoRoundActivations();
@@ -622,6 +625,8 @@
       stopRabbitAnimation: (friendId) => motionController?.stopRabbitAnimation?.(friendId),
       startTriceratopsAnimation: (friendId) => motionController?.startTriceratopsAnimation?.(friendId),
       stopTriceratopsAnimation: (friendId) => motionController?.stopTriceratopsAnimation?.(friendId),
+      startRocketManAnimation: (friendId) => motionController?.startRocketManAnimation?.(friendId),
+      stopRocketManAnimation: (friendId) => motionController?.stopRocketManAnimation?.(friendId),
       syncMerryGoRoundActivations,
       syncDoghouseActivations,
       extractPuppyFromDoghouse,
