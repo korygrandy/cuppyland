@@ -25,6 +25,7 @@
       updateFriendElementAsset,
       syncBackgroundObjectActivation,
       syncMerryGoRoundActivations,
+      syncDoghouseActivations,
       onChocolateMilkFillStart,
       onChocolateMilkFillTick,
       onChocolateMilkFillCancel,
@@ -344,6 +345,9 @@
       if (typeof syncMerryGoRoundActivations === "function") {
         syncMerryGoRoundActivations();
       }
+      if (typeof syncDoghouseActivations === "function") {
+        syncDoghouseActivations();
+      }
       updateChocolateMilkFill(friendElement, friendState, event.clientX, event.clientY);
     }
 
@@ -367,6 +371,9 @@
       }
       if (typeof syncMerryGoRoundActivations === "function") {
         syncMerryGoRoundActivations();
+      }
+      if (typeof syncDoghouseActivations === "function") {
+        syncDoghouseActivations();
       }
       if (friendState?.type === "rabbit-bead-craft") {
         friendState.rabbitAnchorWorldX = friendState.worldX;

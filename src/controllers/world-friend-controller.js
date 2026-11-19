@@ -137,6 +137,16 @@
         return friendState.activated ? animatedAsset : defaultAsset;
       }
 
+      if (friendState.type === "golden-puppy") {
+        return getFriendAssetMap()?.["golden-puppy-sitting"] || getFriendAssetMap()?.[friendState.type] || "";
+      }
+
+      if (friendState.type === "doghouse") {
+        const activeAsset = getFriendAssetMap()?.["doghouse-with-dog"] || getFriendAssetMap()?.[friendState.type] || "";
+        const defaultAsset = getFriendAssetMap()?.[friendState.type] || "";
+        return friendState.activated ? activeAsset : defaultAsset;
+      }
+
       return getFriendAssetMap()?.[friendState.type] || "";
     }
 
@@ -267,6 +277,36 @@
           if (art && asset) {
             art.style.backgroundImage = `url("${asset}")`;
           }
+        });
+    }
+
+    function syncDoghouseActivations() {
+      const worldFriends = getWorldFriendList(state.activeWorld);
+      const friendElements = Array.from(worldCanvas.querySelectorAll(".friend-character"));
+      const puppyElements = friendElements.filter((element) => element.dataset.friendType === "golden-puppy");
+
+      friendElements
+        .filter((element) => element.dataset.friendType === "doghouse")
+        .forEach((doghouseElement) => {
+          const doghouseState = worldFriends.find((friend) => friend.id === doghouseElement.dataset.friendId);
+          if (!doghouseState) {
+            return;
+          }
+
+          const doghouseRect = doghouseElement.getBoundingClientRect();
+          const occupied = puppyElements.some((puppyElement) => {
+            const puppyRect = puppyElement.getBoundingClientRect();
+            return puppyRect.right >= doghouseRect.left
+              && puppyRect.left <= doghouseRect.right
+              && puppyRect.bottom >= doghouseRect.top
+              && puppyRect.top <= doghouseRect.bottom;
+          });
+
+          if (doghouseState.activated === occupied) {
+            return;
+          }
+          doghouseState.activated = occupied;
+          updateFriendElementAsset(doghouseState.id);
         });
     }
 
@@ -467,6 +507,7 @@
           syncBackgroundObjectActivation(friendState, friendElement);
         });
       syncMerryGoRoundActivations();
+      syncDoghouseActivations();
       onRefreshChocolateMilkSequences();
     }
 
@@ -484,6 +525,7 @@
       startTriceratopsAnimation: (friendId) => motionController?.startTriceratopsAnimation?.(friendId),
       stopTriceratopsAnimation: (friendId) => motionController?.stopTriceratopsAnimation?.(friendId),
       syncMerryGoRoundActivations,
+      syncDoghouseActivations,
       renderWorldFriends,
     };
   }
