@@ -272,6 +272,10 @@
         clearTimeout(friendState.rocketScheduleTimer);
         friendState.rocketScheduleTimer = null;
       }
+      if (friendState.rocketLaunchDelayTimer) {
+        clearTimeout(friendState.rocketLaunchDelayTimer);
+        friendState.rocketLaunchDelayTimer = null;
+      }
 
       const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`);
       const art = friendElement?.querySelector(".friend-character-art");
@@ -330,60 +334,63 @@
         const maxY = Math.max(0, worldCanvas.offsetHeight - friendElement.offsetHeight);
         const targetX = Math.max(0, Math.min(maxX, anchorX - 100));
         const targetY = Math.max(0, Math.min(maxY, anchorY - 100));
-        const launchDurationMs = 700;
-        const returnDurationMs = 3200;
-        const launchStartedAt = performance.now();
+        const launchDelayMs = 2000;
+        const launchDurationMs = 2000;
+        const returnDurationMs = 5500;
 
         playSfxClip("rocketmanActivated");
         if (art) {
           art.style.transformOrigin = "center bottom";
         }
 
-        const launchFrame = (now) => {
-          const progress = Math.min(1, (now - launchStartedAt) / launchDurationMs);
-          const eased = 1 - Math.pow(1 - progress, 3);
-          activeFriend.worldX = anchorX + ((targetX - anchorX) * eased);
-          activeFriend.worldY = anchorY + ((targetY - anchorY) * eased);
-          friendElement.style.left = `${activeFriend.worldX}px`;
-          friendElement.style.top = `${activeFriend.worldY}px`;
-          if (art) {
-            art.style.transform = `rotate(${(-8 * eased).toFixed(2)}deg)`;
-          }
-
-          if (progress < 1) {
-            activeFriend.rocketAnimationFrameId = requestAnimationFrame(launchFrame);
-            return;
-          }
-
-          const returnStartedAt = performance.now();
-          const returnFrame = (returnNow) => {
-            const returnProgress = Math.min(1, (returnNow - returnStartedAt) / returnDurationMs);
-            const easedReturn = returnProgress * returnProgress * (3 - (2 * returnProgress));
-            activeFriend.worldX = targetX + ((anchorX - targetX) * easedReturn);
-            activeFriend.worldY = targetY + ((anchorY - targetY) * easedReturn);
+        activeFriend.rocketLaunchDelayTimer = setTimeout(() => {
+          activeFriend.rocketLaunchDelayTimer = null;
+          const launchStartedAt = performance.now();
+          const launchFrame = (now) => {
+            const progress = Math.min(1, (now - launchStartedAt) / launchDurationMs);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            activeFriend.worldX = anchorX + ((targetX - anchorX) * eased);
+            activeFriend.worldY = anchorY + ((targetY - anchorY) * eased);
             friendElement.style.left = `${activeFriend.worldX}px`;
             friendElement.style.top = `${activeFriend.worldY}px`;
             if (art) {
-              art.style.transform = `rotate(${(-8 * (1 - easedReturn)).toFixed(2)}deg)`;
+              art.style.transform = `rotate(${(-8 * eased).toFixed(2)}deg)`;
             }
 
-            if (returnProgress < 1) {
-              activeFriend.rocketAnimationFrameId = requestAnimationFrame(returnFrame);
+            if (progress < 1) {
+              activeFriend.rocketAnimationFrameId = requestAnimationFrame(launchFrame);
               return;
             }
 
-            activeFriend.rocketAnimationFrameId = null;
-            activeFriend.rocketHomeWorldX = null;
-            activeFriend.rocketHomeWorldY = null;
-            if (art) {
-              art.style.transform = "";
-            }
-            scheduleLaunch();
-          };
-          activeFriend.rocketAnimationFrameId = requestAnimationFrame(returnFrame);
-        };
+            const returnStartedAt = performance.now();
+            const returnFrame = (returnNow) => {
+              const returnProgress = Math.min(1, (returnNow - returnStartedAt) / returnDurationMs);
+              const easedReturn = returnProgress * returnProgress * (3 - (2 * returnProgress));
+              activeFriend.worldX = targetX + ((anchorX - targetX) * easedReturn);
+              activeFriend.worldY = targetY + ((anchorY - targetY) * easedReturn);
+              friendElement.style.left = `${activeFriend.worldX}px`;
+              friendElement.style.top = `${activeFriend.worldY}px`;
+              if (art) {
+                art.style.transform = `rotate(${(-8 * (1 - easedReturn)).toFixed(2)}deg)`;
+              }
 
-        activeFriend.rocketAnimationFrameId = requestAnimationFrame(launchFrame);
+              if (returnProgress < 1) {
+                activeFriend.rocketAnimationFrameId = requestAnimationFrame(returnFrame);
+                return;
+              }
+
+              activeFriend.rocketAnimationFrameId = null;
+              activeFriend.rocketHomeWorldX = null;
+              activeFriend.rocketHomeWorldY = null;
+              if (art) {
+                art.style.transform = "";
+              }
+              scheduleLaunch();
+            };
+            activeFriend.rocketAnimationFrameId = requestAnimationFrame(returnFrame);
+          };
+          activeFriend.rocketAnimationFrameId = requestAnimationFrame(launchFrame);
+        }, launchDelayMs);
       };
 
       rocketLaunchers.set(friendId, launchRocket);
