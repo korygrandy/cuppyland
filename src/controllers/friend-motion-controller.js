@@ -294,6 +294,7 @@
       if (art) {
         art.style.transform = "";
       }
+      friendElement?.querySelector(".rocketman-flame")?.remove();
     }
 
     function startRocketManAnimation(friendId) {
@@ -345,6 +346,10 @@
 
         activeFriend.rocketLaunchDelayTimer = setTimeout(() => {
           activeFriend.rocketLaunchDelayTimer = null;
+          const flame = document.createElement("span");
+          flame.className = "rocketman-flame";
+          friendElement.prepend(flame);
+          setTimeout(() => flame.remove(), 2000);
           const launchStartedAt = performance.now();
           const launchFrame = (now) => {
             const progress = Math.min(1, (now - launchStartedAt) / launchDurationMs);

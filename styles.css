@@ -613,6 +613,61 @@ body {
   height: 120px;
 }
 
+.rocketman-flame {
+  position: absolute;
+  left: 58%;
+  top: 76%;
+  z-index: -1;
+  width: 18px;
+  height: 76px;
+  border-radius: 999px 999px 80% 80%;
+  background: linear-gradient(180deg, #fff2a8 0%, #ff9a20 32%, #ff3b16 72%, rgba(255, 44, 12, 0) 100%);
+  box-shadow:
+    0 4px 10px rgba(255, 83, 20, 0.68),
+    0 8px 18px rgba(255, 38, 12, 0.32);
+  transform: rotate(35deg);
+  transform-origin: center top;
+  pointer-events: none;
+  animation: rocketFlameBurst 2000ms ease-out forwards;
+}
+
+.rocketman-flame::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 2px;
+  width: 8px;
+  height: 52px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffbe2 0%, #ffd85f 42%, rgba(255, 190, 40, 0) 100%);
+}
+
+@keyframes rocketFlameBurst {
+  0% {
+    opacity: 0;
+    height: 18px;
+    transform: rotate(35deg) scaleX(0.6);
+  }
+  12% {
+    opacity: 1;
+  }
+  35% {
+    height: 84px;
+    transform: rotate(35deg) scaleX(1);
+  }
+  68% {
+    opacity: 0.9;
+    height: 68px;
+    transform: rotate(35deg) scaleX(0.82);
+  }
+  100% {
+    opacity: 0;
+    height: 20px;
+    transform: rotate(35deg) scaleX(0.35);
+  }
+}
+
 .doghouse-extraction-zone {
   position: absolute;
   left: 35%;
