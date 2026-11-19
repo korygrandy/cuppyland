@@ -278,8 +278,11 @@
       if (friendState.type === "rocketman-craft") {
         const nowMs = Date.now();
         const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 320) {
+        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
           friendState.lastTapAtMs = nowMs;
+          resetFriendDragState();
+          event.preventDefault();
+          event.stopPropagation();
           if (typeof startRocketManAnimation === "function") {
             startRocketManAnimation(friendState.id, true);
           }
