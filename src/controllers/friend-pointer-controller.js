@@ -244,13 +244,13 @@
       }
     }
 
-    function onPointerDown(event) {
+    function onPointerDown(event, overrides = {}) {
       if (state.currentScreen !== "world") {
         return;
       }
 
-      const friendElement = event.currentTarget.closest(".friend-character");
-      const friendState = resolveFriendStateForElement(friendElement);
+      const friendElement = overrides.friendElement || event.currentTarget.closest(".friend-character");
+      const friendState = overrides.friendState || resolveFriendStateForElement(friendElement);
       if (!friendElement || !friendState) {
         return;
       }
@@ -373,7 +373,11 @@
         syncMerryGoRoundActivations();
       }
       if (typeof syncDoghouseActivations === "function") {
-        syncDoghouseActivations();
+        syncDoghouseActivations(true);
+        friendState.activated = false;
+        if (typeof updateFriendElementAsset === "function" && friendState?.type === "golden-puppy") {
+          updateFriendElementAsset(friendState.id);
+        }
       }
       if (friendState?.type === "rabbit-bead-craft") {
         friendState.rabbitAnchorWorldX = friendState.worldX;

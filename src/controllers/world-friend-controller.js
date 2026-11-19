@@ -18,6 +18,8 @@
       motionController = null,
       syncBackgroundObjectActivation = () => {},
       removeBackgroundObjectActivation = () => {},
+      onDoghousePointerDown = () => {},
+      getWorldPointFromClient = () => ({ worldX: 0, worldY: 0 }),
     } = options;
 
     const imagePreloadCache = new Map();
@@ -138,7 +140,9 @@
       }
 
       if (friendState.type === "golden-puppy") {
-        return getFriendAssetMap()?.["golden-puppy-sitting"] || getFriendAssetMap()?.[friendState.type] || "";
+        const activatedAsset = getFriendAssetMap()?.["golden-puppy-activated"] || getFriendAssetMap()?.[friendState.type] || "";
+        const sittingAsset = getFriendAssetMap()?.["golden-puppy-sitting"] || getFriendAssetMap()?.[friendState.type] || "";
+        return friendState.activated ? activatedAsset : sittingAsset;
       }
 
       if (friendState.type === "doghouse") {
@@ -280,7 +284,7 @@
         });
     }
 
-    function syncDoghouseActivations() {
+    function syncDoghouseActivations(commitAttachment = false) {
       const worldFriends = getWorldFriendList(state.activeWorld);
       const friendElements = Array.from(worldCanvas.querySelectorAll(".friend-character"));
       const puppyElements = friendElements.filter((element) => element.dataset.friendType === "golden-puppy");
@@ -294,7 +298,7 @@
           }
 
           const doghouseRect = doghouseElement.getBoundingClientRect();
-          const occupied = puppyElements.some((puppyElement) => {
+          const overlappingPuppy = puppyElements.find((puppyElement) => {
             const puppyRect = puppyElement.getBoundingClientRect();
             return puppyRect.right >= doghouseRect.left
               && puppyRect.left <= doghouseRect.right
@@ -302,12 +306,60 @@
               && puppyRect.top <= doghouseRect.bottom;
           });
 
-          if (doghouseState.activated === occupied) {
+          const puppyState = overlappingPuppy
+            ? worldFriends.find((friend) => friend.id === overlappingPuppy.dataset.friendId)
+            : null;
+          const attachedPuppy = worldFriends.find((friend) => (
+            friend.type === "golden-puppy" && friend.doghouseId === doghouseState.id
+          ));
+          const occupied = Boolean(puppyState && (commitAttachment || puppyState.puppyAttachmentPending));
+
+          if (occupied && puppyState) {
+            puppyState.doghouseId = doghouseState.id;
+            puppyState.attached = true;
+            puppyState.activated = false;
+            puppyState.puppyAttachmentPending = false;
+            doghouseState.attachedPuppyId = puppyState.id;
+            doghouseState.activated = true;
+            onRenderWorldCups();
             return;
           }
-          doghouseState.activated = occupied;
-          updateFriendElementAsset(doghouseState.id);
+
+          doghouseState.activated = Boolean(attachedPuppy);
+          if (!doghouseState.activated) {
+            doghouseState.attachedPuppyId = null;
+          }
+          if (doghouseState.activated) {
+            return;
+          }
+          if (doghouseState.activated === false) {
+            updateFriendElementAsset(doghouseState.id);
+          }
+          if (!puppyState) {
+            return;
+          }
         });
+    }
+
+    function extractPuppyFromDoghouse(doghouseState, event) {
+      const puppyState = getWorldFriendList(state.activeWorld).find((friend) => (
+        friend.type === "golden-puppy" && friend.doghouseId === doghouseState.id
+      ));
+      if (!puppyState) {
+        return null;
+      }
+
+      const point = getWorldPointFromClient(event.clientX, event.clientY);
+      puppyState.doghouseId = null;
+      puppyState.attached = false;
+      puppyState.activated = true;
+      puppyState.puppyAttachmentPending = false;
+      puppyState.worldX = Math.max(0, point.worldX - 60);
+      puppyState.worldY = Math.max(0, point.worldY - 60);
+      doghouseState.attachedPuppyId = null;
+      doghouseState.activated = false;
+      onRenderWorldCups();
+      return puppyState;
     }
 
     function syncAttachedFriendPosition(friendState, friendElement = null) {
@@ -448,6 +500,9 @@
 
     function createFriendElement(friendState) {
       syncAttachedFriendPosition(friendState);
+      if (friendState.type === "golden-puppy" && friendState.attached) {
+        return null;
+      }
       const friendElement = document.createElement("div");
       friendElement.className = "friend-character";
       friendElement.dataset.friendId = friendState.id;
@@ -464,6 +519,17 @@
         art.style.transformOrigin = "center bottom";
       }
       friendElement.appendChild(art);
+      if (friendState.type === "doghouse" && friendState.activated) {
+        const extractionZone = document.createElement("span");
+        extractionZone.className = "doghouse-extraction-zone";
+        extractionZone.setAttribute("aria-hidden", "true");
+        extractionZone.addEventListener("pointerdown", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          onDoghousePointerDown(friendState, event);
+        });
+        friendElement.appendChild(extractionZone);
+      }
       friendElement.addEventListener("pointerdown", onFriendPointerDown);
       friendElement.addEventListener("pointermove", onFriendPointerMove);
       friendElement.addEventListener("pointerup", onFriendPointerUp);
@@ -496,14 +562,17 @@
           if (isBarbieFriend(friendState)) {
             syncBarbieActivationState(friendState);
           }
-          worldCanvas.appendChild(createFriendElement(friendState));
+          const friendElement = createFriendElement(friendState);
+          if (!friendElement) {
+            return;
+          }
+          worldCanvas.appendChild(friendElement);
           if (friendState.type === "rabbit-bead-craft") {
             motionController?.startRabbitAnimation?.(friendState.id);
           }
           if (friendState.type === "triceratops-bead-craft") {
             motionController?.startTriceratopsAnimation?.(friendState.id);
           }
-          const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`);
           syncBackgroundObjectActivation(friendState, friendElement);
         });
       syncMerryGoRoundActivations();
@@ -526,6 +595,7 @@
       stopTriceratopsAnimation: (friendId) => motionController?.stopTriceratopsAnimation?.(friendId),
       syncMerryGoRoundActivations,
       syncDoghouseActivations,
+      extractPuppyFromDoghouse,
       renderWorldFriends,
     };
   }

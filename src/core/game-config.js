@@ -164,6 +164,7 @@
       "merry-go-round": "./assets/merry-go-round.png",
       "merry-go-round-animated": "./assets/merry-go-round-animated.gif",
       "golden-puppy": "./assets/golden-puppy.png",
+      "golden-puppy-activated": "./assets/golden-puppy-activated.png",
       "golden-puppy-sitting": "./assets/golden-puppy-sitting.png",
       "doghouse": "./assets/doghouse.png",
       "doghouse-with-dog": "./assets/doghouse-with-dog.png",

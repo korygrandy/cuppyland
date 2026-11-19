@@ -267,6 +267,19 @@ friendWorldController = window.CuppyLandWorldFriendController.createController({
   motionController: friendMotionController,
   syncBackgroundObjectActivation: (friendState, friendElement) => backgroundObjectController.syncFriend(friendState, friendElement),
   removeBackgroundObjectActivation: (friendId) => backgroundObjectController.removeFriend(friendId),
+  getWorldPointFromClient,
+  onDoghousePointerDown: (doghouseState, event) => {
+    const puppyState = friendWorldController.extractPuppyFromDoghouse(doghouseState, event);
+    if (!puppyState) {
+      return;
+    }
+    requestAnimationFrame(() => {
+      const puppyElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${puppyState.id}"]`);
+      if (puppyElement) {
+        friendPointerController.onPointerDown(event, { friendElement: puppyElement, friendState: puppyState });
+      }
+    });
+  },
 });
 
 function syncAudioForCurrentScreen() {
