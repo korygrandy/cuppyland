@@ -131,6 +131,12 @@
         return isBarbieActivated(friendState) ? activatedAsset : defaultAsset;
       }
 
+      if (friendState.type === "merry-go-round") {
+        const animatedAsset = getFriendAssetMap()?.["merry-go-round-animated"] || getFriendAssetMap()?.[friendState.type] || "";
+        const defaultAsset = getFriendAssetMap()?.[friendState.type] || "";
+        return friendState.activated ? animatedAsset : defaultAsset;
+      }
+
       return getFriendAssetMap()?.[friendState.type] || "";
     }
 
@@ -222,6 +228,46 @@
       }
       const worldFriends = getWorldFriendList(state.activeWorld);
       return worldFriends.find((friend) => friend.id === friendId) || null;
+    }
+
+    function syncMerryGoRoundActivations() {
+      const friendElements = Array.from(worldCanvas.querySelectorAll(".friend-character"));
+      const statesById = new Map(
+        getWorldFriendList(state.activeWorld).map((friendState) => [friendState.id, friendState])
+      );
+
+      friendElements
+        .filter((element) => element.dataset.friendType === "merry-go-round")
+        .forEach((merryElement) => {
+          const merryState = statesById.get(merryElement.dataset.friendId);
+          if (!merryState) {
+            return;
+          }
+
+          const merryRect = merryElement.getBoundingClientRect();
+          const shouldActivate = friendElements.some((friendElement) => {
+            if (friendElement === merryElement) {
+              return false;
+            }
+            const friendRect = friendElement.getBoundingClientRect();
+            return friendRect.right >= merryRect.left
+              && friendRect.left <= merryRect.right
+              && friendRect.bottom >= merryRect.top
+              && friendRect.top <= merryRect.bottom;
+          });
+
+          if (merryState.activated === shouldActivate) {
+            return;
+          }
+          merryState.activated = shouldActivate;
+          const art = merryElement.querySelector(".friend-character-art");
+          const asset = shouldActivate
+            ? getFriendAssetMap()?.["merry-go-round-animated"]
+            : getFriendAssetMap()?.["merry-go-round"];
+          if (art && asset) {
+            art.style.backgroundImage = `url("${asset}")`;
+          }
+        });
     }
 
     function syncAttachedFriendPosition(friendState, friendElement = null) {
@@ -420,6 +466,7 @@
           const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`);
           syncBackgroundObjectActivation(friendState, friendElement);
         });
+      syncMerryGoRoundActivations();
       onRefreshChocolateMilkSequences();
     }
 
@@ -436,6 +483,7 @@
       stopRabbitAnimation: (friendId) => motionController?.stopRabbitAnimation?.(friendId),
       startTriceratopsAnimation: (friendId) => motionController?.startTriceratopsAnimation?.(friendId),
       stopTriceratopsAnimation: (friendId) => motionController?.stopTriceratopsAnimation?.(friendId),
+      syncMerryGoRoundActivations,
       renderWorldFriends,
     };
   }
