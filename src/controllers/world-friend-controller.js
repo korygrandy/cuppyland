@@ -274,7 +274,9 @@
       }
       friendState.activated = true;
       updateFriendElementAsset(friendState.id);
-      playSfxClip("blondeBarbieActivated");
+      playSfxClip(friendState.type === "barbie-blonde-baby"
+        ? "blondeBarbieBabyActivated"
+        : "blondeBarbieActivated");
 
       if (friendState.barbieActivationTimer) {
         clearTimeout(friendState.barbieActivationTimer);
@@ -316,7 +318,7 @@
           }
 
           const merryRect = merryElement.getBoundingClientRect();
-          const shouldActivate = friendElements.some((friendElement) => {
+          const overlappingFriendElement = friendElements.find((friendElement) => {
             if (friendElement === merryElement) {
               return false;
             }
@@ -326,6 +328,39 @@
               && friendRect.bottom >= merryRect.top
               && friendRect.top <= merryRect.bottom;
           });
+          const shouldActivate = Boolean(overlappingFriendElement);
+
+          if (overlappingFriendElement && shouldActivate) {
+            const overlappingFriendState = statesById.get(overlappingFriendElement.dataset.friendId);
+            if (
+              overlappingFriendState
+              && (overlappingFriendState.type === "barbie-blonde" || overlappingFriendState.type === "barbie-blonde-baby")
+              && overlappingFriendState.barbieMerryGoRoundAnchorId !== merryState.id
+            ) {
+              overlappingFriendState.barbieMerryGoRoundAnchorId = merryState.id;
+              overlappingFriendState.activated = true;
+              updateFriendElementAsset(overlappingFriendState.id);
+              playSfxClip(overlappingFriendState.type === "barbie-blonde"
+                ? "barbieBlondeSnap"
+                : "barbieBlondeBabySnap");
+            } else if (!overlappingFriendState || (overlappingFriendState.type !== "barbie-blonde" && overlappingFriendState.type !== "barbie-blonde-baby")) {
+              friendElements.forEach((friendElement) => {
+                const friendState = statesById.get(friendElement.dataset.friendId);
+                if (friendState?.barbieMerryGoRoundAnchorId === merryState.id) {
+                  friendState.barbieMerryGoRoundAnchorId = null;
+                }
+              });
+            }
+          } else if (merryState.activated) {
+            friendElements.forEach((friendElement) => {
+              const friendState = statesById.get(friendElement.dataset.friendId);
+              if (friendState?.barbieMerryGoRoundAnchorId === merryState.id) {
+                friendState.barbieMerryGoRoundAnchorId = null;
+                friendState.activated = false;
+                updateFriendElementAsset(friendState.id);
+              }
+            });
+          }
 
           if (merryState.activated === shouldActivate) {
             return;
@@ -483,6 +518,22 @@
         return false;
       }
       const friendState = worldFriends[friendIndex];
+      if (friendState?.requestTimerId) {
+        clearTimeout(friendState.requestTimerId);
+        friendState.requestTimerId = null;
+        friendState.requestType = null;
+        friendState.requestExpiresAt = 0;
+      }
+      if (friendState?.type === "dogbed" && friendState.attachedPuppyId) {
+        const attachedPuppy = worldFriends.find((friend) => friend.id === friendState.attachedPuppyId);
+        if (attachedPuppy) {
+          attachedPuppy.dogbedId = null;
+        }
+      }
+      if (friendState?.sleepTimer) {
+        clearTimeout(friendState.sleepTimer);
+        friendState.sleepTimer = null;
+      }
       if (friendState && (friendState.type === "barbie-blonde" || friendState.type === "barbie-blonde-baby")) {
         playSfxClip("blondeBarbieObjectRemoved");
         playRemovedSfx = false;

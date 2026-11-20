@@ -28,6 +28,7 @@
       worldCanvas,
       onDirectPuppyToy = null,
       onDirectDogFood = null,
+      onDirectPuppyToBed = null,
     } = options;
     const chocolateMilkFillDurationMs = game.chocolateMilkSequence?.durationMs || 5000;
     const chocolateMilkFillState = {
@@ -336,6 +337,24 @@
       const targetCupId = hoveredCup?.dataset.cupId || getActiveCupId();
       const zone = zoneForPoint(event.clientX, event.clientY);
       const isFriendDrop = dragState.type === "friend";
+      if (isFriendDrop && dragState.value === "golden-puppy") {
+        const targetedElement = document.elementFromPoint(event.clientX, event.clientY);
+        const bedElement = targetedElement?.closest?.('.friend-character[data-friend-type="dogbed"]');
+        if (bedElement) {
+          const activated = onDirectPuppyToBed?.(bedElement.dataset.friendId);
+          if (activated) {
+            dragState.suppressClick = true;
+            dragState.active = false;
+            dragState.type = "";
+            dragState.value = "";
+            dragState.pointerId = null;
+            dragState.moved = false;
+            hideDragGhost();
+            clearZoneHighlights();
+            return;
+          }
+        }
+      }
       if (isFriendDrop && dragState.value === "dogfood") {
         const targetedElement = document.elementFromPoint(event.clientX, event.clientY);
         const bowlElement = targetedElement?.closest?.('.friend-character[data-friend-type="dogbowl"]');
@@ -354,7 +373,7 @@
           }
         }
       }
-      if (isFriendDrop && (dragState.value === "dogbone" || dragState.value === "rope-dogtoy")) {
+      if (isFriendDrop && (dragState.value === "dogbone" || dragState.value === "rope-dogtoy" || dragState.value === "dogtoy-ball")) {
         const targetedElement = document.elementFromPoint(event.clientX, event.clientY);
         const puppyElement = targetedElement?.closest?.('.friend-character[data-friend-type="golden-puppy"]');
         if (puppyElement) {

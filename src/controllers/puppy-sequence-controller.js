@@ -16,6 +16,7 @@
       }
 
       const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"]`);
+      friendElement?.querySelector(".puppy-playing-ball")?.remove();
       const art = friendElement?.querySelector(".friend-character-art");
       if (!friendElement || !art) {
         return false;
@@ -39,15 +40,25 @@
       const assetMap = getFriendAssetMap();
       const isRope = toyType === "rope";
       const isBone = toyType === "bone";
+      const isBall = toyType === "ball";
       const isLeash = toyType === "leash";
       const playingAsset = isRope
         ? assetMap["golden-puppy-playing-rope"]
         : isBone
           ? (assetMap["golden-puppy-playing-bone"] || assetMap["golden-puppy-playing"])
-          : assetMap["golden-puppy-playing"];
+          : isBall
+            ? (assetMap["golden-puppy-playing-with-ball"] || assetMap["golden-puppy-playing"])
+            : assetMap["golden-puppy-playing"];
 
       art.style.transform = "";
       art.style.backgroundImage = `url("${playingAsset || ""}")`;
+      let ballOverlay = null;
+      if (isBall) {
+        ballOverlay = document.createElement("span");
+        ballOverlay.className = "puppy-playing-ball";
+        ballOverlay.style.backgroundImage = `url("${assetMap["dogtoy-ball"] || ""}")`;
+        friendElement.appendChild(ballOverlay);
+      }
 
       const poses = [
         { x: -36, y: -18 },
@@ -89,8 +100,9 @@
         art.style.opacity = "0";
         friendState.puppyPlayTimer = timerLifecycle?.set(`puppy:${friendId}:finish`, () => {
           if (!isLeash) {
-            friendState.hasBone = !isRope;
+            friendState.hasBone = isBone;
             friendState.hasRope = isRope;
+            friendState.hasBall = isBall;
           }
           if (isLeash) {
             friendState.hasLeash = true;
@@ -99,11 +111,15 @@
           art.style.transition = "";
           art.style.opacity = "1";
           art.style.transform = "";
-          const finalAsset = friendState.hasRope
-            ? assetMap["golden-puppy-with-rope-sitting"]
-            : friendState.hasBone
-              ? assetMap["golden-puppy-with-bone-sitting"]
-              : assetMap["golden-puppy-sitting"];
+          ballOverlay?.remove();
+          ballOverlay?.remove();
+          const finalAsset = friendState.hasBall
+            ? assetMap["golden-puppy-sitting-with-ball"]
+            : friendState.hasRope
+              ? assetMap["golden-puppy-with-rope-sitting"]
+              : friendState.hasBone
+                ? assetMap["golden-puppy-with-bone-sitting"]
+                : assetMap["golden-puppy-sitting"];
           art.style.backgroundImage = `url("${finalAsset || assetMap["golden-puppy-sitting"] || ""}")`;
           if (friendState.hasCollar) {
             const collarOverlay = document.createElement("span");
@@ -124,8 +140,9 @@
           friendState.puppyPlayTimer = null;
         }, 420) || setTimeout(() => {
           if (!isLeash) {
-            friendState.hasBone = !isRope;
+            friendState.hasBone = isBone;
             friendState.hasRope = isRope;
+            friendState.hasBall = isBall;
           }
           if (isLeash) {
             friendState.hasLeash = true;
@@ -134,11 +151,13 @@
           art.style.transition = "";
           art.style.opacity = "1";
           art.style.transform = "";
-          const finalAsset = friendState.hasRope
-            ? assetMap["golden-puppy-with-rope-sitting"]
-            : friendState.hasBone
-              ? assetMap["golden-puppy-with-bone-sitting"]
-              : assetMap["golden-puppy-sitting"];
+          const finalAsset = friendState.hasBall
+            ? assetMap["golden-puppy-sitting-with-ball"]
+            : friendState.hasRope
+              ? assetMap["golden-puppy-with-rope-sitting"]
+              : friendState.hasBone
+                ? assetMap["golden-puppy-with-bone-sitting"]
+                : assetMap["golden-puppy-sitting"];
           art.style.backgroundImage = `url("${finalAsset || assetMap["golden-puppy-sitting"] || ""}")`;
           if (friendState.hasCollar) {
             const collarOverlay = document.createElement("span");
@@ -186,6 +205,7 @@
     return {
       playWithBone: (friendId) => playToySequence(friendId, "bone"),
       playWithRope: (friendId) => playToySequence(friendId, "rope"),
+      playWithBall: (friendId) => playToySequence(friendId, "ball"),
       playWithLeash: (friendId) => playToySequence(friendId, "leash"),
       stop,
     };

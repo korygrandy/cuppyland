@@ -6,6 +6,7 @@
       removeFriendInstance,
       playGoldenPuppyWithBone,
       playGoldenPuppyWithRope,
+      playGoldenPuppyWithBall,
       startRabbitAnimation,
       startTriceratopsAnimation,
       startRocketManAnimation,
@@ -20,7 +21,7 @@
     }
 
     function handleToyRelease(friendElement, friendState) {
-      if (friendState?.type !== "dogbone" && friendState?.type !== "rope-dogtoy") {
+      if (friendState?.type !== "dogbone" && friendState?.type !== "rope-dogtoy" && friendState?.type !== "dogtoy-ball") {
         return false;
       }
       if (friendState?.type === "dogbone") {
@@ -49,6 +50,20 @@
         }
         if (removeFriendInstance(friendState.id, { playRemovedSfx: false })) {
           playGoldenPuppyWithRope?.(puppyState.id);
+          return true;
+        }
+      }
+      if (friendState?.type === "dogtoy-ball") {
+        const puppyElement = getPuppyForToy(friendElement);
+        if (!puppyElement) {
+          return false;
+        }
+        const puppyState = resolveFriendStateForElement(puppyElement);
+        if (!puppyState) {
+          return false;
+        }
+        if (removeFriendInstance(friendState.id, { playRemovedSfx: false })) {
+          playGoldenPuppyWithBall?.(puppyState.id);
           return true;
         }
       }
