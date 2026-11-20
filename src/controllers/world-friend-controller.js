@@ -173,6 +173,10 @@
           : (getFriendAssetMap()?.[friendState.type] || "");
       }
 
+      if (friendState.type === "dogbowl-with-food") {
+        return getFriendAssetMap()?.["dogbowl-with-food"] || getFriendAssetMap()?.["dogbowl"] || "";
+      }
+
       if (friendState.type === "doghouse") {
         return petAssetController?.resolveDoghouse(friendState)
           || getFriendAssetMap()?.[friendState.type]
@@ -268,8 +272,23 @@
       if (!friendState || !isBarbieFriend(friendState)) {
         return false;
       }
-      startBarbieActivationSequence(friendState);
-      playSfxClip("barbieActivated");
+      friendState.activated = true;
+      updateFriendElementAsset(friendState.id);
+      playSfxClip("blondeBarbieActivated");
+
+      if (friendState.barbieActivationTimer) {
+        clearTimeout(friendState.barbieActivationTimer);
+      }
+      const durationMs = window.CuppyLandGame?.barbieActivationAnchors?.durationMs ?? 2000;
+      friendState.barbieActivationTimer = setTimeout(() => {
+        const activeFriend = findFriendById(friendState.id);
+        if (!activeFriend) {
+          return;
+        }
+        activeFriend.activated = false;
+        activeFriend.barbieActivationTimer = null;
+        updateFriendElementAsset(activeFriend.id);
+      }, durationMs);
       return true;
     }
 
@@ -464,6 +483,10 @@
         return false;
       }
       const friendState = worldFriends[friendIndex];
+      if (friendState && (friendState.type === "barbie-blonde" || friendState.type === "barbie-blonde-baby")) {
+        playSfxClip("blondeBarbieObjectRemoved");
+        playRemovedSfx = false;
+      }
       if (friendState?.squirrelRunningTimer) {
         clearTimeout(friendState.squirrelRunningTimer);
         friendState.squirrelRunningTimer = null;
@@ -611,7 +634,7 @@
       if (friendState.type === "golden-puppy" && friendState.hasCollar) {
         const collarOverlay = document.createElement("span");
         collarOverlay.className = "dog-collar-overlay";
-        collarOverlay.style.backgroundImage = `url("${getFriendAssetMap()?.["dog-collar"] || ""}")`;
+        collarOverlay.style.backgroundImage = `url("${getFriendAssetMap()?.["dog-collar-anchored"] || getFriendAssetMap()?.["dog-collar"] || ""}")`;
         friendElement.appendChild(collarOverlay);
       }
       if (friendState.type === "golden-puppy" && friendState.hasLeash) {

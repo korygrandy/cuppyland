@@ -97,10 +97,26 @@
       Array.from(runtime.keys()).forEach((friendId) => stop(friendId));
     }
 
+    function startForCup(friendId, cupId) {
+      const friendState = findFriendById(friendId);
+      if (!friendState || friendState.type !== "chocolate-milk" || !cupId) {
+        return false;
+      }
+      if (!isCupOpen({ type: "chocolate-milk", attachedCupId: cupId })) {
+        return false;
+      }
+      friendState.attachedCupId = cupId;
+      friendState.sequenceCompleted = false;
+      friendState.sequenceFrame = 2;
+      refresh();
+      return true;
+    }
+
     return {
       stop,
       refresh,
       stopAll,
+      startForCup,
     };
   }
 

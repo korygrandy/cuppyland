@@ -28,6 +28,7 @@
       defaultCupState,
       findFriendById,
       refreshChocolateMilkSequences,
+      startChocolateMilkSpill,
       cupPartDragController = null,
     } = options;
     const dragClamp = gameplayConfig?.dragClamp || {};
@@ -85,6 +86,9 @@
       cupDragState.startWorldX = Number.isFinite(cupState.worldX) ? cupState.worldX : 920;
       cupDragState.startWorldY = Number.isFinite(cupState.worldY) ? cupState.worldY : 430;
       cupDragState.pointerScale = getElementDragScale(cupElement);
+      cupDragState.zigzagDirection = null;
+      cupDragState.zigzagChanges = 0;
+      cupDragState.lastZigzagClientX = event.clientX;
       if (cupElement) {
         trySetPointerCapture(cupElement, event.pointerId);
       }
@@ -115,31 +119,33 @@
       const maxY = Math.max(0, worldCanvas.offsetHeight - cupElement.offsetHeight);
       const nextX = Math.min(maxX, Math.max(0, cupDragState.startWorldX + deltaX));
       const nextY = Math.min(maxY, Math.max(0, cupDragState.startWorldY + deltaY));
+      const horizontalDelta = event.clientX - cupDragState.lastZigzagClientX;
+      if (Math.abs(horizontalDelta) >= 18) {
+        const direction = horizontalDelta > 0 ? 1 : -1;
+        if (cupDragState.zigzagDirection && cupDragState.zigzagDirection !== direction) {
+          cupDragState.zigzagChanges = (cupDragState.zigzagChanges || 0) + 1;
+        }
+        cupDragState.zigzagDirection = direction;
+        cupDragState.lastZigzagClientX = event.clientX;
+      }
+      const zigzagTriggered = cupDragState.zigzagChanges >= 3;
       if (
-        cupState.lidVisible
-        && !cupState.lidDetached
-        && deltaY >= 100
+        (cupState.lidVisible && !cupState.lidDetached && (deltaY >= 100 || zigzagTriggered))
+        || (cupState.lidDetached && zigzagTriggered)
       ) {
         cupState.lidVisible = false;
         cupState.lidDetached = true;
         window.CuppyLandAudio?.playSfxClip?.("lidSnapOff");
         syncLidPosition(cupElement);
-        const chocolateMilk = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="chocolate-milk"]'))
-          .find((friendElement) => {
-            const friendRect = friendElement.getBoundingClientRect();
-            const cupRect = cupElement.getBoundingClientRect();
-            return friendRect.right >= cupRect.left
-              && friendRect.left <= cupRect.right
-              && friendRect.bottom >= cupRect.top
-              && friendRect.top <= cupRect.bottom;
-          });
-        if (chocolateMilk) {
-          const chocolateState = findFriendById?.(chocolateMilk.dataset.friendId);
+        const chocolateMilkElement = worldCanvas.querySelector('.friend-character[data-friend-type="chocolate-milk"]');
+        if (chocolateMilkElement) {
+          const chocolateState = findFriendById?.(chocolateMilkElement.dataset.friendId);
           if (chocolateState?.type === "chocolate-milk") {
             chocolateState.attachedCupId = cupElement.dataset.cupId;
             chocolateState.sequenceCompleted = false;
             chocolateState.sequenceFrame = 2;
             refreshChocolateMilkSequences?.();
+            startChocolateMilkSpill?.(chocolateState.id, cupElement.dataset.cupId);
           }
         }
       }
