@@ -20,6 +20,9 @@
     }
 
     function handleToyRelease(friendElement, friendState) {
+      if (friendState?.type !== "dogbone" && friendState?.type !== "rope-dogtoy") {
+        return false;
+      }
       if (friendState?.type === "dogbone") {
         const puppyElement = getPuppyForToy(friendElement);
         if (!puppyElement) {

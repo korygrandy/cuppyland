@@ -152,6 +152,27 @@
         return getFriendAssetMap()?.["fishbowl-sequence-1"] || "";
       }
 
+      if (friendState.type === "dogbed") {
+        if (friendState.sleeping) {
+          return getFriendAssetMap()?.["dogbed-with-dog-sleeping"] || getFriendAssetMap()?.["dogbed-with-dog"] || getFriendAssetMap()?.[friendState.type] || "";
+        }
+        if (friendState.activated) {
+          return getFriendAssetMap()?.["dogbed-with-dog"] || getFriendAssetMap()?.[friendState.type] || "";
+        }
+      }
+
+      if (friendState.type === "water-bowl") {
+        return friendState.full
+          ? (getFriendAssetMap()?.["water-bowl-full"] || getFriendAssetMap()?.[friendState.type] || "")
+          : (getFriendAssetMap()?.[friendState.type] || "");
+      }
+
+      if (friendState.type === "dogbowl") {
+        return friendState.hasFood
+          ? (getFriendAssetMap()?.["dogbowl-with-food"] || getFriendAssetMap()?.[friendState.type] || "")
+          : (getFriendAssetMap()?.[friendState.type] || "");
+      }
+
       if (friendState.type === "doghouse") {
         return petAssetController?.resolveDoghouse(friendState)
           || getFriendAssetMap()?.[friendState.type]
@@ -240,6 +261,16 @@
         updateFriendElementAsset(friendState.id);
       }
       return matchedZone;
+    }
+
+    function triggerBarbieActivation(friendId) {
+      const friendState = findFriendById(friendId);
+      if (!friendState || !isBarbieFriend(friendState)) {
+        return false;
+      }
+      startBarbieActivationSequence(friendState);
+      playSfxClip("barbieActivated");
+      return true;
     }
 
     function resolveFriendStateForElement(friendElement) {
@@ -433,6 +464,16 @@
         return false;
       }
       const friendState = worldFriends[friendIndex];
+      if (friendState?.squirrelRunningTimer) {
+        clearTimeout(friendState.squirrelRunningTimer);
+        friendState.squirrelRunningTimer = null;
+        const remainingRunningSquirrel = getWorldFriendList(state.activeWorld).some((friend) => (
+          friend.type === "squirrel" && friend.squirrelRunningTimer
+        ));
+        if (!remainingRunningSquirrel) {
+          window.CuppyLandSquirrelRunningSfx?.reset?.();
+        }
+      }
       if (friendState?.turkeyAnimationTimer) {
         clearTimeout(friendState.turkeyAnimationTimer);
         friendState.turkeyAnimationTimer = null;
@@ -456,6 +497,14 @@
       worldFriends.splice(friendIndex, 1);
       if (playRemovedSfx) {
         playSfxClip("defaultObjectRemoved");
+      }
+      if (friendState.type === "golden-puppy") {
+        const remainingPuppies = getWorldFriendList(state.activeWorld).some((friend) => (
+          friend.type === "golden-puppy"
+        ));
+        if (!remainingPuppies) {
+          window.CuppyLandSquirrelRunningSfx?.reset?.();
+        }
       }
       onRenderWorldCups();
       return true;
@@ -559,6 +608,18 @@
         art.style.transformOrigin = "center bottom";
       }
       friendElement.appendChild(art);
+      if (friendState.type === "golden-puppy" && friendState.hasCollar) {
+        const collarOverlay = document.createElement("span");
+        collarOverlay.className = "dog-collar-overlay";
+        collarOverlay.style.backgroundImage = `url("${getFriendAssetMap()?.["dog-collar"] || ""}")`;
+        friendElement.appendChild(collarOverlay);
+      }
+      if (friendState.type === "golden-puppy" && friendState.hasLeash) {
+        const leashOverlay = document.createElement("span");
+        leashOverlay.className = "dog-leash-overlay";
+        leashOverlay.style.backgroundImage = `url("${getFriendAssetMap()?.dogleash || ""}")`;
+        friendElement.appendChild(leashOverlay);
+      }
       if (friendState.type === "fishbowl") {
         art.style.display = "none";
         const art1 = document.createElement("span");
@@ -651,6 +712,7 @@
       updateFriendElementAsset,
       resolveFriendStateForElement,
       syncBarbieActivationState,
+      triggerBarbieActivation,
       syncAttachedFriendPosition,
       removeFriendInstance,
       triggerTurkeyAnimation,

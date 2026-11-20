@@ -30,8 +30,10 @@
       syncDoghouseActivations,
       cancelPuppyExtraction,
       triggerRocketManAnimation,
+      triggerBarbieActivation,
       playGoldenPuppyWithBone,
       playGoldenPuppyWithRope,
+      playGoldenPuppyWithLeash,
       friendReleaseController = null,
       pauseFishbowlSequence,
       resumeFishbowlSequence,
@@ -40,6 +42,7 @@
       onChocolateMilkFillTick,
       onChocolateMilkFillCancel,
       onChocolateMilkFillComplete,
+      refreshChocolateMilkSequences,
       onChocolateMilkFillEnd,
     } = options;
     const chocolateMilkFillDurationMs = getSequenceConfig?.().durationMs || 5000;
@@ -50,6 +53,35 @@
       completionTimerId: null,
     };
     let hoverMonitorIntervalId = null;
+    let activeSquirrelChases = 0;
+
+    function setSquirrelRunningSfx(isRunning) {
+      if (isRunning) {
+        activeSquirrelChases = Math.max(1, activeSquirrelChases + 1);
+        window.CuppyLandAudio?.playLoopingSfxClip?.("squirrelRunning");
+        return;
+      }
+      activeSquirrelChases = Math.max(0, activeSquirrelChases - 1);
+      if (activeSquirrelChases === 0) {
+        window.CuppyLandAudio?.stopSfxClip?.("squirrelRunning");
+      }
+    }
+
+    function stopSquirrelLoopIfNoPuppies() {
+      const puppyCount = worldCanvas.querySelectorAll('.friend-character[data-friend-type="golden-puppy"]').length;
+      if (puppyCount === 0) {
+        resetSquirrelRunningSfx();
+      }
+    }
+
+    function resetSquirrelRunningSfx() {
+      activeSquirrelChases = 0;
+      window.CuppyLandAudio?.stopSfxClip?.("squirrelRunning");
+    }
+
+    window.CuppyLandSquirrelRunningSfx = {
+      reset: resetSquirrelRunningSfx,
+    };
 
     function clearHoverMonitor() {
       if (hoverMonitorIntervalId) {
@@ -77,6 +109,7 @@
           return;
         }
 
+
         if (friendState.type === "fishbowl") {
           friendElement.dataset.dragging = "true";
           if (typeof pauseFishbowlSequence === "function") {
@@ -100,6 +133,76 @@
 
       friendArt.style.transform = isDragging ? "rotate(-45deg)" : "";
       friendArt.style.transformOrigin = isDragging ? "center center" : "";
+    }
+
+    function syncSquirrelAvoidance(dogElement, dogState) {
+      if (!dogElement || !dogState || dogState.type !== "golden-puppy" || dogState.activated === true) {
+        return;
+      }
+      const squirrelElements = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="squirrel"]'));
+      if (!squirrelElements.length) {
+        return;
+      }
+      const dogRect = dogElement.getBoundingClientRect();
+      const dogCenterX = dogRect.left + dogRect.width / 2;
+      const dogCenterY = dogRect.top + dogRect.height / 2;
+
+      squirrelElements.forEach((squirrelElement) => {
+        const squirrelRect = squirrelElement.getBoundingClientRect();
+        const squirrelState = resolveFriendStateForElement(squirrelElement);
+        if (!squirrelState) {
+          return;
+        }
+        const squirrelCenterX = squirrelRect.left + squirrelRect.width / 2;
+        const squirrelCenterY = squirrelRect.top + squirrelRect.height / 2;
+        const deltaX = squirrelCenterX - dogCenterX;
+        const deltaY = squirrelCenterY - dogCenterY;
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        if (distance >= 260) {
+          return;
+        }
+        const directionX = distance > 1 ? deltaX / distance : 1;
+        const directionY = distance > 1 ? deltaY / distance : 0;
+        const nextX = squirrelState.worldX + directionX * 42;
+        const nextY = squirrelState.worldY + directionY * 42;
+        squirrelState.worldX = Math.max(0, Math.min(worldCanvas.offsetWidth - squirrelElement.offsetWidth, nextX));
+        squirrelState.worldY = Math.max(0, Math.min(worldCanvas.offsetHeight - squirrelElement.offsetHeight, nextY));
+        squirrelElement.style.left = `${squirrelState.worldX}px`;
+        squirrelElement.style.top = `${squirrelState.worldY}px`;
+        const art = squirrelElement.querySelector(".friend-character-art");
+        if (art) {
+          const dogIsLeftOfSquirrel = dogCenterX < squirrelCenterX;
+          art.style.transformOrigin = "center bottom";
+          art.style.transform = dogIsLeftOfSquirrel
+            ? "scaleX(-1) rotate(45deg)"
+            : "rotate(115deg)";
+          const runningAsset = window.CuppyLandGame?.friendAssetMap?.["squirrel-running"]
+            || window.CuppyLandGame?.friendAssetMap?.["squirrel"];
+          if (runningAsset) {
+            art.style.backgroundImage = `url("${runningAsset}")`;
+          }
+          squirrelElement.classList.add("is-running");
+          if (!squirrelState.squirrelRunningTimer) {
+            setSquirrelRunningSfx(true);
+          }
+          if (squirrelState.squirrelRunningTimer) {
+            window.clearTimeout(squirrelState.squirrelRunningTimer);
+          }
+          squirrelState.squirrelRunningTimer = window.setTimeout(() => {
+            if (art.isConnected) {
+              squirrelElement.classList.remove("is-running");
+              art.style.transform = "";
+              art.style.transformOrigin = "";
+              const normalAsset = window.CuppyLandGame?.friendAssetMap?.["squirrel"];
+              if (normalAsset) {
+                art.style.backgroundImage = `url("${normalAsset}")`;
+              }
+              squirrelState.squirrelRunningTimer = null;
+              setSquirrelRunningSfx(false);
+            }
+          }, 800);
+        }
+      });
     }
 
     function resetFriendDragState() {
@@ -275,6 +378,53 @@
         return;
       }
 
+      if (friendState.type === "golden-puppy" && friendState.activated !== true) {
+        const nowMs = Date.now();
+        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
+        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
+          friendState.lastTapAtMs = nowMs;
+          resetFriendDragState();
+          event.preventDefault();
+          event.stopPropagation();
+          window.CuppyLandAudio?.playSfxClip?.("puppyBarking");
+          return;
+        }
+        friendState.lastTapAtMs = nowMs;
+        if (friendState.hasLeash) {
+          friendState.hasLeash = false;
+          friendElement.querySelector(".dog-leash-overlay")?.remove();
+        }
+      }
+
+      if (friendState.type === "barbie-blonde" || friendState.type === "barbie-blonde-baby") {
+        const nowMs = Date.now();
+        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
+        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
+          friendState.lastTapAtMs = nowMs;
+          resetFriendDragState();
+          event.preventDefault();
+          event.stopPropagation();
+          triggerBarbieActivation?.(friendState.id);
+          return;
+        }
+        friendState.lastTapAtMs = nowMs;
+      }
+
+      if (friendState.type === "water-bowl") {
+        const nowMs = Date.now();
+        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
+        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
+          friendState.lastTapAtMs = nowMs;
+          resetFriendDragState();
+          event.preventDefault();
+          event.stopPropagation();
+          friendState.full = !friendState.full;
+          updateFriendElementAsset(friendState.id);
+          return;
+        }
+        friendState.lastTapAtMs = nowMs;
+      }
+
       if (friendState.type === "turkey") {
         const nowMs = Date.now();
         const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
@@ -317,6 +467,30 @@
           event.stopPropagation();
           if (typeof triggerRocketManAnimation === "function") {
             triggerRocketManAnimation(friendState.id);
+          }
+          return;
+        }
+        friendState.lastTapAtMs = nowMs;
+      }
+
+      if (friendState.type === "chocolate-milk") {
+        const nowMs = Date.now();
+        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
+        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
+          friendState.lastTapAtMs = nowMs;
+          resetFriendDragState();
+          event.preventDefault();
+          event.stopPropagation();
+
+          const hoveredCup = getCupElementAtPoint(event.clientX, event.clientY);
+          const cupId = hoveredCup?.dataset?.cupId || null;
+          const cupState = cupId ? getCupStateById?.(cupId) : null;
+          const isCupOpen = Boolean(cupState && (cupState.lidVisible === false || cupState.lidDetached === true));
+          if (isCupOpen && cupId) {
+            friendState.attachedCupId = cupId;
+            friendState.sequenceCompleted = false;
+            friendState.sequenceFrame = 2;
+            refreshChocolateMilkSequences?.();
           }
           return;
         }
@@ -378,6 +552,7 @@
         resetChocolateMilkFill("removed-outside-canvas");
         resetFriendDragState();
         removeFriendInstance(friendId);
+        stopSquirrelLoopIfNoPuppies();
         return;
       }
 
@@ -406,6 +581,7 @@
       );
       friendElement.style.left = `${friendState.worldX}px`;
       friendElement.style.top = `${friendState.worldY}px`;
+      syncSquirrelAvoidance(friendElement, friendState);
       if (typeof syncBarbieActivationState === "function") {
         syncBarbieActivationState(friendState);
       }
@@ -465,6 +641,157 @@
           updateFriendElementAsset(friendState.id);
         }
       }
+      if (friendState?.type === "dogleash") {
+        const puppyElement = window.CuppyLandFriendOverlap?.findOverlappingElement(
+          worldCanvas,
+          friendElement,
+          '.friend-character[data-friend-type="golden-puppy"]'
+        );
+        const doghouseElement = window.CuppyLandFriendOverlap?.findOverlappingElement(
+          worldCanvas,
+          friendElement,
+          '.friend-character[data-friend-type="doghouse"]'
+        );
+        if (puppyElement) {
+          const puppyState = resolveFriendStateForElement(puppyElement);
+          if (puppyState?.hasCollar) {
+            puppyState.hasLeash = true;
+            removeFriendInstance(friendState.id, { playRemovedSfx: false });
+            const overlay = document.createElement("span");
+            overlay.className = "dog-leash-overlay";
+            overlay.style.backgroundImage = `url("${window.CuppyLandGame.friendAssetMap?.dogleash || ""}")`;
+            puppyElement.querySelector(".dog-leash-overlay")?.remove();
+            puppyElement.appendChild(overlay);
+          }
+        } else if (doghouseElement) {
+          const doghouseState = resolveFriendStateForElement(doghouseElement);
+          const attachedPuppy = doghouseState?.attachedPuppyId
+            ? resolveFriendStateForElement(worldCanvas.querySelector(`.friend-character[data-friend-id="${doghouseState.attachedPuppyId}"]`))
+            : null;
+          if (attachedPuppy?.hasCollar) {
+            attachedPuppy.hasLeash = true;
+            removeFriendInstance(friendState.id, { playRemovedSfx: false });
+            playGoldenPuppyWithLeash?.(attachedPuppy.id);
+          }
+        }
+      }
+      if (friendState?.type === "dog-collar") {
+        const puppyElement = window.CuppyLandFriendOverlap?.findOverlappingElement(
+          worldCanvas,
+          friendElement,
+          '.friend-character[data-friend-type="golden-puppy"]'
+        );
+        if (puppyElement) {
+          const puppyState = resolveFriendStateForElement(puppyElement);
+          if (puppyState) {
+            puppyState.hasCollar = true;
+            removeFriendInstance(friendState.id, { playRemovedSfx: false });
+            const overlay = document.createElement("span");
+            overlay.className = "dog-collar-overlay";
+            overlay.style.backgroundImage = `url("${window.CuppyLandGame.friendAssetMap?.["dog-collar"] || ""}")`;
+            puppyElement.querySelector(".dog-collar-overlay")?.remove();
+            puppyElement.appendChild(overlay);
+          }
+        }
+      }
+      if (friendState?.type === "dogbed") {
+        const puppyElement = window.CuppyLandFriendOverlap?.findOverlappingElement(
+          worldCanvas,
+          friendElement,
+          '.friend-character[data-friend-type="golden-puppy"]'
+        );
+        if (puppyElement) {
+          const puppyState = resolveFriendStateForElement(puppyElement);
+          if (puppyState) {
+            friendState.activated = true;
+            friendState.attachedPuppyId = puppyState.id;
+            puppyState.dogbedId = friendState.id;
+            puppyState.activated = false;
+            updateFriendElementAsset(friendState.id);
+            friendState.sleepTimer = setTimeout(() => {
+              friendState.sleeping = true;
+              updateFriendElementAsset(friendState.id);
+            }, 4000);
+          }
+        }
+      }
+      if (friendState?.type === "dogfood") {
+        const bowlElement = window.CuppyLandFriendOverlap?.findOverlappingElement(
+          worldCanvas,
+          friendElement,
+          '.friend-character[data-friend-type="dogbowl"]'
+        );
+        if (bowlElement) {
+          const bowlState = resolveFriendStateForElement(bowlElement);
+          if (bowlState) {
+            bowlState.hasFood = true;
+            updateFriendElementAsset(bowlState.id);
+            removeFriendInstance(friendState.id, { playRemovedSfx: false });
+          }
+        }
+      }
+      if (friendState?.type === "water-bowl") {
+        const puppyElement = window.CuppyLandFriendOverlap?.findOverlappingElement(
+          worldCanvas,
+          friendElement,
+          '.friend-character[data-friend-type="golden-puppy"]'
+        );
+        if (puppyElement && friendState.full) {
+          const puppyState = resolveFriendStateForElement(puppyElement);
+          if (puppyState) {
+            puppyState.isDrinking = true;
+            puppyState.isEating = false;
+            updateFriendElementAsset(puppyState.id);
+            window.CuppyLandAudio?.playSfxClip?.("canIHaveDrink");
+            setTimeout(() => {
+              puppyState.isDrinking = false;
+              updateFriendElementAsset(puppyState.id);
+            }, 4000);
+          }
+        }
+        if (!friendState.full && state.activeWorld === "playground") {
+          const fountainAnchor = window.CuppyLandWorldAnchors?.backgroundObjectAnchors?.playground?.find(
+            (anchor) => anchor.id === "drinking-fountain"
+          );
+          if (fountainAnchor) {
+            const canvasRect = worldCanvas.getBoundingClientRect();
+            const scaleX = worldCanvas.offsetWidth ? canvasRect.width / worldCanvas.offsetWidth : 1;
+            const scaleY = worldCanvas.offsetHeight ? canvasRect.height / worldCanvas.offsetHeight : 1;
+            const fountainRect = {
+              left: canvasRect.left + fountainAnchor.x * scaleX,
+              right: canvasRect.left + (fountainAnchor.x + fountainAnchor.width) * scaleX,
+              top: canvasRect.top + fountainAnchor.y * scaleY,
+              bottom: canvasRect.top + (fountainAnchor.y + fountainAnchor.height) * scaleY,
+            };
+            if (window.CuppyLandFriendOverlap.rectsOverlap(friendElement.getBoundingClientRect(), fountainRect)) {
+              friendState.full = true;
+              updateFriendElementAsset(friendState.id);
+            }
+          }
+        }
+      }
+      if (friendState?.type === "dogbowl") {
+        const puppyElement = friendState.hasFood
+          ? window.CuppyLandFriendOverlap?.findOverlappingElement(
+            worldCanvas,
+            friendElement,
+            '.friend-character[data-friend-type="golden-puppy"]'
+          )
+          : null;
+        if (puppyElement) {
+          const puppyState = resolveFriendStateForElement(puppyElement);
+          if (puppyState) {
+            puppyState.isEating = true;
+            puppyState.isDrinking = false;
+            updateFriendElementAsset(puppyState.id);
+            window.CuppyLandAudio?.playSfxClip?.("canIHaveFood");
+            setTimeout(() => {
+              puppyState.isEating = false;
+              updateFriendElementAsset(puppyState.id);
+            }, 4000);
+          }
+        }
+      }
       friendReleaseController?.handleToyRelease(friendElement, friendState);
       friendReleaseController?.handleMotionRelease(friendState);
 
@@ -488,6 +815,7 @@
         removeFriendInstance(friendDragState.friendId);
       }
 
+      stopSquirrelLoopIfNoPuppies();
       resetChocolateMilkFill("pointer-end");
       resetFriendDragState();
     }

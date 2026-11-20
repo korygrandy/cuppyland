@@ -26,6 +26,8 @@
       }
       timerLifecycle?.clearPrefix(`puppy:${friendId}:`);
       friendState.puppyAttachmentPending = false;
+      friendState.isDrinking = false;
+      friendState.isEating = false;
       playSfxClip("goldenPuppyActivated");
 
       const anchorX = Number.isFinite(friendState.worldX) ? friendState.worldX : 0;
@@ -34,9 +36,13 @@
       const maxY = Math.max(0, worldCanvas.offsetHeight - friendElement.offsetHeight);
       const assetMap = getFriendAssetMap();
       const isRope = toyType === "rope";
+      const isBone = toyType === "bone";
+      const isLeash = toyType === "leash";
       const playingAsset = isRope
         ? assetMap["golden-puppy-playing-rope"]
-        : assetMap["golden-puppy-playing"];
+        : isBone
+          ? (assetMap["golden-puppy-playing-bone"] || assetMap["golden-puppy-playing"])
+          : assetMap["golden-puppy-playing"];
 
       art.style.transform = "";
       art.style.backgroundImage = `url("${playingAsset || ""}")`;
@@ -80,15 +86,22 @@
         art.style.transition = "opacity 420ms ease";
         art.style.opacity = "0";
         friendState.puppyPlayTimer = timerLifecycle?.set(`puppy:${friendId}:finish`, () => {
-          friendState.hasBone = !isRope;
-          friendState.hasRope = isRope;
+          if (!isLeash) {
+            friendState.hasBone = !isRope;
+            friendState.hasRope = isRope;
+          }
+          if (isLeash) {
+            friendState.hasLeash = true;
+          }
           friendState.activated = false;
           art.style.transition = "";
           art.style.opacity = "1";
           art.style.transform = "";
-          const finalAsset = isRope
+          const finalAsset = friendState.hasRope
             ? assetMap["golden-puppy-with-rope-sitting"]
-            : assetMap["golden-puppy-with-bone-sitting"];
+            : friendState.hasBone
+              ? assetMap["golden-puppy-with-bone-sitting"]
+              : assetMap["golden-puppy-sitting"];
           art.style.backgroundImage = `url("${finalAsset || assetMap["golden-puppy-sitting"] || ""}")`;
           friendState.worldX = anchorX;
           friendState.worldY = anchorY;
@@ -96,15 +109,22 @@
           friendElement.style.top = `${anchorY}px`;
           friendState.puppyPlayTimer = null;
         }, 420) || setTimeout(() => {
-          friendState.hasBone = !isRope;
-          friendState.hasRope = isRope;
+          if (!isLeash) {
+            friendState.hasBone = !isRope;
+            friendState.hasRope = isRope;
+          }
+          if (isLeash) {
+            friendState.hasLeash = true;
+          }
           friendState.activated = false;
           art.style.transition = "";
           art.style.opacity = "1";
           art.style.transform = "";
-          const finalAsset = isRope
+          const finalAsset = friendState.hasRope
             ? assetMap["golden-puppy-with-rope-sitting"]
-            : assetMap["golden-puppy-with-bone-sitting"];
+            : friendState.hasBone
+              ? assetMap["golden-puppy-with-bone-sitting"]
+              : assetMap["golden-puppy-sitting"];
           art.style.backgroundImage = `url("${finalAsset || assetMap["golden-puppy-sitting"] || ""}")`;
           friendState.worldX = anchorX;
           friendState.worldY = anchorY;
@@ -140,6 +160,7 @@
     return {
       playWithBone: (friendId) => playToySequence(friendId, "bone"),
       playWithRope: (friendId) => playToySequence(friendId, "rope"),
+      playWithLeash: (friendId) => playToySequence(friendId, "leash"),
       stop,
     };
   }

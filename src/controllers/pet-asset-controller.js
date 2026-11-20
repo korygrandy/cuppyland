@@ -4,6 +4,12 @@
 
     function resolveGoldenPuppy(friendState) {
       const assetMap = getFriendAssetMap();
+      if (friendState?.isDrinking) {
+        return assetMap["golden-puppy-drinking"] || assetMap["golden-puppy-sitting"] || assetMap[friendState.type] || "";
+      }
+      if (friendState?.isEating) {
+        return assetMap["golden-puppy-eating"] || assetMap["golden-puppy-sitting"] || assetMap[friendState.type] || "";
+      }
       if (friendState?.hasRope) {
         return assetMap["golden-puppy-with-rope-sitting"] || assetMap["golden-puppy-sitting"] || assetMap[friendState.type] || "";
       }
