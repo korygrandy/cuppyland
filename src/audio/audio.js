@@ -396,14 +396,22 @@
 
   function handleAppVisibilityChange() {
     if (document.hidden || !document.hasFocus()) {
+      audioState.resumingFromHidden = true;
       pauseAllSfx();
       pauseAllAudio();
       return;
     }
 
-    if (audioState.unlocked && audioState.musicVolume > 0) {
-      syncAudioForCurrentScreen();
+    if (!audioState.unlocked || audioState.musicVolume <= 0) {
+      return;
     }
+    if (audioState.resumingFromHidden) {
+      audioState.resumingFromHidden = false;
+      audioState.activeTrack = null;
+      syncAudioForCurrentScreen();
+      return;
+    }
+    syncAudioForCurrentScreen();
   }
 
   audioEngine.setMusicVolume(audioState.musicVolume);

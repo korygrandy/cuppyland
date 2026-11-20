@@ -26,6 +26,7 @@
       isHairstyleNearLid,
       gameplayConfig,
       defaultCupState,
+      cupPartDragController = null,
     } = options;
     const dragClamp = gameplayConfig?.dragClamp || {};
     const anchors = gameplayConfig?.anchors || {};
@@ -88,17 +89,7 @@
     }
 
     function getElementDragScale(element) {
-      if (!element) {
-        return 1;
-      }
-
-      const rect = element.getBoundingClientRect();
-      const baseWidth = element.offsetWidth || rect.width || 1;
-      const derivedScale = rect.width / baseWidth;
-      if (!Number.isFinite(derivedScale) || derivedScale <= 0) {
-        return 1;
-      }
-      return derivedScale;
+      return cupPartDragController?.getElementDragScale(element) || 1;
     }
 
     function onCupPointerMove(event) {
@@ -122,8 +113,10 @@
       const maxY = Math.max(0, worldCanvas.offsetHeight - cupElement.offsetHeight);
       const nextX = Math.min(maxX, Math.max(0, cupDragState.startWorldX + deltaX));
       const nextY = Math.min(maxY, Math.max(0, cupDragState.startWorldY + deltaY));
-      cupState.worldX = nextX;
-      cupState.worldY = nextY;
+      const clamped = cupPartDragController?.clampWorldPosition(nextX, nextY, cupElement)
+        || { worldX: nextX, worldY: nextY };
+      cupState.worldX = clamped.worldX;
+      cupState.worldY = clamped.worldY;
       syncCupWorldPosition(cupElement);
 
     }

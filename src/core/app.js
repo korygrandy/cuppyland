@@ -50,6 +50,7 @@ const {
   sfxMuteBtn,
 } = dom;
 const { defaultSleeveAsset } = window.CuppyLandGame;
+const timerLifecycleController = window.CuppyLandTimerLifecycle.createController();
 
 const {
   dragState,
@@ -118,6 +119,10 @@ const cupDragHelpers = window.CuppyLandCupDrag.createHelpers({
   hairstyleLayer,
   gameplayConfig,
 });
+const cupPartDragController = window.CuppyLandCupPartDragController.createController({
+  worldCanvas,
+  gameplayConfig,
+});
 const {
   clampDetachedOffset,
   isLidNearCup,
@@ -150,6 +155,7 @@ const cupPointerController = window.CuppyLandCupPointerController.createControll
   isHairstyleNearLid,
   gameplayConfig,
   defaultCupState,
+  cupPartDragController,
 });
 const inventoryInteractionController = window.CuppyLandInventoryInteraction.createController({
   state,
@@ -218,6 +224,37 @@ const friendMotionController = window.CuppyLandFriendMotionController.createCont
   findFriendById: (friendId) => findFriendById(friendId, state.activeWorld),
   playSfxClip: (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName),
 });
+const puppySequenceController = window.CuppyLandPuppySequenceController.createController({
+  state,
+  worldCanvas,
+  findFriendById: (friendId) => findFriendById(friendId, state.activeWorld),
+  playSfxClip: (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName),
+  getFriendAssetMap: () => window.CuppyLandGame.friendAssetMap,
+  timerLifecycle: timerLifecycleController,
+});
+const friendReleaseController = window.CuppyLandFriendReleaseController.createController({
+  worldCanvas,
+  resolveFriendStateForElement,
+  removeFriendInstance,
+  playGoldenPuppyWithBone: (friendId) => puppySequenceController.playWithBone(friendId),
+  playGoldenPuppyWithRope: (friendId) => puppySequenceController.playWithRope(friendId),
+  startRabbitAnimation: (friendId) => friendMotionController.startRabbitAnimation(friendId),
+  startTriceratopsAnimation: (friendId) => friendMotionController.startTriceratopsAnimation(friendId),
+  startRocketManAnimation: (friendId) => friendMotionController.startRocketManAnimation(friendId),
+});
+const petAssetController = window.CuppyLandPetAssetController.createController({
+  state,
+  getFriendAssetMap: () => window.CuppyLandGame.friendAssetMap,
+  getWorldFriendList,
+});
+const doghouseController = window.CuppyLandDoghouseController.createController({
+  state,
+  worldCanvas,
+  getWorldFriendList,
+  getWorldPointFromClient,
+  onRenderWorldCups: () => renderWorldCups(),
+  updateFriendElementAsset: (friendId) => friendWorldController?.updateFriendElementAsset?.(friendId),
+});
 const friendPointerController = window.CuppyLandFriendPointerController.createController({
   state,
   worldCanvas,
@@ -242,8 +279,8 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   startRocketManAnimation: (friendId) => friendMotionController.startRocketManAnimation(friendId),
   stopRocketManAnimation: (friendId) => friendMotionController.stopRocketManAnimation(friendId),
   triggerRocketManAnimation: (friendId) => friendMotionController.triggerRocketManAnimation(friendId),
-  playGoldenPuppyWithBone: (friendId) => friendMotionController.playGoldenPuppyWithBone(friendId),
-  playGoldenPuppyWithRope: (friendId) => friendMotionController.playGoldenPuppyWithRope(friendId),
+  playGoldenPuppyWithBone: (friendId) => puppySequenceController.playWithBone(friendId),
+  playGoldenPuppyWithRope: (friendId) => puppySequenceController.playWithRope(friendId),
   syncBarbieActivationState: (friendState) => friendWorldController?.syncBarbieActivationState?.(friendState),
   updateFriendElementAsset: (friendId) => friendWorldController?.updateFriendElementAsset?.(friendId),
   syncBackgroundObjectActivation: (friendState, friendElement) => backgroundObjectController.syncFriend(friendState, friendElement),
@@ -280,6 +317,9 @@ friendWorldController = window.CuppyLandWorldFriendController.createController({
   syncBackgroundObjectActivation: (friendState, friendElement) => backgroundObjectController.syncFriend(friendState, friendElement),
   removeBackgroundObjectActivation: (friendId) => backgroundObjectController.removeFriend(friendId),
   getWorldPointFromClient,
+  petAssetController,
+  doghouseController,
+  puppySequenceController,
   onDoghousePointerDown: (doghouseState, event) => {
     const puppyState = friendWorldController.extractPuppyFromDoghouse(doghouseState, event);
     if (!puppyState) {
@@ -489,6 +529,14 @@ const screenWorldController = window.CuppyLandScreenWorldController.createContro
   toggleInventory,
   onScreenChanged: syncAudioForCurrentScreen,
 });
+const appActionController = window.CuppyLandAppActionController.createController({
+  state,
+  inventoryPanel,
+  screenWorldController,
+  clearChocolateMilkDragFillPreview,
+  stopAllChocolateMilkSequences,
+  hideWorldHeadlineOverlay,
+});
 
 function showScreen(screen) {
   screenWorldController.showScreen(screen);
@@ -580,8 +628,7 @@ function buildInventoryItems() {
 }
 
 function toggleInventory(forceOpen) {
-  state.inventoryOpen = typeof forceOpen === "boolean" ? forceOpen : !state.inventoryOpen;
-  inventoryPanel.classList.toggle("open", state.inventoryOpen);
+  appActionController.toggleInventory(forceOpen);
 }
 
 function ensureWorldCupState(worldId) {
@@ -600,11 +647,7 @@ function openWorld(worldId) {
 }
 
 function closeWorld() {
-  window.CuppyLandAudio?.stopSfxClip?.("milkPour");
-  hideWorldHeadlineOverlay();
-  clearChocolateMilkDragFillPreview();
-  stopAllChocolateMilkSequences();
-  screenWorldController.closeWorld();
+  appActionController.closeWorld();
 }
 
 function showCloseModal() {
