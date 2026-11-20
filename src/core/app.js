@@ -243,6 +243,7 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   stopRocketManAnimation: (friendId) => friendMotionController.stopRocketManAnimation(friendId),
   triggerRocketManAnimation: (friendId) => friendMotionController.triggerRocketManAnimation(friendId),
   playGoldenPuppyWithBone: (friendId) => friendMotionController.playGoldenPuppyWithBone(friendId),
+  playGoldenPuppyWithRope: (friendId) => friendMotionController.playGoldenPuppyWithRope(friendId),
   syncBarbieActivationState: (friendState) => friendWorldController?.syncBarbieActivationState?.(friendState),
   updateFriendElementAsset: (friendId) => friendWorldController?.updateFriendElementAsset?.(friendId),
   syncBackgroundObjectActivation: (friendState, friendElement) => backgroundObjectController.syncFriend(friendState, friendElement),

@@ -232,6 +232,9 @@
   }
 
   function playSfx(profileName) {
+    if (document.hidden || !document.hasFocus()) {
+      return;
+    }
     if (audioState.sfxVolume <= 0) {
       return;
     }
@@ -240,6 +243,12 @@
   }
 
   function playSfxClip(clipName, onEnded = null) {
+    if (document.hidden || !document.hasFocus()) {
+      if (typeof onEnded === "function") {
+        onEnded();
+      }
+      return;
+    }
     if (audioState.sfxVolume <= 0) {
       if (typeof onEnded === "function") {
         onEnded();
@@ -283,6 +292,9 @@
   }
 
   function playLoopingSfxClip(clipName) {
+    if (document.hidden || !document.hasFocus()) {
+      return;
+    }
     if (audioState.sfxVolume <= 0) {
       return;
     }

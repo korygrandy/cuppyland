@@ -31,6 +31,7 @@
       cancelPuppyExtraction,
       triggerRocketManAnimation,
       playGoldenPuppyWithBone,
+      playGoldenPuppyWithRope,
       pauseFishbowlSequence,
       resumeFishbowlSequence,
       toggleFishbowlSequence,
@@ -397,7 +398,11 @@
       const nextX = worldX - friendDragState.pointerOffsetX;
       const nextY = worldY - friendDragState.pointerOffsetY;
       friendState.worldX = Math.max(0, Math.min(worldCanvas.offsetWidth - friendElement.offsetWidth, nextX));
-      friendState.worldY = Math.max(0, Math.min(worldCanvas.offsetHeight - friendElement.offsetHeight, nextY));
+      const topClearance = friendState.type === "dogbone" ? 24 : 12;
+      friendState.worldY = Math.max(
+        topClearance,
+        Math.min(worldCanvas.offsetHeight - friendElement.offsetHeight, nextY)
+      );
       friendElement.style.left = `${friendState.worldX}px`;
       friendElement.style.top = `${friendState.worldY}px`;
       if (typeof syncBarbieActivationState === "function") {
@@ -476,6 +481,27 @@
             const removedBone = removeFriendInstance(friendState.id, { playRemovedSfx: false });
             if (removedBone) {
               playGoldenPuppyWithBone?.(puppyState.id);
+            }
+          }
+        }
+      }
+      if (friendState?.type === "rope-dogtoy") {
+        const ropeElement = friendElement;
+        const ropeRect = ropeElement.getBoundingClientRect();
+        const puppyElements = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="golden-puppy"]'));
+        const puppyElement = puppyElements.find((element) => {
+          const puppyRect = element.getBoundingClientRect();
+          return puppyRect.right >= ropeRect.left
+            && puppyRect.left <= ropeRect.right
+            && puppyRect.bottom >= ropeRect.top
+            && puppyRect.top <= ropeRect.bottom;
+        });
+        if (puppyElement) {
+          const puppyState = resolveFriendStateForElement(puppyElement);
+          if (puppyState) {
+            const removedRope = removeFriendInstance(friendState.id, { playRemovedSfx: false });
+            if (removedRope) {
+              playGoldenPuppyWithRope?.(puppyState.id);
             }
           }
         }
