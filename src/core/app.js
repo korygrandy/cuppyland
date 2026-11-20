@@ -11,8 +11,6 @@ const {
   worldHeadlineConfig,
   gameplayConfig,
   defaultCupState,
-  findFriendById: (friendId) => findFriendById(friendId, state.activeWorld),
-  refreshChocolateMilkSequences: () => refreshChocolateMilkSequences(),
   chocolateMilkSequence,
 } = window.CuppyLandGame;
 
@@ -158,6 +156,9 @@ const cupPointerController = window.CuppyLandCupPointerController.createControll
   gameplayConfig,
   defaultCupState,
   cupPartDragController,
+  findFriendById: (friendId) => findFriendById(friendId, state.activeWorld),
+  refreshChocolateMilkSequences: () => refreshChocolateMilkSequences(),
+  startChocolateMilkSpill: (friendId, cupId) => chocolateMilkSequenceController.startForCup(friendId, cupId),
 });
 const inventoryInteractionController = window.CuppyLandInventoryInteraction.createController({
   state,
@@ -193,6 +194,16 @@ const inventoryInteractionController = window.CuppyLandInventoryInteraction.crea
     }
     return false;
   },
+  onDirectDogFood: (bowlId) => {
+    const bowlState = findFriendById(bowlId, state.activeWorld);
+    if (!bowlState || (bowlState.type !== "dogbowl" && bowlState.type !== "dogbowl-with-food")) {
+      return false;
+    }
+    bowlState.type = "dogbowl-with-food";
+    bowlState.hasFood = true;
+    updateFriendElementAsset(bowlId);
+    return true;
+  },
 });
 const sparkleEffectController = window.CuppyLandSparkleEffectController.createController({
   worldCanvas,
@@ -212,7 +223,7 @@ const chocolateMilkSequenceController = window.CuppyLandChocolateMilkSequenceCon
   findFriendById: (friendId) => findFriendById(friendId, state.activeWorld),
   isCupOpen: (cupId) => {
     const cupState = findCupById(cupId, state.activeWorld)?.state;
-    return Boolean(cupState && cupState.lidVisible === false);
+    return Boolean(cupState && (cupState.lidVisible === false || cupState.lidDetached === true));
   },
   getSequenceConfig: () => getChocolateMilkSequenceConfig(),
   syncAttachedFriendPosition: (friendState) => {
@@ -314,6 +325,7 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   onChocolateMilkFillComplete,
   onChocolateMilkFillEnd,
   refreshChocolateMilkSequences: () => refreshChocolateMilkSequences(),
+  startChocolateMilkSpill: (friendId, cupId) => chocolateMilkSequenceController.startForCup(friendId, cupId),
   friendReleaseController,
 });
 friendWorldController = window.CuppyLandWorldFriendController.createController({

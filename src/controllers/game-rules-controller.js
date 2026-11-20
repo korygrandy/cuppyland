@@ -63,6 +63,7 @@
       worldFriends.push({
         id: `friend-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
         type: friendType,
+        hasFood: friendType === "dogbowl-with-food",
         worldX,
         worldY,
         zIndex: typeof getNextWorldZIndex === "function" ? getNextWorldZIndex(state.activeWorld) : (90 + fallbackIndex),
@@ -88,11 +89,8 @@
       if (friendType === "furball-guy") {
         window.CuppyLandAudio?.playSfxClip?.("furballGuy");
       }
-      if (friendType === "barbie-blonde") {
-        window.CuppyLandAudio?.playSfxClip?.("barbieBlonde");
-      }
-      if (friendType === "barbie-blonde-baby") {
-        window.CuppyLandAudio?.playSfxClip?.("barbieBlondeBaby");
+      if (friendType === "uke") {
+        window.CuppyLandAudio?.playSfxClip?.("uke");
       }
       return true;
     }

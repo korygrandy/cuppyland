@@ -28,6 +28,8 @@
       friendState.puppyAttachmentPending = false;
       friendState.isDrinking = false;
       friendState.isEating = false;
+      friendElement.querySelector(".dog-collar-overlay")?.remove();
+      friendElement.querySelector(".dog-leash-overlay")?.remove();
       playSfxClip("goldenPuppyActivated");
 
       const anchorX = Number.isFinite(friendState.worldX) ? friendState.worldX : 0;
@@ -103,6 +105,18 @@
               ? assetMap["golden-puppy-with-bone-sitting"]
               : assetMap["golden-puppy-sitting"];
           art.style.backgroundImage = `url("${finalAsset || assetMap["golden-puppy-sitting"] || ""}")`;
+          if (friendState.hasCollar) {
+            const collarOverlay = document.createElement("span");
+            collarOverlay.className = "dog-collar-overlay";
+            collarOverlay.style.backgroundImage = `url("${assetMap["dog-collar-anchored"] || assetMap["dog-collar"] || ""}")`;
+            friendElement.appendChild(collarOverlay);
+          }
+          if (friendState.hasLeash) {
+            const leashOverlay = document.createElement("span");
+            leashOverlay.className = "dog-leash-overlay";
+            leashOverlay.style.backgroundImage = `url("${assetMap.dogleash || ""}")`;
+            friendElement.appendChild(leashOverlay);
+          }
           friendState.worldX = anchorX;
           friendState.worldY = anchorY;
           friendElement.style.left = `${anchorX}px`;
@@ -126,6 +140,18 @@
               ? assetMap["golden-puppy-with-bone-sitting"]
               : assetMap["golden-puppy-sitting"];
           art.style.backgroundImage = `url("${finalAsset || assetMap["golden-puppy-sitting"] || ""}")`;
+          if (friendState.hasCollar) {
+            const collarOverlay = document.createElement("span");
+            collarOverlay.className = "dog-collar-overlay";
+            collarOverlay.style.backgroundImage = `url("${assetMap["dog-collar-anchored"] || assetMap["dog-collar"] || ""}")`;
+            friendElement.appendChild(collarOverlay);
+          }
+          if (friendState.hasLeash) {
+            const leashOverlay = document.createElement("span");
+            leashOverlay.className = "dog-leash-overlay";
+            leashOverlay.style.backgroundImage = `url("${assetMap.dogleash || ""}")`;
+            friendElement.appendChild(leashOverlay);
+          }
           friendState.worldX = anchorX;
           friendState.worldY = anchorY;
           friendElement.style.left = `${anchorX}px`;
