@@ -21,10 +21,11 @@
     }
 
     function handleToyRelease(friendElement, friendState) {
-      if (friendState?.type !== "dogbone" && friendState?.type !== "rope-dogtoy" && friendState?.type !== "dogtoy-ball") {
+      const toySequenceType = window.CuppyLandInteractionRules?.getToySequenceType(friendState?.type);
+      if (!toySequenceType) {
         return false;
       }
-      if (friendState?.type === "dogbone") {
+      if (toySequenceType === "bone") {
         const puppyElement = getPuppyForToy(friendElement);
         if (!puppyElement) {
           return false;
@@ -39,7 +40,7 @@
         }
       }
 
-      if (friendState?.type === "rope-dogtoy") {
+      if (toySequenceType === "rope") {
         const puppyElement = getPuppyForToy(friendElement);
         if (!puppyElement) {
           return false;
@@ -53,7 +54,7 @@
           return true;
         }
       }
-      if (friendState?.type === "dogtoy-ball") {
+      if (toySequenceType === "ball") {
         const puppyElement = getPuppyForToy(friendElement);
         if (!puppyElement) {
           return false;

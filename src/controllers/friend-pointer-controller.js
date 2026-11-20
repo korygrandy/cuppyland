@@ -28,13 +28,15 @@
       syncBackgroundObjectActivation,
       syncMerryGoRoundActivations,
       syncDoghouseActivations,
+      syncBallAvoidance = () => {},
+      syncSquirrelProximity = () => {},
+      resetSquirrelProximity = () => {},
       cancelPuppyExtraction,
       triggerRocketManAnimation,
       triggerBarbieActivation,
       playGoldenPuppyWithBone,
       playGoldenPuppyWithRope,
       playGoldenPuppyWithLeash,
-      playGoldenPuppyWithBall,
       friendReleaseController = null,
       pauseFishbowlSequence,
       resumeFishbowlSequence,
@@ -47,6 +49,8 @@
       startChocolateMilkSpill,
       onChocolateMilkFillEnd,
       triggerFriendCelebration = () => {},
+      completePuppyRequest = () => false,
+      timerLifecycle = null,
     } = options;
     const chocolateMilkFillDurationMs = getSequenceConfig?.().durationMs || 5000;
     const chocolateMilkFillState = {
@@ -56,49 +60,6 @@
       completionTimerId: null,
     };
     let hoverMonitorIntervalId = null;
-    const puppyRequestTimers = new Map();
-
-    function startPuppyRequestTimer(puppyState, requestType) {
-      if (!puppyState?.id) {
-        return;
-      }
-      if (puppyRequestTimers.has(puppyState.id)) {
-        clearTimeout(puppyRequestTimers.get(puppyState.id));
-      }
-      puppyState.requestType = requestType;
-      puppyState.requestExpiresAt = Date.now() + 10000;
-      const timerId = window.setTimeout(() => {
-        puppyRequestTimers.delete(puppyState.id);
-        puppyState.requestType = null;
-        puppyState.requestExpiresAt = 0;
-      }, 10000);
-      puppyRequestTimers.set(puppyState.id, timerId);
-    }
-
-    function completePuppyRequest(puppyState, requestType) {
-      if (!puppyState?.id) {
-        return false;
-      }
-      const isActive = puppyState.requestType === requestType
-        && Number.isFinite(puppyState.requestExpiresAt)
-        && puppyState.requestExpiresAt > Date.now();
-      if (!isActive) {
-        return false;
-      }
-      if (puppyRequestTimers.has(puppyState.id)) {
-        clearTimeout(puppyRequestTimers.get(puppyState.id));
-        puppyRequestTimers.delete(puppyState.id);
-      }
-      if (puppyState.requestTimerId) {
-        clearTimeout(puppyState.requestTimerId);
-        puppyState.requestTimerId = null;
-      }
-      puppyState.requestType = null;
-      puppyState.requestExpiresAt = 0;
-      const puppyElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${puppyState.id}"]`);
-      triggerFriendCelebration(puppyState, puppyElement);
-      return true;
-    }
     let activeSquirrelChases = 0;
 
     function setSquirrelRunningSfx(isRunning) {
@@ -122,6 +83,7 @@
 
     function resetSquirrelRunningSfx() {
       activeSquirrelChases = 0;
+      resetSquirrelProximity();
       window.CuppyLandAudio?.stopSfxClip?.("squirrelRunning");
     }
 
@@ -182,129 +144,9 @@
     }
 
     function syncSquirrelAvoidance(dogElement, dogState) {
-      if (!dogElement || !dogState || dogState.type !== "golden-puppy" || dogState.activated === true) {
-        return;
-      }
-      const squirrelElements = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="squirrel"]'));
-      if (!squirrelElements.length) {
-        return;
-      }
-      const dogRect = dogElement.getBoundingClientRect();
-      const dogCenterX = dogRect.left + dogRect.width / 2;
-      const dogCenterY = dogRect.top + dogRect.height / 2;
-
-      squirrelElements.forEach((squirrelElement) => {
-        const squirrelRect = squirrelElement.getBoundingClientRect();
-        const squirrelState = resolveFriendStateForElement(squirrelElement);
-        if (!squirrelState) {
-          return;
-        }
-        const squirrelCenterX = squirrelRect.left + squirrelRect.width / 2;
-        const squirrelCenterY = squirrelRect.top + squirrelRect.height / 2;
-        const deltaX = squirrelCenterX - dogCenterX;
-        const deltaY = squirrelCenterY - dogCenterY;
-        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-        if (distance >= 260) {
-          return;
-        }
-        const directionX = distance > 1 ? deltaX / distance : 1;
-        const directionY = distance > 1 ? deltaY / distance : 0;
-        const nextX = squirrelState.worldX + directionX * 42;
-        const nextY = squirrelState.worldY + directionY * 42;
-        squirrelState.worldX = Math.max(0, Math.min(worldCanvas.offsetWidth - squirrelElement.offsetWidth, nextX));
-        squirrelState.worldY = Math.max(0, Math.min(worldCanvas.offsetHeight - squirrelElement.offsetHeight, nextY));
-        squirrelElement.style.left = `${squirrelState.worldX}px`;
-        squirrelElement.style.top = `${squirrelState.worldY}px`;
-        const art = squirrelElement.querySelector(".friend-character-art");
-        if (art) {
-          const dogIsLeftOfSquirrel = dogCenterX < squirrelCenterX;
-          art.style.transformOrigin = "center bottom";
-          art.style.transform = dogIsLeftOfSquirrel
-            ? "scaleX(-1) rotate(45deg)"
-            : "rotate(115deg)";
-          const runningAsset = window.CuppyLandGame?.friendAssetMap?.["squirrel-running"]
-            || window.CuppyLandGame?.friendAssetMap?.["squirrel"];
-          if (runningAsset) {
-            art.style.backgroundImage = `url("${runningAsset}")`;
-          }
-          squirrelElement.classList.add("is-running");
-          if (!squirrelState.squirrelRunningTimer) {
-            setSquirrelRunningSfx(true);
-          }
-          if (squirrelState.squirrelRunningTimer) {
-            window.clearTimeout(squirrelState.squirrelRunningTimer);
-          }
-          squirrelState.squirrelRunningTimer = window.setTimeout(() => {
-            if (art.isConnected) {
-              squirrelElement.classList.remove("is-running");
-              art.style.transform = "";
-              art.style.transformOrigin = "";
-              const normalAsset = window.CuppyLandGame?.friendAssetMap?.["squirrel"];
-              if (normalAsset) {
-                art.style.backgroundImage = `url("${normalAsset}")`;
-              }
-              squirrelState.squirrelRunningTimer = null;
-              setSquirrelRunningSfx(false);
-            }
-          }, 800);
-        }
-      });
+      syncSquirrelProximity(dogElement, dogState);
     }
 
-    function syncBallAvoidance(dogElement, dogState) {
-      if (!dogElement || !dogState || dogState.type !== "golden-puppy" || dogState.activated === true || dogState.hasBall) {
-        return;
-      }
-      const ballElements = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="dogtoy-ball"]'));
-      if (!ballElements.length) {
-        return;
-      }
-      const dogRect = dogElement.getBoundingClientRect();
-      const dogCenterX = dogRect.left + dogRect.width / 2;
-      const dogCenterY = dogRect.top + dogRect.height / 2;
-
-      ballElements.forEach((ballElement) => {
-        const ballState = resolveFriendStateForElement(ballElement);
-        if (!ballState) {
-          return;
-        }
-        const ballRect = ballElement.getBoundingClientRect();
-        const ballCenterX = ballRect.left + ballRect.width / 2;
-        const ballCenterY = ballRect.top + ballRect.height / 2;
-        const deltaX = ballCenterX - dogCenterX;
-        const deltaY = ballCenterY - dogCenterY;
-        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-        if (distance >= 260) {
-          return;
-        }
-
-        if (distance < 115) {
-          if (removeFriendInstance(ballState.id, { playRemovedSfx: false })) {
-            playGoldenPuppyWithBall?.(dogState.id, { ballOrigin: "canvas" });
-          }
-          return;
-        }
-
-        const directionX = distance > 1 ? deltaX / distance : 1;
-        const directionY = distance > 1 ? deltaY / distance : 0;
-        const nextX = ballState.worldX + directionX * 42;
-        const nextY = ballState.worldY + directionY * 42;
-        ballState.worldX = Math.max(0, Math.min(worldCanvas.offsetWidth - ballElement.offsetWidth, nextX));
-        ballState.worldY = Math.max(0, Math.min(worldCanvas.offsetHeight - ballElement.offsetHeight, nextY));
-        ballElement.style.left = `${ballState.worldX}px`;
-        ballElement.style.top = `${ballState.worldY}px`;
-        ballElement.classList.add("is-pushed");
-        if (ballState.ballPushTimer) {
-          window.clearTimeout(ballState.ballPushTimer);
-        }
-        ballState.ballPushTimer = window.setTimeout(() => {
-          if (ballElement.isConnected) {
-            ballElement.classList.remove("is-pushed");
-          }
-          ballState.ballPushTimer = null;
-        }, 800);
-      });
-    }
 
     function resetFriendDragState() {
       friendDragState.active = false;
