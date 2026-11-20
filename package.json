@@ -4,6 +4,7 @@
   "description": "Olivia's World tablet game",
   "main": "index.js",
   "scripts": {
+    "test": "node --test tests/*.test.js",
     "prepare:web": "powershell -ExecutionPolicy Bypass -File .\\scripts\\prepare-web.ps1",
     "build:release": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\build-release.ps1",
     "cap:copy": "npm run prepare:web && npx cap copy android",

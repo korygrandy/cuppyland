@@ -26,6 +26,16 @@
     } = options;
 
     const imagePreloadCache = new Map();
+    const friendRemovalController = window.CuppyLandFriendRemovalController.createController({
+      state,
+      getWorldFriendList,
+      playSfxClip,
+      motionController,
+      puppySequenceController,
+      removeBackgroundObjectActivation,
+      stopChocolateMilkSequence,
+      onRenderWorldCups,
+    });
 
     function preloadImageAsset(assetSrc) {
       if (!assetSrc) {
@@ -508,80 +518,10 @@
     }
 
     function removeFriendInstance(friendId, options = {}) {
-      const { playRemovedSfx = true } = options;
-      if (!state.activeWorld || !friendId) {
+      if (!friendRemovalController) {
         return false;
       }
-      const worldFriends = getWorldFriendList(state.activeWorld);
-      const friendIndex = worldFriends.findIndex((friend) => friend.id === friendId);
-      if (friendIndex < 0) {
-        return false;
-      }
-      const friendState = worldFriends[friendIndex];
-      if (friendState?.requestTimerId) {
-        clearTimeout(friendState.requestTimerId);
-        friendState.requestTimerId = null;
-        friendState.requestType = null;
-        friendState.requestExpiresAt = 0;
-      }
-      if (friendState?.type === "dogbed" && friendState.attachedPuppyId) {
-        const attachedPuppy = worldFriends.find((friend) => friend.id === friendState.attachedPuppyId);
-        if (attachedPuppy) {
-          attachedPuppy.dogbedId = null;
-        }
-      }
-      if (friendState?.sleepTimer) {
-        clearTimeout(friendState.sleepTimer);
-        friendState.sleepTimer = null;
-      }
-      const isBarbieRemoval = friendState
-        && (friendState.type === "barbie-blonde" || friendState.type === "barbie-blonde-baby");
-      if (friendState?.squirrelRunningTimer) {
-        clearTimeout(friendState.squirrelRunningTimer);
-        friendState.squirrelRunningTimer = null;
-        const remainingRunningSquirrel = getWorldFriendList(state.activeWorld).some((friend) => (
-          friend.type === "squirrel" && friend.squirrelRunningTimer
-        ));
-        if (!remainingRunningSquirrel) {
-          window.CuppyLandSquirrelRunningSfx?.reset?.();
-        }
-      }
-      if (friendState?.turkeyAnimationTimer) {
-        clearTimeout(friendState.turkeyAnimationTimer);
-        friendState.turkeyAnimationTimer = null;
-      }
-      if (friendState?.lavaLampSequenceTimer) {
-        clearTimeout(friendState.lavaLampSequenceTimer);
-        friendState.lavaLampSequenceTimer = null;
-      }
-      if (friendState?.barbieActivationTimer) {
-        clearTimeout(friendState.barbieActivationTimer);
-        friendState.barbieActivationTimer = null;
-      }
-      if (friendState?.fishbowlSequenceTimer) {
-        clearTimeout(friendState.fishbowlSequenceTimer);
-        friendState.fishbowlSequenceTimer = null;
-      }
-      motionController?.stopForFriend?.(friendId);
-      puppySequenceController?.stop?.(friendId);
-      removeBackgroundObjectActivation(friendId);
-      stopChocolateMilkSequence(friendId);
-      worldFriends.splice(friendIndex, 1);
-      if (isBarbieRemoval) {
-        playSfxClip("blondeBarbieObjectRemoved");
-      } else if (playRemovedSfx) {
-        playSfxClip("defaultObjectRemoved");
-      }
-      if (friendState.type === "golden-puppy") {
-        const remainingPuppies = getWorldFriendList(state.activeWorld).some((friend) => (
-          friend.type === "golden-puppy"
-        ));
-        if (!remainingPuppies) {
-          window.CuppyLandSquirrelRunningSfx?.reset?.();
-        }
-      }
-      onRenderWorldCups();
-      return true;
+      return friendRemovalController.removeFriendInstance(friendId, options);
     }
 
     function startLavaLampSequence(friendState) {

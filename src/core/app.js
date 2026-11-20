@@ -278,6 +278,23 @@ const puppySequenceController = window.CuppyLandPuppySequenceController.createCo
   timerLifecycle: timerLifecycleController,
   removeFriendInstance,
 });
+const puppyRequestController = window.CuppyLandPuppyRequestController.createController({
+  timerLifecycle: timerLifecycleController,
+  worldCanvas,
+  triggerCelebration: (puppyState, puppyElement) => {
+    sparkleEffectController.triggerFriendSparkle(puppyState, puppyElement);
+  },
+});
+const friendProximityController = window.CuppyLandFriendProximityController.createController({
+  state,
+  worldCanvas,
+  resolveFriendStateForElement,
+  removeFriendInstance,
+  playGoldenPuppyWithBall: (friendId, options) => puppySequenceController.playWithBall(friendId, options),
+  playLoopingSfxClip: (clipName) => window.CuppyLandAudio?.playLoopingSfxClip?.(clipName),
+  stopSfxClip: (clipName) => window.CuppyLandAudio?.stopSfxClip?.(clipName),
+  getFriendAssetMap: () => window.CuppyLandGame.friendAssetMap,
+});
 const friendReleaseController = window.CuppyLandFriendReleaseController.createController({
   worldCanvas,
   resolveFriendStateForElement,
@@ -342,6 +359,9 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   syncDoghouseActivations: (commitAttachment, draggedFriendState) => (
     friendWorldController?.syncDoghouseActivations?.(commitAttachment, draggedFriendState)
   ),
+  syncBallAvoidance: (friendElement, friendState) => friendProximityController.syncBallAvoidance(friendElement, friendState),
+  syncSquirrelProximity: (friendElement, friendState) => friendProximityController.syncSquirrelAvoidance(friendElement, friendState),
+  resetSquirrelProximity: () => friendProximityController.resetSquirrelRunningSfx(),
   cancelPuppyExtraction: (puppyState) => friendWorldController?.cancelPuppyExtraction?.(puppyState),
   pauseFishbowlSequence: (friendId) => friendWorldController?.pauseFishbowlSequence?.(friendId),
   resumeFishbowlSequence: (friendId) => friendWorldController?.startFishbowlSequence?.(friendId),
@@ -352,8 +372,10 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   onChocolateMilkFillComplete,
   onChocolateMilkFillEnd,
   refreshChocolateMilkSequences: () => refreshChocolateMilkSequences(),
+  completePuppyRequest: (puppyState, requestType) => puppyRequestController.complete(puppyState, requestType),
   startChocolateMilkSpill: (friendId, cupId) => chocolateMilkSequenceController.startForCup(friendId, cupId),
   friendReleaseController,
+  timerLifecycle: timerLifecycleController,
   triggerFriendCelebration: (friendState, friendElement) => {
     sparkleEffectController.triggerFriendSparkle(friendState, friendElement);
   },
@@ -742,6 +764,7 @@ const gameRulesController = window.CuppyLandGameRulesController.createController
   renderWorldCups,
   defaultCupState,
   getNextWorldZIndex,
+  schedulePuppyRequest: (puppyState) => puppyRequestController.schedule(puppyState),
 });
 
 function addCupToWorld() {

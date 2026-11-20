@@ -16,6 +16,7 @@
       renderWorldCups,
       defaultCupState,
       getNextWorldZIndex,
+      schedulePuppyRequest = () => false,
     } = options;
 
     function addCupToWorld() {
@@ -95,16 +96,7 @@
       if (friendType === "golden-puppy") {
         window.CuppyLandAudio?.playSfxClip?.("goldenPuppyActivated");
         const newPuppy = worldFriends[worldFriends.length - 1];
-        if (newPuppy && Math.random() < 0.5) {
-          const requestType = Math.random() < 0.5 ? "food" : "drink";
-          newPuppy.requestType = requestType;
-          newPuppy.requestExpiresAt = Date.now() + 10000;
-          newPuppy.requestTimerId = window.setTimeout(() => {
-            newPuppy.requestType = null;
-            newPuppy.requestExpiresAt = 0;
-            newPuppy.requestTimerId = null;
-          }, 10000);
-        }
+        schedulePuppyRequest(newPuppy);
       }
       return true;
     }
