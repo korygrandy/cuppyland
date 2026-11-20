@@ -199,6 +199,7 @@
       "water-bowl-full": "./assets/water-bowl-full.png",
       "golden-puppy-drinking": "./assets/golden-puppy-drinking.png",
       "golden-puppy-eating": "./assets/golden-puppy-eating.png",
+      "drinking-fountain-activated": "./assets/drinking-fountain-activated.png",
       "squirrel": "./assets/squirrel.png",
       "squirrel-running": "./assets/squirrel-running.png",
       "golden-puppy-playing-rope": "./assets/golden-puppy-playing-rope.png",

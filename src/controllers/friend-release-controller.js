@@ -63,7 +63,7 @@
           return false;
         }
         if (removeFriendInstance(friendState.id, { playRemovedSfx: false })) {
-          playGoldenPuppyWithBall?.(puppyState.id);
+          playGoldenPuppyWithBall?.(puppyState.id, { ballOrigin: "canvas" });
           return true;
         }
       }

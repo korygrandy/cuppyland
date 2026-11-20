@@ -534,10 +534,8 @@
         clearTimeout(friendState.sleepTimer);
         friendState.sleepTimer = null;
       }
-      if (friendState && (friendState.type === "barbie-blonde" || friendState.type === "barbie-blonde-baby")) {
-        playSfxClip("blondeBarbieObjectRemoved");
-        playRemovedSfx = false;
-      }
+      const isBarbieRemoval = friendState
+        && (friendState.type === "barbie-blonde" || friendState.type === "barbie-blonde-baby");
       if (friendState?.squirrelRunningTimer) {
         clearTimeout(friendState.squirrelRunningTimer);
         friendState.squirrelRunningTimer = null;
@@ -569,7 +567,9 @@
       removeBackgroundObjectActivation(friendId);
       stopChocolateMilkSequence(friendId);
       worldFriends.splice(friendIndex, 1);
-      if (playRemovedSfx) {
+      if (isBarbieRemoval) {
+        playSfxClip("blondeBarbieObjectRemoved");
+      } else if (playRemovedSfx) {
         playSfxClip("defaultObjectRemoved");
       }
       if (friendState.type === "golden-puppy") {
