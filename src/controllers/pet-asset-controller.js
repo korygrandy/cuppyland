@@ -4,6 +4,9 @@
 
     function resolveGoldenPuppy(friendState) {
       const assetMap = getFriendAssetMap();
+      if (friendState?.hasBall) {
+        return assetMap["golden-puppy-sitting-with-ball"] || assetMap["golden-puppy-sitting"] || assetMap[friendState.type] || "";
+      }
       if (friendState?.isDrinking) {
         return assetMap["golden-puppy-drinking"] || assetMap["golden-puppy-sitting"] || assetMap[friendState.type] || "";
       }

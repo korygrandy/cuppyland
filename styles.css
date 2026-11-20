@@ -620,6 +620,35 @@ body {
   transform-origin: center bottom;
 }
 
+.friend-character[data-friend-type="golden-puppy"].is-drinking .friend-character-art {
+  transform: scale(1.75);
+  transform-origin: center bottom;
+}
+
+.puppy-playing-ball {
+  position: absolute;
+  width: 58px;
+  height: 58px;
+  right: -52px;
+  bottom: 18px;
+  z-index: 4;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  transform-origin: center bottom;
+  animation: puppy-ball-bounce 520ms ease-in-out infinite alternate;
+}
+
+@keyframes puppy-ball-bounce {
+  0% {
+    transform: translateY(0) rotate(-8deg);
+  }
+  100% {
+    transform: translateY(-34px) rotate(18deg);
+  }
+}
+
 .friend-character[data-friend-type="rope-dogtoy"] {
   width: 120px;
   height: 120px;
