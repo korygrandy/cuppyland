@@ -143,6 +143,10 @@
         const activatedAsset = getFriendAssetMap()?.["golden-puppy-activated"] || getFriendAssetMap()?.[friendState.type] || "";
         const sittingAsset = getFriendAssetMap()?.["golden-puppy-sitting"] || getFriendAssetMap()?.[friendState.type] || "";
         const withBoneAsset = getFriendAssetMap()?.["golden-puppy-with-bone-sitting"] || sittingAsset;
+        const withRopeAsset = getFriendAssetMap()?.["golden-puppy-with-rope-sitting"] || sittingAsset;
+        if (friendState.hasRope) {
+          return withRopeAsset;
+        }
         if (friendState.hasBone) {
           return withBoneAsset;
         }
@@ -160,9 +164,19 @@
         const attachedPuppy = getWorldFriendList(state.activeWorld).find((friend) => (
           friend.type === "golden-puppy" && friend.doghouseId === friendState.id
         ));
-        const activeAsset = attachedPuppy?.hasBone
-          ? (getFriendAssetMap()?.["doghouse-with-puppies"] || getFriendAssetMap()?.["doghouse-with-dog"] || getFriendAssetMap()?.[friendState.type] || "")
-          : (getFriendAssetMap()?.["doghouse-with-dog"] || getFriendAssetMap()?.[friendState.type] || "");
+        if (friendState.activated && attachedPuppy?.hasBone) {
+          return getFriendAssetMap()?.["doghouse-with-bone"]
+            || getFriendAssetMap()?.["doghouse-with-dog"]
+            || getFriendAssetMap()?.[friendState.type]
+            || "";
+        }
+        if (friendState.activated && attachedPuppy?.hasRope) {
+          return getFriendAssetMap()?.["doghouse-with-rope"]
+            || getFriendAssetMap()?.["doghouse-with-dog"]
+            || getFriendAssetMap()?.[friendState.type]
+            || "";
+        }
+        const activeAsset = getFriendAssetMap()?.["doghouse-with-dog"] || getFriendAssetMap()?.[friendState.type] || "";
         const defaultAsset = getFriendAssetMap()?.[friendState.type] || "";
         return friendState.activated ? activeAsset : defaultAsset;
       }
