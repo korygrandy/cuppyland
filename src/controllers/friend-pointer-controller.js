@@ -32,6 +32,7 @@
       triggerRocketManAnimation,
       playGoldenPuppyWithBone,
       playGoldenPuppyWithRope,
+      friendReleaseController = null,
       pauseFishbowlSequence,
       resumeFishbowlSequence,
       toggleFishbowlSequence,
@@ -464,64 +465,8 @@
           updateFriendElementAsset(friendState.id);
         }
       }
-      if (friendState?.type === "dogbone") {
-        const boneElement = friendElement;
-        const boneRect = boneElement.getBoundingClientRect();
-        const puppyElements = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="golden-puppy"]'));
-        const puppyElement = puppyElements.find((element) => {
-          const puppyRect = element.getBoundingClientRect();
-          return puppyRect.right >= boneRect.left
-            && puppyRect.left <= boneRect.right
-            && puppyRect.bottom >= boneRect.top
-            && puppyRect.top <= boneRect.bottom;
-        });
-        if (puppyElement) {
-          const puppyState = resolveFriendStateForElement(puppyElement);
-          if (puppyState) {
-            const removedBone = removeFriendInstance(friendState.id, { playRemovedSfx: false });
-            if (removedBone) {
-              playGoldenPuppyWithBone?.(puppyState.id);
-            }
-          }
-        }
-      }
-      if (friendState?.type === "rope-dogtoy") {
-        const ropeElement = friendElement;
-        const ropeRect = ropeElement.getBoundingClientRect();
-        const puppyElements = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="golden-puppy"]'));
-        const puppyElement = puppyElements.find((element) => {
-          const puppyRect = element.getBoundingClientRect();
-          return puppyRect.right >= ropeRect.left
-            && puppyRect.left <= ropeRect.right
-            && puppyRect.bottom >= ropeRect.top
-            && puppyRect.top <= ropeRect.bottom;
-        });
-        if (puppyElement) {
-          const puppyState = resolveFriendStateForElement(puppyElement);
-          if (puppyState) {
-            const removedRope = removeFriendInstance(friendState.id, { playRemovedSfx: false });
-            if (removedRope) {
-              playGoldenPuppyWithRope?.(puppyState.id);
-            }
-          }
-        }
-      }
-      if (friendState?.type === "rabbit-bead-craft") {
-        friendState.rabbitAnchorWorldX = friendState.worldX;
-        friendState.rabbitAnchorWorldY = friendState.worldY;
-        if (typeof startRabbitAnimation === "function") {
-          startRabbitAnimation(friendState.id);
-        }
-      }
-      if (friendState?.type === "triceratops-bead-craft") {
-        friendState.triceratopsAnchorWorldX = friendState.worldX;
-        if (typeof startTriceratopsAnimation === "function") {
-          startTriceratopsAnimation(friendState.id);
-        }
-      }
-      if (friendState?.type === "rocketman-craft" && typeof startRocketManAnimation === "function") {
-        startRocketManAnimation(friendState.id);
-      }
+      friendReleaseController?.handleToyRelease(friendElement, friendState);
+      friendReleaseController?.handleMotionRelease(friendState);
 
       if (friendElement && friendState?.type === "chocolate-milk") {
         const previousPointerEvents = friendElement.style.pointerEvents || "";

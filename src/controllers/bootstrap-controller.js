@@ -14,6 +14,7 @@
       documentRef.addEventListener("keydown", () => audio.unlockAudio(), { once: true });
       documentRef.addEventListener("visibilitychange", audio.handleAppVisibilityChange);
       windowRef.addEventListener("blur", audio.handleAppVisibilityChange);
+      windowRef.addEventListener("focus", audio.handleAppVisibilityChange);
       windowRef.addEventListener("pagehide", audio.handleAppVisibilityChange);
       windowRef.addEventListener("pageshow", audio.handleAppVisibilityChange);
 
