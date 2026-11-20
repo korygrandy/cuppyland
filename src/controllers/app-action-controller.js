@@ -16,6 +16,8 @@
 
     function closeWorld() {
       window.CuppyLandAudio?.stopSfxClip?.("milkPour");
+      window.CuppyLandAudio?.stopSfxClip?.("squirrelRunning");
+      window.CuppyLandSquirrelRunningSfx?.reset?.();
       hideWorldHeadlineOverlay();
       clearChocolateMilkDragFillPreview();
       stopAllChocolateMilkSequences();

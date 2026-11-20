@@ -11,6 +11,8 @@ const {
   worldHeadlineConfig,
   gameplayConfig,
   defaultCupState,
+  findFriendById: (friendId) => findFriendById(friendId, state.activeWorld),
+  refreshChocolateMilkSequences: () => refreshChocolateMilkSequences(),
   chocolateMilkSequence,
 } = window.CuppyLandGame;
 
@@ -179,7 +181,18 @@ const inventoryInteractionController = window.CuppyLandInventoryInteraction.crea
   onChocolateMilkFillTick,
   onChocolateMilkFillCancel,
   onChocolateMilkFillComplete,
+  refreshChocolateMilkSequences: () => refreshChocolateMilkSequences(),
   onChocolateMilkFillEnd,
+  worldCanvas,
+  onDirectPuppyToy: (toyType, puppyId) => {
+    if (toyType === "dogbone") {
+      return puppySequenceController?.playWithBone(puppyId) || false;
+    }
+    if (toyType === "rope-dogtoy") {
+      return puppySequenceController?.playWithRope(puppyId) || false;
+    }
+    return false;
+  },
 });
 const sparkleEffectController = window.CuppyLandSparkleEffectController.createController({
   worldCanvas,
@@ -238,6 +251,7 @@ const friendReleaseController = window.CuppyLandFriendReleaseController.createCo
   removeFriendInstance,
   playGoldenPuppyWithBone: (friendId) => puppySequenceController.playWithBone(friendId),
   playGoldenPuppyWithRope: (friendId) => puppySequenceController.playWithRope(friendId),
+  playGoldenPuppyWithLeash: (friendId) => puppySequenceController.playWithLeash(friendId),
   startRabbitAnimation: (friendId) => friendMotionController.startRabbitAnimation(friendId),
   startTriceratopsAnimation: (friendId) => friendMotionController.startTriceratopsAnimation(friendId),
   startRocketManAnimation: (friendId) => friendMotionController.startRocketManAnimation(friendId),
@@ -279,8 +293,10 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   startRocketManAnimation: (friendId) => friendMotionController.startRocketManAnimation(friendId),
   stopRocketManAnimation: (friendId) => friendMotionController.stopRocketManAnimation(friendId),
   triggerRocketManAnimation: (friendId) => friendMotionController.triggerRocketManAnimation(friendId),
+  triggerBarbieActivation: (friendId) => friendWorldController?.triggerBarbieActivation?.(friendId),
   playGoldenPuppyWithBone: (friendId) => puppySequenceController.playWithBone(friendId),
   playGoldenPuppyWithRope: (friendId) => puppySequenceController.playWithRope(friendId),
+  playGoldenPuppyWithLeash: (friendId) => puppySequenceController.playWithLeash(friendId),
   syncBarbieActivationState: (friendState) => friendWorldController?.syncBarbieActivationState?.(friendState),
   updateFriendElementAsset: (friendId) => friendWorldController?.updateFriendElementAsset?.(friendId),
   syncBackgroundObjectActivation: (friendState, friendElement) => backgroundObjectController.syncFriend(friendState, friendElement),
@@ -297,6 +313,8 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   onChocolateMilkFillCancel,
   onChocolateMilkFillComplete,
   onChocolateMilkFillEnd,
+  refreshChocolateMilkSequences: () => refreshChocolateMilkSequences(),
+  friendReleaseController,
 });
 friendWorldController = window.CuppyLandWorldFriendController.createController({
   state,

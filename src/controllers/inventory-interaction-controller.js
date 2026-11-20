@@ -25,6 +25,8 @@
       onChocolateMilkFillCancel,
       onChocolateMilkFillComplete,
       onChocolateMilkFillEnd,
+      worldCanvas,
+      onDirectPuppyToy = null,
     } = options;
     const chocolateMilkFillDurationMs = game.chocolateMilkSequence?.durationMs || 5000;
     const chocolateMilkFillState = {
@@ -333,6 +335,28 @@
       const targetCupId = hoveredCup?.dataset.cupId || getActiveCupId();
       const zone = zoneForPoint(event.clientX, event.clientY);
       const isFriendDrop = dragState.type === "friend";
+      if (isFriendDrop && (dragState.value === "dogbone" || dragState.value === "rope-dogtoy")) {
+        const targetedElement = document.elementFromPoint(event.clientX, event.clientY);
+        const puppyElement = targetedElement?.closest?.('.friend-character[data-friend-type="golden-puppy"]');
+        if (puppyElement) {
+          const activated = onDirectPuppyToy?.(
+            dragState.value,
+            puppyElement.dataset.friendId
+          );
+          if (activated) {
+            dragState.suppressClick = true;
+            dragState.active = false;
+            dragState.type = "";
+            dragState.value = "";
+            dragState.pointerId = null;
+            dragState.moved = false;
+            resetChocolateMilkFill("direct-puppy-toy");
+            hideDragGhost();
+            clearZoneHighlights();
+            return;
+          }
+        }
+      }
       const dropPoint = isFriendDrop ? getWorldDropPoint(event.clientX, event.clientY) : null;
       const result = isFriendDrop
         ? applyDrop(dragState.type, dragState.value, zone || "friend", targetCupId, dropPoint)

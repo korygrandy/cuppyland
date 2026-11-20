@@ -26,6 +26,8 @@
       isHairstyleNearLid,
       gameplayConfig,
       defaultCupState,
+      findFriendById,
+      refreshChocolateMilkSequences,
       cupPartDragController = null,
     } = options;
     const dragClamp = gameplayConfig?.dragClamp || {};
@@ -113,6 +115,34 @@
       const maxY = Math.max(0, worldCanvas.offsetHeight - cupElement.offsetHeight);
       const nextX = Math.min(maxX, Math.max(0, cupDragState.startWorldX + deltaX));
       const nextY = Math.min(maxY, Math.max(0, cupDragState.startWorldY + deltaY));
+      if (
+        cupState.lidVisible
+        && !cupState.lidDetached
+        && deltaY >= 100
+      ) {
+        cupState.lidVisible = false;
+        cupState.lidDetached = true;
+        window.CuppyLandAudio?.playSfxClip?.("lidSnapOff");
+        syncLidPosition(cupElement);
+        const chocolateMilk = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="chocolate-milk"]'))
+          .find((friendElement) => {
+            const friendRect = friendElement.getBoundingClientRect();
+            const cupRect = cupElement.getBoundingClientRect();
+            return friendRect.right >= cupRect.left
+              && friendRect.left <= cupRect.right
+              && friendRect.bottom >= cupRect.top
+              && friendRect.top <= cupRect.bottom;
+          });
+        if (chocolateMilk) {
+          const chocolateState = findFriendById?.(chocolateMilk.dataset.friendId);
+          if (chocolateState?.type === "chocolate-milk") {
+            chocolateState.attachedCupId = cupElement.dataset.cupId;
+            chocolateState.sequenceCompleted = false;
+            chocolateState.sequenceFrame = 2;
+            refreshChocolateMilkSequences?.();
+          }
+        }
+      }
       const clamped = cupPartDragController?.clampWorldPosition(nextX, nextY, cupElement)
         || { worldX: nextX, worldY: nextY };
       cupState.worldX = clamped.worldX;

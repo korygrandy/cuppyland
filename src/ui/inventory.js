@@ -173,7 +173,7 @@
     const friendsItems = document.getElementById("friendsItems");
 
     const accessoryTypes = new Set(["lavalamp", "chocolate-milk", "uke", "flower-bead-craft", "merry-go-round"]);
-    const petTypes = new Set(["golden-puppy", "doghouse", "dogbone", "rope-dogtoy", "fishbowl", "rabbit-bead-craft", "triceratops-bead-craft", "turkey"]);
+    const petTypes = new Set(["golden-puppy", "doghouse", "dogbone", "rope-dogtoy", "dogleash", "dog-collar", "dogbed", "dogbowl", "dogbowl-with-food", "dogfood", "water-bowl", "squirrel", "fishbowl", "rabbit-bead-craft", "triceratops-bead-craft", "turkey"]);
 
     colorItems.innerHTML = "";
     expressionItems.innerHTML = "";

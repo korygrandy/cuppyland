@@ -35,7 +35,7 @@
     }
 
     function start(friendState) {
-      if (!friendState || friendState.sequenceCompleted || runtime.has(friendState.id)) {
+      if (!friendState || runtime.has(friendState.id)) {
         return;
       }
 
