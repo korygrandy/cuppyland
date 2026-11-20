@@ -5,6 +5,7 @@
       { id: "swing-left", label: "Swing Left", x: 3475, y: 345, width: 220, height: 185 },
       { id: "swing-right", label: "Swing Right", x: 5661, y: 325, width: 220, height: 185 },
       { id: "trampoline", label: "Trampoline", x: 325, y: 295, width: 220, height: 185 },
+      { id: "merry-go-round-left", label: "Merry-Go-Round Left", x: 3050, y: 598, width: 259, height: 161 },
       { id: "merry-go-round-right", label: "Merry-Go-Round Right", x: 5249, y: 565, width: 220, height: 185 },
     ],
     "olivia-room": [
@@ -36,6 +37,7 @@
           "pizza-man-craft",
           "barbie-blonde",
           "barbie-blonde-baby",
+          "water-bowl",
         ],
       },
       {

@@ -7,9 +7,10 @@
       playSfxClip = () => {},
       getFriendAssetMap = () => ({}),
       timerLifecycle = null,
+      removeFriendInstance = () => false,
     } = options;
 
-    function playToySequence(friendId, toyType) {
+    function playToySequence(friendId, toyType, options = {}) {
       const friendState = findFriendById(friendId);
       if (!friendState || friendState.type !== "golden-puppy") {
         return false;
@@ -57,6 +58,9 @@
         ballOverlay = document.createElement("span");
         ballOverlay.className = "puppy-playing-ball";
         ballOverlay.style.backgroundImage = `url("${assetMap["dogtoy-ball"] || ""}")`;
+        if (options.ballOrigin === "canvas") {
+          ballOverlay.style.right = "-13px";
+        }
         friendElement.appendChild(ballOverlay);
       }
 
@@ -85,6 +89,19 @@
         friendState.worldY = Math.max(0, Math.min(maxY, anchorY + pose.y));
         friendElement.style.left = `${friendState.worldX}px`;
         friendElement.style.top = `${friendState.worldY}px`;
+
+        const ballElements = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="dogtoy-ball"]'));
+        ballElements.forEach((ballElement) => {
+          const overlaps = window.CuppyLandFriendOverlap?.rectsOverlap
+            ? window.CuppyLandFriendOverlap.rectsOverlap(friendElement.getBoundingClientRect(), ballElement.getBoundingClientRect())
+            : false;
+          if (overlaps) {
+            const ballState = findFriendById(ballElement.dataset.friendId);
+            if (ballState && removeFriendInstance(ballState.id, { playRemovedSfx: false })) {
+              return;
+            }
+          }
+        });
         poseIndex += 1;
 
         if (poseIndex < poses.length) {
@@ -205,7 +222,7 @@
     return {
       playWithBone: (friendId) => playToySequence(friendId, "bone"),
       playWithRope: (friendId) => playToySequence(friendId, "rope"),
-      playWithBall: (friendId) => playToySequence(friendId, "ball"),
+      playWithBall: (friendId, options = {}) => playToySequence(friendId, "ball", options),
       playWithLeash: (friendId) => playToySequence(friendId, "leash"),
       stop,
     };

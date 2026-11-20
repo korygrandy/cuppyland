@@ -276,6 +276,7 @@ const puppySequenceController = window.CuppyLandPuppySequenceController.createCo
   playSfxClip: (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName),
   getFriendAssetMap: () => window.CuppyLandGame.friendAssetMap,
   timerLifecycle: timerLifecycleController,
+  removeFriendInstance,
 });
 const friendReleaseController = window.CuppyLandFriendReleaseController.createController({
   worldCanvas,
@@ -284,9 +285,7 @@ const friendReleaseController = window.CuppyLandFriendReleaseController.createCo
   playGoldenPuppyWithBone: (friendId) => puppySequenceController.playWithBone(friendId),
   playGoldenPuppyWithRope: (friendId) => puppySequenceController.playWithRope(friendId),
   playGoldenPuppyWithLeash: (friendId) => puppySequenceController.playWithLeash(friendId),
-  playGoldenPuppyWithBall: (friendId) => puppySequenceController.playWithBall(friendId),
-  playGoldenPuppyWithBall: (friendId) => puppySequenceController.playWithBall(friendId),
-  playGoldenPuppyWithBall: (friendId) => puppySequenceController.playWithBall(friendId),
+  playGoldenPuppyWithBall: (friendId, options) => puppySequenceController.playWithBall(friendId, options),
   startRabbitAnimation: (friendId) => friendMotionController.startRabbitAnimation(friendId),
   startTriceratopsAnimation: (friendId) => friendMotionController.startTriceratopsAnimation(friendId),
   startRocketManAnimation: (friendId) => friendMotionController.startRocketManAnimation(friendId),
@@ -335,6 +334,7 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   playGoldenPuppyWithBone: (friendId) => puppySequenceController.playWithBone(friendId),
   playGoldenPuppyWithRope: (friendId) => puppySequenceController.playWithRope(friendId),
   playGoldenPuppyWithLeash: (friendId) => puppySequenceController.playWithLeash(friendId),
+  playGoldenPuppyWithBall: (friendId, options) => puppySequenceController.playWithBall(friendId, options),
   syncBarbieActivationState: (friendState) => friendWorldController?.syncBarbieActivationState?.(friendState),
   updateFriendElementAsset: (friendId) => friendWorldController?.updateFriendElementAsset?.(friendId),
   syncBackgroundObjectActivation: (friendState, friendElement) => backgroundObjectController.syncFriend(friendState, friendElement),
