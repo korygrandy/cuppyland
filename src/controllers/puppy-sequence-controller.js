@@ -43,13 +43,11 @@
       const isBone = toyType === "bone";
       const isBall = toyType === "ball";
       const isLeash = toyType === "leash";
-      const playingAsset = isRope
-        ? assetMap["golden-puppy-playing-rope"]
-        : isBone
-          ? (assetMap["golden-puppy-playing-bone"] || assetMap["golden-puppy-playing"])
-          : isBall
-            ? (assetMap["golden-puppy-playing-with-ball"] || assetMap["golden-puppy-playing"])
-            : assetMap["golden-puppy-playing"];
+      const playingAsset = window.CuppyLandPuppySequenceAssetHelper?.resolvePlayingAsset?.({
+        toyType,
+        friendState,
+        assetMap,
+      }) || assetMap["golden-puppy-playing"] || "";
 
       art.style.transform = "";
       art.style.backgroundImage = `url("${playingAsset || ""}")`;
