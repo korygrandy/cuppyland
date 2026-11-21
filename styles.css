@@ -863,6 +863,22 @@ body {
   cursor: grab;
 }
 
+.dogbed-extraction-zone {
+  position: absolute;
+  left: 25%;
+  bottom: 18%;
+  width: 50%;
+  height: 36%;
+  z-index: 6;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: grab;
+  border: 2px dashed rgba(255, 255, 255, 0.92);
+  border-radius: 16px;
+  background: rgba(94, 197, 255, 0.18);
+  box-shadow: 0 0 0 1px rgba(38, 99, 255, 0.45) inset;
+}
+
 .friend-character[data-friend-type="rabbit-bead-craft"] .friend-character-art {
   transition: transform 180ms ease-in-out;
   transform-origin: center bottom;
