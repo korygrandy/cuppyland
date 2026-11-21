@@ -176,7 +176,6 @@
       cupState.worldX = clamped.worldX;
       cupState.worldY = clamped.worldY;
       syncCupWorldPosition(cupElement);
-
     }
 
     function onCupPointerUp(event) {

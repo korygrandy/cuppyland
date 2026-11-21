@@ -56,6 +56,10 @@
         artOffsetX: 0,
         artOffsetY: 0,
         artScale: 1,
+        hitboxOffsetX: 42,
+        hitboxOffsetY: 180,
+        hitboxWidth: 350,
+        hitboxHeight: 110,
 
       },
       {

@@ -13,6 +13,26 @@
     const trampolineFriends = new Map();
     const trampolineFriendDelays = new Map();
     let activeWorld = null;
+    const trampolineBouncerTypes = new Set([
+      "heart-women",
+      "heart-man",
+      "rocketman-craft",
+      "furball-guy",
+      "hairy-guy",
+      "spongebob-stuffy",
+      "pizza-man-craft",
+      "barbie-blonde",
+      "barbie-blonde-baby",
+      "golden-puppy",
+      "triceratops-bead-craft",
+      "rabbit-bead-craft",
+      "squirrel",
+      "turkey",
+    ]);
+
+    function isTrampolineBouncer(friendState) {
+      return Boolean(friendState?.type && trampolineBouncerTypes.has(friendState.type));
+    }
 
     function restoreTrampolineFriend(friendId, record) {
       if (!record?.element) {
@@ -185,6 +205,12 @@
         anchor.style.top = `${objectConfig.y}px`;
         anchor.style.width = `${objectConfig.width}px`;
         anchor.style.height = `${objectConfig.height}px`;
+        if (objectConfig.id === "trampoline") {
+          anchor.style.setProperty("--trampoline-hitbox-left", `${objectConfig.hitboxOffsetX ?? 0}px`);
+          anchor.style.setProperty("--trampoline-hitbox-top", `${objectConfig.hitboxOffsetY ?? 0}px`);
+          anchor.style.setProperty("--trampoline-hitbox-width", `${objectConfig.hitboxWidth ?? objectConfig.width}px`);
+          anchor.style.setProperty("--trampoline-hitbox-height", `${objectConfig.hitboxHeight ?? objectConfig.height}px`);
+        }
 
         const activatedArt = document.createElement("div");
         activatedArt.className = "world-background-object-art";
@@ -203,6 +229,17 @@
     }
 
     function friendIntersectsObject(friendState, friendElement, objectConfig) {
+      const hitboxLeft = objectConfig.hitboxOffsetX != null
+        ? objectConfig.x + objectConfig.hitboxOffsetX
+        : objectConfig.x;
+      const hitboxTop = objectConfig.hitboxOffsetY != null
+        ? objectConfig.y + objectConfig.hitboxOffsetY
+        : objectConfig.y;
+      const hitboxWidth = objectConfig.hitboxWidth ?? objectConfig.width;
+      const hitboxHeight = objectConfig.hitboxHeight ?? objectConfig.height;
+      const hitboxRight = hitboxLeft + hitboxWidth;
+      const hitboxBottom = hitboxTop + hitboxHeight;
+
       if (worldCanvas && friendElement?.getBoundingClientRect) {
         const canvasRect = worldCanvas.getBoundingClientRect();
         const friendRect = friendElement.getBoundingClientRect();
@@ -217,10 +254,10 @@
           const friendTop = (friendRect.top - canvasRect.top) / scaleY;
           const friendRight = (friendRect.right - canvasRect.left) / scaleX;
           const friendBottom = (friendRect.bottom - canvasRect.top) / scaleY;
-          return friendRight >= objectConfig.x
-            && friendLeft <= objectConfig.x + objectConfig.width
-            && friendBottom >= objectConfig.y
-            && friendTop <= objectConfig.y + objectConfig.height;
+          return friendRight >= hitboxLeft
+            && friendLeft <= hitboxRight
+            && friendBottom >= hitboxTop
+            && friendTop <= hitboxBottom;
         }
       }
 
@@ -229,10 +266,10 @@
       const friendRight = friendLeft + (friendElement?.offsetWidth || 0);
       const friendBottom = friendTop + (friendElement?.offsetHeight || 0);
 
-      return friendRight >= objectConfig.x
-        && friendLeft <= objectConfig.x + objectConfig.width
-        && friendBottom >= objectConfig.y
-        && friendTop <= objectConfig.y + objectConfig.height;
+      return friendRight >= hitboxLeft
+        && friendLeft <= hitboxRight
+        && friendBottom >= hitboxTop
+        && friendTop <= hitboxBottom;
     }
 
     function syncFriend(friendState, friendElement) {
@@ -244,8 +281,9 @@
         const activeFriends = activeFriendsByObject.get(objectConfig.id) || new Set();
         const wasActive = activeFriends.size > 0;
         activeFriends.delete(friendState.id);
+        const isAllowedBouncer = isTrampolineBouncer(friendState);
 
-        if (friendIntersectsObject(friendState, friendElement, objectConfig)) {
+        if (isAllowedBouncer && friendIntersectsObject(friendState, friendElement, objectConfig)) {
           activeFriends.add(friendState.id);
         }
 
@@ -258,7 +296,7 @@
         if (objectConfig.id === "trampoline") {
           const currentFriendOverlaps = friendIntersectsObject(friendState, friendElement, objectConfig);
           let newlyRegistered = false;
-          if (currentFriendOverlaps) {
+          if (isAllowedBouncer && currentFriendOverlaps) {
             newlyRegistered = registerTrampolineFriend(objectConfig.id, friendState, friendElement);
           } else {
             unregisterTrampolineFriend(objectConfig.id, friendState.id);
@@ -298,6 +336,10 @@
       });
     }
 
+    function syncCup(cupState, cupElement) {
+      return;
+    }
+
     function removeFriend(friendId) {
       if (!friendId) {
         return;
@@ -320,6 +362,7 @@
     return {
       render,
       syncFriend,
+      syncCup,
       removeFriend,
     };
   }

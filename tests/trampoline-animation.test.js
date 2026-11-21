@@ -21,6 +21,10 @@ test("trampoline anchor and assets are configured", () => {
   assert.equal(trampoline.artOffsetX, 0);
   assert.equal(trampoline.artOffsetY, 0);
   assert.equal(trampoline.artScale, 1);
+  assert.equal(trampoline.hitboxOffsetX, 42);
+  assert.equal(trampoline.hitboxOffsetY, 180);
+  assert.equal(trampoline.hitboxWidth, 350);
+  assert.equal(trampoline.hitboxHeight, 110);
 });
 
 test("trampoline assets exist and have matching 600px dimensions", () => {
@@ -171,16 +175,42 @@ test("trampoline bounce applies only to overlapping registered friends", () => {
 
   const barbie = makeFriend("barbie-1", "barbie-blonde", 235, 240);
   const baby = makeFriend("baby-1", "barbie-blonde-baby", 300, 240);
-  const outside = makeFriend("puppy-1", "golden-puppy", 800, 240);
+  const puppy = makeFriend("puppy-1", "golden-puppy", 350, 240);
+  const triceratops = makeFriend("triceratops-1", "triceratops-bead-craft", 380, 240);
+  const rabbit = makeFriend("rabbit-1", "rabbit-bead-craft", 410, 240);
+  const squirrel = makeFriend("squirrel-1", "squirrel", 440, 240);
+  const turkey = makeFriend("turkey-1", "turkey", 470, 240);
+  const accessory = makeFriend("ball-1", "dogtoy-ball", 500, 240);
+  const outside = makeFriend("heart-outside", "heart-women", 800, 240);
 
   controller.syncFriend(barbie.state, barbie.element);
   controller.syncFriend(baby.state, baby.element);
+  controller.syncFriend(puppy.state, puppy.element);
+  controller.syncFriend(triceratops.state, triceratops.element);
+  controller.syncFriend(rabbit.state, rabbit.element);
+  controller.syncFriend(squirrel.state, squirrel.element);
+  controller.syncFriend(turkey.state, turkey.element);
+  controller.syncFriend(accessory.state, accessory.element);
   controller.syncFriend(outside.state, outside.element);
 
   assert.equal(outside.element.classes.has("trampoline-bounce-up") || outside.element.classes.has("trampoline-bounce-down"), false);
+  assert.equal(accessory.element.classes.has("trampoline-bounce-up") || accessory.element.classes.has("trampoline-bounce-down"), false);
   const controllerSource = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
   assert.equal(controllerSource.includes("registerTrampolineFriend"), true);
   assert.equal(controllerSource.includes("const currentFriendOverlaps"), true);
   assert.equal(controllerSource.includes("getBoundingClientRect"), true);
   assert.equal(controllerSource.includes("newlyRegistered"), true);
+  assert.equal(controllerSource.includes("function syncCup"), true);
+  assert.equal(controllerSource.includes("trampoline-bounce-up"), true);
+});
+
+test("trampoline allows only friend and pet character types", () => {
+  const controllerSource = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
+  assert.equal(controllerSource.includes("const trampolineBouncerTypes = new Set"), true);
+  assert.equal(controllerSource.includes('"golden-puppy"'), true);
+  assert.equal(controllerSource.includes('"triceratops-bead-craft"'), true);
+  assert.equal(controllerSource.includes('"rabbit-bead-craft"'), true);
+  assert.equal(controllerSource.includes('"squirrel"'), true);
+  assert.equal(controllerSource.includes('"turkey"'), true);
+  assert.equal(controllerSource.includes("isAllowedBouncer"), true);
 });
