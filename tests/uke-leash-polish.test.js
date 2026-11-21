@@ -114,6 +114,21 @@ test("trampoline debug line is removed and puppy overlay poses are separated", (
   assert.equal(sequenceSource.includes("is-puppy-playing"), true);
 });
 
+test("walking puppy flips left and right without changing overlay offsets", () => {
+  const styles = fs.readFileSync("styles.css", "utf8");
+  const pointerSource = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
+
+  assert.equal(pointerSource.includes("walkingFacing"), true);
+  assert.equal(pointerSource.includes("movementDelta"), true);
+  assert.equal(pointerSource.includes('walkingFacing = "left"'), true);
+  assert.equal(pointerSource.includes('walkingFacing = "right"'), true);
+  assert.equal(pointerSource.includes("syncPuppyFacing"), true);
+  assert.equal(styles.includes(".friend-character.is-facing-left .friend-character-art"), true);
+  assert.equal(styles.includes("transform: scaleX(-1) scale(0.5)"), true);
+  assert.equal(styles.includes("left: -20px"), true);
+  assert.equal(styles.includes("left: 30px"), true);
+});
+
 test("double-tap plays only ukuleleActivated while snap plays only uke", () => {
   const pointerSource = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
   const worldSource = fs.readFileSync("src/controllers/world-friend-controller.js", "utf8");

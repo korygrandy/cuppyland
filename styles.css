@@ -872,6 +872,23 @@ body {
   transform: none;
 }
 
+.friend-character.is-facing-left .friend-character-art {
+  transform: scaleX(-1);
+  transform-origin: center bottom;
+}
+
+.friend-character.is-facing-left.is-puppy-playing .dog-collar-overlay,
+.friend-character.is-facing-left.is-walking-puppy .dog-collar-overlay {
+  transform: scaleX(-1) scale(0.5);
+  transform-origin: center center;
+}
+
+.friend-character.is-facing-left.is-puppy-playing .dog-leash-overlay,
+.friend-character.is-facing-left.is-walking-puppy .dog-leash-overlay {
+  transform: scaleX(-1);
+  transform-origin: center center;
+}
+
 .friend-character[data-friend-type="squirrel"].is-running .friend-character-art {
   animation: squirrel-run-hop 260ms ease-in-out infinite;
 }

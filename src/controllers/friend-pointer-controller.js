@@ -235,6 +235,19 @@
       syncSquirrelProximity(dogElement, dogState);
     }
 
+    function syncPuppyFacing(friendState, friendElement) {
+      if (!friendState || friendState.type !== "golden-puppy" || !friendElement) {
+        return;
+      }
+      const facing = friendState.walkingFacing === "left" ? "left" : "right";
+      friendElement.classList.toggle("is-facing-left", facing === "left");
+      const art = friendElement.querySelector(".friend-character-art");
+      if (art) {
+        art.style.transform = facing === "left" ? "scaleX(-1)" : "";
+        art.style.transformOrigin = facing === "left" ? "center bottom" : "";
+      }
+    }
+
 
     function resetFriendDragState() {
       friendDragState.active = false;
@@ -429,7 +442,9 @@
         friendState.lastTapAtMs = nowMs;
         if (friendState.hasLeash) {
           friendState.walkingActive = true;
+          friendState.walkingFacing = friendState.walkingFacing || "right";
           friendElement.classList.add("is-walking-puppy");
+          syncPuppyFacing(friendState, friendElement);
           const assetMap = window.CuppyLandGame?.friendAssetMap || {};
           friendState.sequencePlayingAsset = friendState.hasBall
             ? (assetMap["golden-puppy-playing-with-ball"] || assetMap["golden-puppy-playing-with-leash"] || assetMap["golden-puppy-playing"] || "")
@@ -624,6 +639,17 @@
       const nextX = worldX - friendDragState.pointerOffsetX;
       const nextY = worldY - friendDragState.pointerOffsetY;
       const safePosition = clampFriendPosition(friendElement, friendState, nextX, nextY);
+      if (friendState.type === "golden-puppy" && friendState.hasLeash) {
+        const movementDelta = safePosition.worldX - friendState.worldX;
+        if (movementDelta < -1) {
+          friendState.walkingFacing = "left";
+        } else if (movementDelta > 1) {
+          friendState.walkingFacing = "right";
+        }
+        friendState.walkingActive = true;
+        friendElement.classList.add("is-walking-puppy");
+        syncPuppyFacing(friendState, friendElement);
+      }
       friendState.worldX = safePosition.worldX;
       friendState.worldY = safePosition.worldY;
       friendElement.style.left = `${friendState.worldX}px`;
@@ -750,6 +776,7 @@
         friendState.walkingActive = false;
         friendState.sequencePlayingAsset = null;
         friendElement?.classList.remove("is-walking-puppy");
+        syncPuppyFacing(friendState, friendElement);
         stopWalkingPuppyAudio(friendState);
         updateFriendElementAsset?.(friendState.id);
       }
