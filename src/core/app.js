@@ -312,6 +312,7 @@ const friendProximityController = window.CuppyLandFriendProximityController.crea
   playLoopingSfxClip: (clipName) => window.CuppyLandAudio?.playLoopingSfxClip?.(clipName),
   stopSfxClip: (clipName) => window.CuppyLandAudio?.stopSfxClip?.(clipName),
   getFriendAssetMap: () => window.CuppyLandGame.friendAssetMap,
+  syncFriendActivation: (friendState, friendElement) => backgroundObjectController.syncFriend(friendState, friendElement),
 });
 const friendReleaseController = window.CuppyLandFriendReleaseController.createController({
   worldCanvas,

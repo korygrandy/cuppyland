@@ -9,6 +9,7 @@
       playLoopingSfxClip = () => {},
       stopSfxClip = () => {},
       getFriendAssetMap = () => ({}),
+      syncFriendActivation = () => {},
     } = options;
 
     let activeSquirrelChases = 0;
@@ -59,6 +60,7 @@
         );
         squirrelElement.style.left = `${squirrelState.worldX}px`;
         squirrelElement.style.top = `${squirrelState.worldY}px`;
+        syncFriendActivation(squirrelState, squirrelElement);
         const art = squirrelElement.querySelector(".friend-character-art");
         if (!art) {
           return;

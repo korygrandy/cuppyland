@@ -56,3 +56,63 @@ test("close puppy proximity pushes the ball away instead of starting a sequence"
   assert.equal(pushedClassAdded, true);
   assert.equal(ballState.worldX > 200, true);
 });
+
+test("pushed squirrel resyncs trampoline overlap immediately", () => {
+  const context = {
+    window: {
+      clearTimeout: () => {},
+      setTimeout: () => 1,
+    },
+  };
+  loadBrowserScript("src/controllers/friend-proximity-controller.js", context);
+
+  const dogState = { id: "puppy-1", type: "golden-puppy", activated: false };
+  const squirrelState = { id: "squirrel-1", type: "squirrel", worldX: 400, worldY: 300 };
+  let syncCount = 0;
+
+  const dogElement = {
+    getBoundingClientRect: () => ({ left: 100, right: 220, top: 100, bottom: 220 }),
+  };
+  const squirrelElement = {
+    offsetWidth: 120,
+    offsetHeight: 120,
+    style: {},
+    classList: {
+      add: () => {},
+      remove: () => {},
+    },
+    getBoundingClientRect: () => ({
+      left: squirrelState.worldX,
+      right: squirrelState.worldX + 120,
+      top: squirrelState.worldY,
+      bottom: squirrelState.worldY + 120,
+    }),
+    querySelector: () => ({
+      style: {},
+    }),
+  };
+
+  const controller = context.window.CuppyLandFriendProximityController.createController({
+    state: {},
+    worldCanvas: {
+      offsetWidth: 1200,
+      offsetHeight: 700,
+      querySelectorAll: () => [squirrelElement],
+    },
+    resolveFriendStateForElement: () => squirrelState,
+    getFriendAssetMap: () => ({
+      squirrel: "squirrel",
+      "squirrel-running": "squirrel-running",
+    }),
+    syncFriendActivation: (state, element) => {
+      syncCount += 1;
+      assert.equal(state, squirrelState);
+      assert.equal(element, squirrelElement);
+    },
+  });
+
+  controller.syncSquirrelAvoidance(dogElement, dogState);
+
+  assert.equal(squirrelState.worldX > 400, true);
+  assert.equal(syncCount, 1);
+});
