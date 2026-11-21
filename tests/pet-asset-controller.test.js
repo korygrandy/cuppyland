@@ -52,6 +52,29 @@ test("golden puppy resolves squirrel sitting variant", () => {
   assert.equal(asset, "puppy-sit-squirrel");
 });
 
+test("golden puppy active sequence preserves the playing asset", () => {
+  const context = { window: {} };
+  loadBrowserScript("src/controllers/pet-asset-controller.js", context);
+
+  const controller = context.window.CuppyLandPetAssetController.createController({
+    state: { activeWorld: "playground" },
+    getWorldFriendList: () => [],
+    getFriendAssetMap: () => ({
+      "golden-puppy-sitting": "puppy-sit",
+      "golden-puppy-sitting-with-ball": "puppy-sit-ball",
+    }),
+  });
+
+  const asset = controller.resolveGoldenPuppy({
+    type: "golden-puppy",
+    sequenceActive: true,
+    sequencePlayingAsset: "puppy-playing-ball",
+    hasBall: true,
+  });
+
+  assert.equal(asset, "puppy-playing-ball");
+});
+
 test("doghouse resolves every puppy variant and the collar-added matrix", () => {
   const context = { window: {} };
   loadBrowserScript("src/controllers/pet-asset-controller.js", context);

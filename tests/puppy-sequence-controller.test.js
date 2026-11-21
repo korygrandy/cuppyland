@@ -39,6 +39,7 @@ test("puppy sequence blocks overlapping starts while active", () => {
     setTimeout,
     clearTimeout,
   };
+  loadBrowserScript("src/controllers/puppy-sequence-asset-helper.js", context);
   loadBrowserScript("src/controllers/puppy-sequence-controller.js", context);
   const controller = context.window.CuppyLandPuppySequenceController.createController({
     state: {},
@@ -61,6 +62,7 @@ test("puppy sequence blocks overlapping starts while active", () => {
 
   assert.equal(controller.playWithBall(friendState.id), true);
   assert.equal(friendState.sequenceActive, true);
+  assert.equal(friendState.sequencePlayingAsset, "playing-ball");
   assert.equal(controller.playWithBone(friendState.id), false);
 });
 

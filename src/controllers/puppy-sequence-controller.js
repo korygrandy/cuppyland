@@ -75,6 +75,7 @@
         friendState,
         assetMap,
       }) || assetMap["golden-puppy-playing"] || "";
+      friendState.sequencePlayingAsset = playingAsset;
 
       art.style.transform = "";
       art.style.backgroundImage = `url("${playingAsset || ""}")`;
@@ -180,6 +181,7 @@
           friendElement.style.top = `${restoredPose.worldY}px`;
           friendState.puppyPlayTimer = null;
           friendState.preSequencePose = null;
+          friendState.sequencePlayingAsset = null;
           friendState.sequenceActive = false;
         };
 
@@ -219,6 +221,7 @@
         friendElement.style.top = `${restoredPose.worldY}px`;
       }
       friendState.preSequencePose = null;
+      friendState.sequencePlayingAsset = null;
     }
 
     return {
