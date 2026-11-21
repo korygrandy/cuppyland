@@ -15,12 +15,12 @@ test("uke shake is slowed and music notes use an S-curve", () => {
   assert.equal(styles.includes("--note-direction"), true);
 });
 
-test("leash overlay is anchored left 10px and down 25px", () => {
+test("leash overlay is anchored left 10px and raised 30px for sitting pose", () => {
   const styles = fs.readFileSync("styles.css", "utf8");
 
   assert.equal(styles.includes(".dog-leash-overlay"), true);
   assert.equal(styles.includes("left: 40px"), true);
-  assert.equal(styles.includes("top: -25px"), true);
+  assert.equal(styles.includes("top: -55px"), true);
   assert.equal(styles.includes("width: 100%"), true);
 });
 
@@ -77,13 +77,13 @@ test("puppy leash starts walking on drag and returns to sitting on release", () 
   assert.equal(petSource.includes("walkingActive && friendState?.hasLeash"), true);
 });
 
-test("collar and leash anchors move left 10px and down 25px", () => {
+test("sitting collar and leash anchors move left 10px and up 30px", () => {
   const styles = fs.readFileSync("styles.css", "utf8");
 
   assert.equal(styles.includes("left: -10px"), true);
-  assert.equal(styles.includes("top: 25px"), true);
+  assert.equal(styles.includes("top: -5px"), true);
   assert.equal(styles.includes("left: 40px"), true);
-  assert.equal(styles.includes("top: -25px"), true);
+  assert.equal(styles.includes("top: -55px"), true);
 });
 
 test("walking puppy loops panting and randomized barking until release", () => {
