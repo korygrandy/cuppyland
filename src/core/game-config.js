@@ -213,6 +213,7 @@
       "doghouse-with-bone": "./assets/doghouse-with-bone.png",
       "doghouse-with-ball": "./assets/doghouse-with-ball.png",
       "doghouse-with-collar": "./assets/doghouse-with-collar.png",
+      "doghouse-with-squirrel": "./assets/doghouse-with-squirrel.png",
       "fishbowl": "./assets/fishbowl-sequence1.png",
       "fishbowl-sequence-1": "./assets/fishbowl-sequence1.png",
       "fishbowl-sequence-2": "./assets/fishbowl-sequence2.png",
@@ -266,6 +267,9 @@
         lidToCup: 110,
         sleeveToCup: 120,
         hairstyleToLid: 90,
+      },
+      friendAnimationConfig: {
+        ukuleleDanceMs: 2300,
       },
       dragClamp: {
         lid: { minLeft: -60, maxLeft: 200, minTop: -80, maxTop: 120 },

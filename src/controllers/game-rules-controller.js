@@ -16,6 +16,7 @@
       renderWorldCups,
       defaultCupState,
       getNextWorldZIndex,
+      worldCanvas = null,
       schedulePuppyRequest = () => false,
     } = options;
 
@@ -61,12 +62,37 @@
           ? defaultPanelCenterY
           : fallbackWorldY;
 
+      const friendSizes = {
+        "golden-puppy": { width: 120, height: 120 },
+        "dogtoy-ball": { width: 72, height: 72 },
+        "dogbone": { width: 110, height: 56 },
+        "dog-collar": { width: 120, height: 72 },
+        dogleash: { width: 120, height: 72 },
+        dogbed: { width: 220, height: 150 },
+        doghouse: { width: 180, height: 140 },
+        uke: { width: 72, height: 220 },
+        "barbie-blonde": { width: 150, height: 150 },
+        "barbie-blonde-baby": { width: 86, height: 140 },
+        "flower-bead-craft": { width: 96, height: 176 },
+        "merry-go-round": { width: 259, height: 161 },
+      };
+      const friendSize = friendSizes[friendType] || { width: 132, height: 132 };
+      const worldWidth = worldCanvas?.offsetWidth || (state.activeWorld === "playground" ? 6600 : 2200);
+      const worldHeight = worldCanvas?.offsetHeight || 760;
+      const safeWorldX = attachedCup
+        ? worldX
+        : Math.max(0, Math.min(worldWidth - friendSize.width, worldX));
+      const safeWorldY = attachedCup
+        ? worldY
+        : Math.max(12, Math.min(worldHeight - friendSize.height, worldY));
+
       worldFriends.push({
         id: `friend-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
         type: friendType,
         hasFood: friendType === "dogbowl-with-food",
-        worldX,
-        worldY,
+        pizzaWobbleActive: friendType === "pizza-man-craft",
+        worldX: safeWorldX,
+        worldY: safeWorldY,
         zIndex: typeof getNextWorldZIndex === "function" ? getNextWorldZIndex(state.activeWorld) : (90 + fallbackIndex),
         attachedCupId: null,
         attachedOffsetX: 0,

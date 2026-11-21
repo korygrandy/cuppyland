@@ -29,11 +29,55 @@
       findFriendById,
       refreshChocolateMilkSequences,
       startChocolateMilkSpill,
+      ensureChocolateMilkForCup,
       cupPartDragController = null,
     } = options;
     const dragClamp = gameplayConfig?.dragClamp || {};
     const anchors = gameplayConfig?.anchors || {};
     const dragMovementThreshold = gameplayConfig?.dragMovementThreshold ?? 8;
+    const cupLastTapAt = new Map();
+
+    function triggerChocolateMilkSpill(cupElement, cupState) {
+      if (!cupElement || !cupState) {
+        return false;
+      }
+      const cupId = cupElement.dataset.cupId;
+      if (!cupId) {
+        return false;
+      }
+      const open = window.CuppyLandChocolateMilkSpillHelper?.isCupOpen
+        ? window.CuppyLandChocolateMilkSpillHelper.isCupOpen(cupState)
+        : (cupState.lidVisible === false || cupState.lidDetached === true);
+      if (!open) {
+        return false;
+      }
+
+      let chocolateState = ensureChocolateMilkForCup?.(cupId) || null;
+      if (!chocolateState) {
+        const chocolateElement = worldCanvas.querySelector('.friend-character[data-friend-type="chocolate-milk"]');
+        if (chocolateElement) {
+          chocolateState = findFriendById?.(chocolateElement.dataset.friendId);
+        }
+      }
+      if (!chocolateState) {
+        const chocolateElements = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="chocolate-milk"]'));
+        for (const element of chocolateElements) {
+          const candidate = findFriendById?.(element.dataset.friendId);
+          if (candidate?.attachedCupId === cupId) {
+            chocolateState = candidate;
+            break;
+          }
+        }
+      }
+      if (!chocolateState) {
+        return false;
+      }
+      chocolateState.attachedCupId = cupId;
+      chocolateState.sequenceCompleted = false;
+      chocolateState.sequenceFrame = 2;
+      refreshChocolateMilkSequences?.();
+      return startChocolateMilkSpill?.(chocolateState.id, cupId) || false;
+    }
 
     function setSleeveDragForeground(cupElement, isActive) {
       if (!cupElement) {
@@ -86,9 +130,7 @@
       cupDragState.startWorldX = Number.isFinite(cupState.worldX) ? cupState.worldX : 920;
       cupDragState.startWorldY = Number.isFinite(cupState.worldY) ? cupState.worldY : 430;
       cupDragState.pointerScale = getElementDragScale(cupElement);
-      cupDragState.zigzagDirection = null;
-      cupDragState.zigzagChanges = 0;
-      cupDragState.lastZigzagClientX = event.clientX;
+      cupDragState.moved = false;
       if (cupElement) {
         trySetPointerCapture(cupElement, event.pointerId);
       }
@@ -115,39 +157,19 @@
       const pointerScale = cupDragState.pointerScale || getElementDragScale(cupElement);
       const deltaX = (event.clientX - cupDragState.startClientX) / pointerScale;
       const deltaY = (event.clientY - cupDragState.startClientY) / pointerScale;
+      if (Math.hypot(deltaX, deltaY) > dragMovementThreshold) {
+        cupDragState.moved = true;
+      }
       const maxX = Math.max(0, worldCanvas.offsetWidth - cupElement.offsetWidth);
       const maxY = Math.max(0, worldCanvas.offsetHeight - cupElement.offsetHeight);
       const nextX = Math.min(maxX, Math.max(0, cupDragState.startWorldX + deltaX));
       const nextY = Math.min(maxY, Math.max(0, cupDragState.startWorldY + deltaY));
-      const horizontalDelta = event.clientX - cupDragState.lastZigzagClientX;
-      if (Math.abs(horizontalDelta) >= 18) {
-        const direction = horizontalDelta > 0 ? 1 : -1;
-        if (cupDragState.zigzagDirection && cupDragState.zigzagDirection !== direction) {
-          cupDragState.zigzagChanges = (cupDragState.zigzagChanges || 0) + 1;
-        }
-        cupDragState.zigzagDirection = direction;
-        cupDragState.lastZigzagClientX = event.clientX;
-      }
-      const zigzagTriggered = cupDragState.zigzagChanges >= 3;
-      if (
-        (cupState.lidVisible && !cupState.lidDetached && (deltaY >= 100 || zigzagTriggered))
-        || (cupState.lidDetached && zigzagTriggered)
-      ) {
+      if (cupState.lidVisible && !cupState.lidDetached && deltaY >= 100) {
         cupState.lidVisible = false;
         cupState.lidDetached = true;
         window.CuppyLandAudio?.playSfxClip?.("lidSnapOff");
         syncLidPosition(cupElement);
-        const chocolateMilkElement = worldCanvas.querySelector('.friend-character[data-friend-type="chocolate-milk"]');
-        if (chocolateMilkElement) {
-          const chocolateState = findFriendById?.(chocolateMilkElement.dataset.friendId);
-          if (chocolateState?.type === "chocolate-milk") {
-            chocolateState.attachedCupId = cupElement.dataset.cupId;
-            chocolateState.sequenceCompleted = false;
-            chocolateState.sequenceFrame = 2;
-            refreshChocolateMilkSequences?.();
-            startChocolateMilkSpill?.(chocolateState.id, cupElement.dataset.cupId);
-          }
-        }
+        triggerChocolateMilkSpill(cupElement, cupState);
       }
       const clamped = cupPartDragController?.clampWorldPosition(nextX, nextY, cupElement)
         || { worldX: nextX, worldY: nextY };
@@ -160,6 +182,23 @@
     function onCupPointerUp(event) {
       if (!cupDragState.active || event.pointerId !== cupDragState.pointerId) {
         return;
+      }
+
+      const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
+      const cupState = resolveCupStateForElement(cupElement);
+      const cupId = cupElement?.dataset?.cupId;
+      if (cupId && !cupDragState.moved) {
+        const nowMs = Date.now();
+        const lastTapAt = cupLastTapAt.get(cupId) || 0;
+        if (lastTapAt && nowMs - lastTapAt <= 450) {
+          cupLastTapAt.delete(cupId);
+          triggerChocolateMilkSpill(cupElement, cupState);
+          cupDragState.active = false;
+          cupDragState.pointerId = null;
+          cupDragState.pointerScale = 1;
+          return;
+        }
+        cupLastTapAt.set(cupId, nowMs);
       }
 
       cupDragState.active = false;

@@ -21,8 +21,10 @@
       stopRabbitAnimation,
       startTriceratopsAnimation,
       stopTriceratopsAnimation,
+      stopPizzaManAnimation,
       stopRocketManAnimation,
       startRocketManAnimation,
+      startPizzaManAnimation,
       syncBarbieActivationState,
       updateFriendElementAsset,
       syncBackgroundObjectActivation,
@@ -85,6 +87,19 @@
       activeSquirrelChases = 0;
       resetSquirrelProximity();
       window.CuppyLandAudio?.stopSfxClip?.("squirrelRunning");
+    }
+
+    function clampFriendPosition(friendElement, friendState, nextX, nextY) {
+      if (!friendElement || !friendState) {
+        return { worldX: 0, worldY: 12 };
+      }
+      const edgeInset = 12;
+      const maxX = Math.max(edgeInset, worldCanvas.offsetWidth - friendElement.offsetWidth);
+      const maxY = Math.max(edgeInset, worldCanvas.offsetHeight - friendElement.offsetHeight);
+      return {
+        worldX: Math.max(0, Math.min(maxX, nextX)),
+        worldY: Math.max(edgeInset, Math.min(maxY, nextY)),
+      };
     }
 
     window.CuppyLandSquirrelRunningSfx = {
@@ -208,7 +223,8 @@
 
       chocolateMilkFillState.completed = true;
       if (friendState?.id) {
-        removeFriendInstance(friendState.id, { playRemovedSfx: false });
+        friendState.attachedCupId = cupId;
+        friendState.sequenceCompleted = false;
       }
       if (typeof onChocolateMilkFillComplete === "function") {
         onChocolateMilkFillComplete(cupId);
@@ -344,24 +360,6 @@
         }
       }
 
-      if (
-        friendState
-        && friendState.type === "uke"
-        && !friendDragState.moved
-      ) {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-          friendState.lastTapAtMs = nowMs;
-          resetFriendDragState();
-          event.preventDefault();
-          event.stopPropagation();
-          window.CuppyLandAudio?.playSfxClip?.("ukuleleActivated");
-          return;
-        }
-        friendState.lastTapAtMs = nowMs;
-      }
-
       if (friendState.type === "turkey") {
         const nowMs = Date.now();
         const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
@@ -421,7 +419,9 @@
           event.stopPropagation();
 
           const hoveredCup = getCupElementAtPoint(event.clientX, event.clientY);
-          const hoveredCupId = hoveredCup?.dataset?.cupId || null;
+          const hoveredCupId = window.CuppyLandChocolateMilkSpillHelper?.getDoubleTapCupId
+            ? window.CuppyLandChocolateMilkSpillHelper.getDoubleTapCupId(friendState, hoveredCup?.dataset?.cupId || null)
+            : (hoveredCup?.dataset?.cupId || friendState.attachedCupId || null);
           const fallbackCupId = hoveredCupId || state.activeCupId || null;
           const fallbackCupState = fallbackCupId ? getCupStateById?.(fallbackCupId) : null;
           const hoveredCupState = hoveredCupId ? getCupStateById?.(hoveredCupId) : null;
@@ -458,6 +458,16 @@
       friendDragState.startClientY = event.clientY;
       friendDragState.moved = false;
       friendDragState.dragStartedAtMs = Date.now();
+      const normalizedPosition = clampFriendPosition(
+        friendElement,
+        friendState,
+        friendState.worldX,
+        friendState.worldY
+      );
+      friendState.worldX = normalizedPosition.worldX;
+      friendState.worldY = normalizedPosition.worldY;
+      friendElement.style.left = `${friendState.worldX}px`;
+      friendElement.style.top = `${friendState.worldY}px`;
       if (friendState.type === "golden-puppy") {
         friendState.puppyAttachmentPending = friendState.activated !== true;
         if (friendState.isEating) {
@@ -490,6 +500,11 @@
       if (friendState.type === "rocketman-craft" && typeof stopRocketManAnimation === "function") {
         stopRocketManAnimation(friendState.id);
       }
+      if (friendState.type === "pizza-man-craft" && typeof stopPizzaManAnimation === "function") {
+        stopPizzaManAnimation(friendState.id);
+        friendState.pizzaAnchorWorldX = friendState.worldX;
+        friendState.pizzaAnchorWorldY = friendState.worldY;
+      }
       if (friendState.type === "chocolate-milk") {
         friendState.attachedCupId = null;
         friendState.sequenceCompleted = false;
@@ -505,15 +520,6 @@
 
     function onPointerMove(event) {
       if (!friendDragState.active || event.pointerId !== friendDragState.pointerId) {
-        return;
-      }
-
-      if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
-        const friendId = friendDragState.friendId;
-        resetChocolateMilkFill("removed-outside-canvas");
-        resetFriendDragState();
-        removeFriendInstance(friendId);
-        stopSquirrelLoopIfNoPuppies();
         return;
       }
 
@@ -534,16 +540,9 @@
       }
       const nextX = worldX - friendDragState.pointerOffsetX;
       const nextY = worldY - friendDragState.pointerOffsetY;
-      friendState.worldX = Math.max(0, Math.min(worldCanvas.offsetWidth - friendElement.offsetWidth, nextX));
-      const topClearance = (
-        friendState.type === "dogbone"
-        || friendState.type === "dog-collar"
-        || friendState.type === "rope-dogtoy"
-      ) ? 24 : 12;
-      friendState.worldY = Math.max(
-        topClearance,
-        Math.min(worldCanvas.offsetHeight - friendElement.offsetHeight, nextY)
-      );
+      const safePosition = clampFriendPosition(friendElement, friendState, nextX, nextY);
+      friendState.worldX = safePosition.worldX;
+      friendState.worldY = safePosition.worldY;
       friendElement.style.left = `${friendState.worldX}px`;
       friendElement.style.top = `${friendState.worldY}px`;
       syncSquirrelAvoidance(friendElement, friendState);
@@ -574,6 +573,60 @@
       const friendElement = event.currentTarget.closest(".friend-character");
       const friendState = resolveFriendStateForElement(friendElement);
       setFriendDragVisual(friendElement, friendState, false);
+
+      if (
+        friendState
+        && friendState.type === "uke"
+        && !friendDragState.moved
+      ) {
+        const nowMs = Date.now();
+        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
+        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
+          friendState.lastTapAtMs = 0;
+          resetFriendDragState();
+          event.preventDefault();
+          event.stopPropagation();
+          window.CuppyLandAudio?.playSfxClip?.("ukuleleActivated");
+          friendState.ukeDancing = true;
+          friendElement?.classList.add("is-dancing");
+          if (friendState.ukeDanceTimer) {
+            clearTimeout(friendState.ukeDanceTimer);
+          }
+          updateFriendElementAsset?.(friendState.id);
+          const danceDurationMs = window.CuppyLandGame?.friendAnimationConfig?.ukuleleDanceMs ?? 2300;
+          friendState.ukeDanceTimer = setTimeout(() => {
+            friendState.ukeDancing = false;
+            friendState.ukeDanceTimer = null;
+            const activeUkeElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`);
+            activeUkeElement?.classList.remove("is-dancing");
+            updateFriendElementAsset?.(friendState.id);
+          }, danceDurationMs);
+          return;
+        }
+        friendState.lastTapAtMs = nowMs;
+      }
+
+      if (friendState?.type === "pizza-man-craft" && !friendDragState.moved) {
+        const nowMs = Date.now();
+        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
+        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
+          friendState.lastTapAtMs = 0;
+          resetFriendDragState();
+          event.preventDefault();
+          event.stopPropagation();
+          const wobbleEnabled = window.CuppyLandFriendAnimationHelper?.togglePizzaWobble?.(friendState);
+          if (wobbleEnabled) {
+            friendState.pizzaAnchorWorldX = friendState.worldX;
+            friendState.pizzaAnchorWorldY = friendState.worldY;
+            startPizzaManAnimation?.(friendState.id);
+          } else {
+            stopPizzaManAnimation?.(friendState.id);
+          }
+          updateFriendElementAsset?.(friendState.id);
+          return;
+        }
+        friendState.lastTapAtMs = nowMs;
+      }
 
       if (
         friendState
@@ -828,6 +881,47 @@
           }
         }
       }
+      if (friendState?.type === "dogtoy-ball") {
+        const puppyElement = window.CuppyLandFriendOverlap?.findOverlappingElement(
+          worldCanvas,
+          friendElement,
+          '.friend-character[data-friend-type="golden-puppy"]'
+        );
+        const puppyState = puppyElement ? resolveFriendStateForElement(puppyElement) : null;
+        if (puppyState && !puppyState.sequenceActive && !puppyState.hasBall) {
+          const claimed = window.CuppyLandPuppyBallClaimHelper?.tryClaim
+            ? window.CuppyLandPuppyBallClaimHelper.tryClaim(friendState, puppyState.id)
+            : true;
+          if (claimed) {
+            const started = playGoldenPuppyWithBall?.(puppyState.id, {
+              ballOrigin: "canvas",
+              ballFriendId: friendState.id,
+            });
+            if (started) {
+              removeFriendInstance(friendState.id, { playRemovedSfx: false });
+              friendElement?.remove?.();
+              const scheduleCleanup = typeof window.setTimeout === "function"
+                ? window.setTimeout.bind(window)
+                : () => {};
+              scheduleCleanup(() => {
+                removeFriendInstance(friendState.id, { playRemovedSfx: false });
+                worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`)?.remove?.();
+              }, 50);
+              scheduleCleanup(() => {
+                removeFriendInstance(friendState.id, { playRemovedSfx: false });
+                worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`)?.remove?.();
+              }, 500);
+              scheduleCleanup(() => {
+                removeFriendInstance(friendState.id, { playRemovedSfx: false });
+                worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`)?.remove?.();
+              }, 1500);
+              window.CuppyLandPuppyBallClaimHelper?.release?.(friendState, puppyState.id);
+            } else {
+              window.CuppyLandPuppyBallClaimHelper?.release?.(friendState, puppyState.id);
+            }
+          }
+        }
+      }
       friendReleaseController?.handleToyRelease(friendElement, friendState);
       friendReleaseController?.handleMotionRelease(friendState);
 
@@ -847,7 +941,10 @@
         }
       }
 
-      if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
+      if (
+        friendDragState.moved
+        && isPointerOutsideWorldCanvas(event.clientX, event.clientY, 24)
+      ) {
         removeFriendInstance(friendDragState.friendId);
       }
 
@@ -860,6 +957,7 @@
       onPointerDown,
       onPointerMove,
       onPointerUp,
+      clampFriendPosition,
     };
   }
 

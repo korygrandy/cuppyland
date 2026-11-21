@@ -106,15 +106,6 @@
         return "";
       }
 
-      if (friendState.type === "chocolate-milk") {
-        const sequenceConfig = getSequenceConfig();
-        if (friendState.sequenceFrame === 2) {
-          return sequenceConfig.frame2Asset;
-        }
-        if (friendState.sequenceFrame === 3) {
-          return sequenceConfig.frame3Asset;
-        }
-      }
 
       if (friendState.type === "turkey") {
         if (friendState.sequenceFrame === 2) {
@@ -220,13 +211,52 @@
       friendElement.appendChild(extractionZone);
     }
 
+    function syncFriendAnimationClasses(friendState, friendElement) {
+      if (!friendState || !friendElement) {
+        return;
+      }
+      const isUkeDancing = window.CuppyLandFriendAnimationHelper?.isUkeDancing
+        ? window.CuppyLandFriendAnimationHelper.isUkeDancing(friendState)
+        : Boolean(friendState.type === "uke" && friendState.ukeDancing);
+      const isPizzaWobbling = window.CuppyLandFriendAnimationHelper?.isPizzaWobbling
+        ? window.CuppyLandFriendAnimationHelper.isPizzaWobbling(friendState)
+        : Boolean(friendState.type === "pizza-man-craft" && friendState.pizzaWobbleActive);
+      friendElement.classList.toggle("is-dancing", isUkeDancing);
+      friendElement.classList.toggle("is-wobbling", isPizzaWobbling);
+    }
+
+    function startUkeDance(friendState) {
+      if (!friendState || friendState.type !== "uke") {
+        return false;
+      }
+      friendState.ukeDancing = true;
+      if (friendState.ukeDanceTimer) {
+        clearTimeout(friendState.ukeDanceTimer);
+      }
+      updateFriendElementAsset(friendState.id);
+      playSfxClip("ukuleleActivated");
+      const durationMs = window.CuppyLandGame?.friendAnimationConfig?.ukuleleDanceMs ?? 2300;
+      friendState.ukeDanceTimer = setTimeout(() => {
+        const active = findFriendById(friendState.id);
+        if (!active) {
+          return;
+        }
+        active.ukeDancing = false;
+        active.ukeDanceTimer = null;
+        updateFriendElementAsset(active.id);
+      }, durationMs);
+      return true;
+    }
+
     function updateFriendElementAsset(friendId) {
       const friendState = findFriendById(friendId);
       const asset = resolveFriendAsset(friendState);
+      const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"]`);
       const friendArt = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"] .friend-character-art`);
       if (friendArt) {
         friendArt.style.backgroundImage = `url("${asset}")`;
       }
+      syncFriendAnimationClasses(friendState, friendElement);
       syncDogbedExtractionZone(friendState);
     }
 
@@ -743,6 +773,7 @@
       if (friendState.type === "dogbed" && friendState.sleeping) {
         syncDogbedExtractionZone(friendState);
       }
+      syncFriendAnimationClasses(friendState, friendElement);
       friendElement.addEventListener("pointerdown", onFriendPointerDown);
       friendElement.addEventListener("pointermove", onFriendPointerMove);
       friendElement.addEventListener("pointerup", onFriendPointerUp);
@@ -788,6 +819,9 @@
           }
           if (friendState.type === "rocketman-craft") {
             motionController?.startRocketManAnimation?.(friendState.id);
+          }
+          if (friendState.type === "pizza-man-craft" && friendState.pizzaWobbleActive) {
+            motionController?.startPizzaManAnimation?.(friendState.id);
           }
           if (friendState.type === "fishbowl") {
             startFishbowlSequence(friendState.id);

@@ -373,9 +373,18 @@
           }
         }
       }
-      if (isFriendDrop && (dragState.value === "dogbone" || dragState.value === "rope-dogtoy" || dragState.value === "dogtoy-ball")) {
+      if (isFriendDrop && (dragState.value === "dogbone" || dragState.value === "rope-dogtoy" || dragState.value === "dogtoy-ball" || dragState.value === "squirrel")) {
         const targetedElement = document.elementFromPoint(event.clientX, event.clientY);
-        const puppyElement = targetedElement?.closest?.('.friend-character[data-friend-type="golden-puppy"]');
+        let puppyElement = targetedElement?.closest?.('.friend-character[data-friend-type="golden-puppy"]');
+        if (!puppyElement && worldCanvas) {
+          puppyElement = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="golden-puppy"]')).find((candidate) => {
+            const rect = candidate.getBoundingClientRect();
+            return event.clientX >= rect.left
+              && event.clientX <= rect.right
+              && event.clientY >= rect.top
+              && event.clientY <= rect.bottom;
+          }) || null;
+        }
         if (puppyElement) {
           const activated = onDirectPuppyToy?.(
             dragState.value,

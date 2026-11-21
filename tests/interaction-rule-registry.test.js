@@ -10,7 +10,7 @@ test("interaction registry maps toy types and Barbie types", () => {
   assert.equal(rules.getToySequenceType("dogbone"), "bone");
   assert.equal(rules.getToySequenceType("rope-dogtoy"), "rope");
   assert.equal(rules.getToySequenceType("dogtoy-ball"), "ball");
-  assert.equal(rules.getToySequenceType("squirrel"), null);
+  assert.equal(rules.getToySequenceType("squirrel"), "squirrel");
   assert.equal(rules.isBarbieType("barbie-blonde"), true);
   assert.equal(rules.isBarbieType("barbie-blonde-baby"), true);
   assert.equal(rules.isPuppyType("golden-puppy"), true);

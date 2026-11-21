@@ -57,6 +57,7 @@
         "lavaLampSequenceTimer",
         "barbieActivationTimer",
         "fishbowlSequenceTimer",
+        "ukeDanceTimer",
       ].forEach((timerName) => {
         if (friendState?.[timerName]) {
           clearTimeout(friendState[timerName]);

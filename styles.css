@@ -446,6 +446,10 @@ body {
   z-index: 1100 !important;
 }
 
+.cup-character.is-spilling {
+  z-index: 1400 !important;
+}
+
 .cup-lid {
   position: absolute;
   z-index: 3;
@@ -623,6 +627,24 @@ body {
 .friend-character[data-friend-type="golden-puppy"].is-drinking .friend-character-art {
   transform: scale(1.75);
   transform-origin: center bottom;
+}
+
+.friend-character[data-friend-type="uke"].is-dancing .friend-character-art {
+  transform-origin: center bottom;
+  animation: uke-dance-shake 260ms ease-in-out infinite;
+}
+
+@keyframes uke-dance-shake {
+  0% { transform: rotate(-8deg) translateY(0) scale(1); }
+  25% { transform: rotate(6deg) translateY(-4px) scale(1.02); }
+  50% { transform: rotate(-4deg) translateY(0) scale(1); }
+  75% { transform: rotate(8deg) translateY(-3px) scale(1.03); }
+  100% { transform: rotate(-8deg) translateY(0) scale(1); }
+}
+
+.friend-character[data-friend-type="pizza-man-craft"].is-wobbling .friend-character-art {
+  transform-origin: center bottom;
+  will-change: transform;
 }
 
 .puppy-playing-ball {
@@ -919,6 +941,143 @@ body {
   opacity: 0.95;
   transform: translate(-50%, -50%);
   transform-origin: center center;
+}
+
+.chocolate-milk-spill {
+  position: absolute;
+  inset: 0;
+  z-index: 1401;
+  pointer-events: none;
+  opacity: 0;
+  overflow: visible;
+}
+
+.chocolate-milk-spill.is-active {
+  opacity: 1;
+}
+
+.chocolate-milk-spill .milk-flow {
+  position: absolute;
+  left: 198px;
+  top: 58px;
+  width: 26px;
+  height: 210px;
+  border-radius: 12px 12px 18px 18px;
+  transform-origin: top center;
+  background:
+    linear-gradient(90deg,
+      rgba(255, 255, 255, 0.28) 0 14%,
+      rgba(126, 72, 34, 0.95) 15% 52%,
+      #5a301b 53% 82%,
+      rgba(255, 255, 255, 0.18) 83% 100%);
+  box-shadow:
+    inset 4px 0 5px rgba(255, 255, 255, 0.22),
+    5px 5px 10px rgba(54, 24, 12, 0.18);
+  animation: chocolate-milk-flow 520ms ease-in-out infinite alternate;
+}
+
+.chocolate-milk-spill.is-pulsing .milk-flow {
+  animation-duration: 380ms;
+  filter: brightness(1.08);
+}
+
+.chocolate-milk-spill .milk-splash {
+  position: absolute;
+  left: 137px;
+  top: 252px;
+  width: 138px;
+  height: 42px;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 50% 65%, #77421f 0 38%, rgba(119, 66, 31, 0.82) 39% 54%, transparent 55%);
+  transform-origin: center bottom;
+  animation: chocolate-milk-splash 680ms ease-out infinite;
+}
+
+.chocolate-milk-spill .milk-splash i {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50% 50% 55% 55%;
+  background: #77421f;
+  box-shadow: inset 2px 2px 2px rgba(255, 255, 255, 0.22);
+  animation: chocolate-milk-drop 680ms ease-out infinite;
+}
+
+.chocolate-milk-spill .milk-splash i:nth-child(1) {
+  left: 18px;
+  top: 4px;
+  --drop-x: -30px;
+  --drop-y: -36px;
+}
+
+.chocolate-milk-spill .milk-splash i:nth-child(2) {
+  left: 44px;
+  top: 0;
+  --drop-x: -12px;
+  --drop-y: -48px;
+  animation-delay: 80ms;
+}
+
+.chocolate-milk-spill .milk-splash i:nth-child(3) {
+  left: 66px;
+  top: 3px;
+  --drop-x: 8px;
+  --drop-y: -44px;
+  animation-delay: 160ms;
+}
+
+.chocolate-milk-spill .milk-splash i:nth-child(4) {
+  right: 22px;
+  top: 7px;
+  --drop-x: 32px;
+  --drop-y: -34px;
+  animation-delay: 240ms;
+}
+
+.chocolate-milk-spill .milk-splash i:nth-child(5) {
+  left: 86px;
+  top: 18px;
+  --drop-x: 46px;
+  --drop-y: -24px;
+  animation-delay: 320ms;
+}
+
+@keyframes chocolate-milk-flow {
+  0% {
+    transform: scaleX(0.72) scaleY(0.92);
+  }
+  100% {
+    transform: scaleX(1) scaleY(1);
+  }
+}
+
+@keyframes chocolate-milk-splash {
+  0%,
+  100% {
+    transform: scaleX(0.82) scaleY(0.55);
+  }
+  45% {
+    transform: scaleX(1.12) scaleY(0.9);
+  }
+}
+
+@keyframes chocolate-milk-drop {
+  0% {
+    transform: translate(0, 8px) scale(0.55);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    transform: translate(var(--drop-x), var(--drop-y)) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--drop-x), 18px) scale(0.7);
+    opacity: 0;
+  }
 }
 
 .cup-sparkle-burst {
@@ -1283,6 +1442,13 @@ body {
   display: flex;
   gap: 0.6rem;
   flex-wrap: wrap;
+}
+
+.pets-inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 72px);
+  align-items: start;
+  gap: 0.6rem;
 }
 
 .inventory-item {

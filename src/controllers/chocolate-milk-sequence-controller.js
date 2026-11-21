@@ -7,10 +7,49 @@
       getSequenceConfig,
       syncAttachedFriendPosition,
       updateFriendElementAsset,
+      getCupElementById = null,
       onCompleted = () => {},
+      removeFriendInstance = () => false,
     } = options;
 
     const runtime = new Map();
+
+    function ensureSpillEffect(cupId) {
+      if (!cupId) {
+        return null;
+      }
+      const cupElement = typeof getCupElementById === "function"
+        ? getCupElementById(cupId)
+        : null;
+      if (!cupElement) {
+        return null;
+      }
+      let spillElement = cupElement.querySelector(".chocolate-milk-spill");
+      if (!spillElement) {
+        spillElement = document.createElement("div");
+        spillElement.className = "chocolate-milk-spill";
+        spillElement.setAttribute("aria-hidden", "true");
+        spillElement.innerHTML = [
+          '<span class="milk-flow"></span>',
+          '<span class="milk-splash"><i></i><i></i><i></i><i></i><i></i></span>',
+        ].join("");
+        cupElement.appendChild(spillElement);
+      }
+      cupElement.classList.add("is-spilling");
+      return spillElement;
+    }
+
+    function stopSpillEffect(cupId) {
+      const cupElement = typeof getCupElementById === "function"
+        ? getCupElementById(cupId)
+        : null;
+      const spillElement = cupElement?.querySelector(".chocolate-milk-spill");
+      if (spillElement) {
+        spillElement.classList.remove("is-active");
+        spillElement.remove();
+      }
+      cupElement?.classList.remove("is-spilling");
+    }
 
     function isAttachedAndOpen(friendState) {
       if (!friendState || friendState.type !== "chocolate-milk" || !friendState.attachedCupId) {
@@ -31,6 +70,7 @@
       if (friendState && !keepFrame) {
         friendState.sequenceFrame = null;
         updateFriendElementAsset(friendId);
+        stopSpillEffect(friendState.attachedCupId);
       }
     }
 
@@ -40,8 +80,14 @@
       }
 
       const sequenceConfig = getSequenceConfig();
-      friendState.sequenceFrame = 2;
+      friendState.sequenceFrame = null;
       updateFriendElementAsset(friendState.id);
+      const spillElement = ensureSpillEffect(friendState.attachedCupId);
+      if (spillElement) {
+        spillElement.classList.remove("is-active");
+        void spillElement.offsetWidth;
+        spillElement.classList.add("is-active");
+      }
 
       const startedAt = Date.now();
       const intervalId = setInterval(() => {
@@ -53,13 +99,17 @@
 
         syncAttachedFriendPosition(activeFriend);
         const elapsedMs = Date.now() - startedAt;
-        activeFriend.sequenceFrame = activeFriend.sequenceFrame === 2 ? 3 : 2;
-        updateFriendElementAsset(activeFriend.id);
+        const currentSpill = ensureSpillEffect(activeFriend.attachedCupId);
+        if (currentSpill) {
+          currentSpill.classList.toggle("is-pulsing", Math.floor(elapsedMs / 450) % 2 === 0);
+        }
 
         if (elapsedMs >= sequenceConfig.durationMs) {
           const attachedCupId = activeFriend.attachedCupId;
           activeFriend.sequenceCompleted = true;
           stop(activeFriend.id);
+          stopSpillEffect(attachedCupId);
+          removeFriendInstance(activeFriend.id, { playRemovedSfx: false });
           if (attachedCupId) {
             onCompleted(attachedCupId);
           }
@@ -102,12 +152,13 @@
       if (!friendState || friendState.type !== "chocolate-milk" || !cupId) {
         return false;
       }
-      if (!isCupOpen({ type: "chocolate-milk", attachedCupId: cupId })) {
+      const normalizedCupId = typeof cupId === "object" ? cupId.attachedCupId : cupId;
+      if (!normalizedCupId || !isCupOpen(normalizedCupId)) {
         return false;
       }
-      friendState.attachedCupId = cupId;
+      friendState.attachedCupId = normalizedCupId;
       friendState.sequenceCompleted = false;
-      friendState.sequenceFrame = 2;
+      friendState.sequenceFrame = null;
       refresh();
       return true;
     }

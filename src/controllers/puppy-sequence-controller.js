@@ -57,6 +57,19 @@
       const isBone = toyType === "bone";
       const isBall = toyType === "ball";
       const isLeash = toyType === "leash";
+      const isSquirrel = toyType === "squirrel";
+      if (isBall && friendState.hasBall) {
+        friendState.sequenceActive = false;
+        return false;
+      }
+      if (isBall && options.ballFriendId) {
+        removeFriendInstance(options.ballFriendId, { playRemovedSfx: false });
+        worldCanvas.querySelector(`.friend-character[data-friend-id="${options.ballFriendId}"]`)?.remove?.();
+      }
+      if (isSquirrel && friendState.hasSquirrel) {
+        friendState.sequenceActive = false;
+        return false;
+      }
       const playingAsset = window.CuppyLandPuppySequenceAssetHelper?.resolvePlayingAsset?.({
         toyType,
         friendState,
@@ -130,6 +143,7 @@
             friendState.hasBone = isBone;
             friendState.hasRope = isRope;
             friendState.hasBall = isBall;
+            friendState.hasSquirrel = isSquirrel;
           }
           if (isLeash) {
             friendState.hasLeash = true;
@@ -141,13 +155,12 @@
           art.style.transform = restoredPose.transform || "";
           art.style.transformOrigin = restoredPose.transformOrigin || "";
           ballOverlay?.remove();
-          const finalAsset = friendState.hasBall
-            ? assetMap["golden-puppy-sitting-with-ball"]
-            : friendState.hasRope
-              ? assetMap["golden-puppy-with-rope-sitting"]
-              : friendState.hasBone
-                ? assetMap["golden-puppy-with-bone-sitting"]
-                : assetMap["golden-puppy-sitting"];
+          const finalAsset = window.CuppyLandPuppySequenceAssetHelper?.resolveFinalAsset
+            ? window.CuppyLandPuppySequenceAssetHelper.resolveFinalAsset({
+                friendState,
+                assetMap,
+              })
+            : assetMap["golden-puppy-sitting"];
           art.style.backgroundImage = `url("${finalAsset || assetMap["golden-puppy-sitting"] || ""}")`;
           if (friendState.hasCollar) {
             const collarOverlay = document.createElement("span");
@@ -213,6 +226,7 @@
       playWithRope: (friendId) => playToySequence(friendId, "rope"),
       playWithBall: (friendId, options = {}) => playToySequence(friendId, "ball", options),
       playWithLeash: (friendId) => playToySequence(friendId, "leash"),
+      playWithSquirrel: (friendId) => playToySequence(friendId, "squirrel"),
       stop,
     };
   }

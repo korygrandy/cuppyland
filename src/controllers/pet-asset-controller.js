@@ -40,14 +40,17 @@
       if (attachedPuppy?.hasBall) {
         return assetMap["doghouse-with-ball"] || assetMap["doghouse-with-dog"] || assetMap.doghouse || "";
       }
-      if (attachedPuppy?.hasCollar) {
-        return assetMap["doghouse-with-collar"] || assetMap["doghouse-with-dog"] || assetMap.doghouse || "";
+      if (attachedPuppy?.hasSquirrel) {
+        return assetMap["doghouse-with-squirrel"] || assetMap["doghouse-with-dog"] || assetMap.doghouse || "";
       }
       if (attachedPuppy?.hasBone) {
         return assetMap["doghouse-with-bone"] || assetMap["doghouse-with-dog"] || assetMap.doghouse || "";
       }
       if (attachedPuppy?.hasRope) {
         return assetMap["doghouse-with-rope"] || assetMap["doghouse-with-dog"] || assetMap.doghouse || "";
+      }
+      if (attachedPuppy?.hasCollar) {
+        return assetMap["doghouse-with-collar"] || assetMap["doghouse-with-dog"] || assetMap.doghouse || "";
       }
       return assetMap["doghouse-with-dog"] || assetMap.doghouse || "";
     }
