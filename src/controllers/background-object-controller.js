@@ -21,6 +21,7 @@
       "hairy-guy",
       "spongebob-stuffy",
       "pizza-man-craft",
+      "chocolate-milk",
       "barbie-blonde",
       "barbie-blonde-baby",
       "golden-puppy",

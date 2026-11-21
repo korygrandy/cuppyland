@@ -180,6 +180,7 @@ test("trampoline bounce applies only to overlapping registered friends", () => {
   const rabbit = makeFriend("rabbit-1", "rabbit-bead-craft", 410, 240);
   const squirrel = makeFriend("squirrel-1", "squirrel", 440, 240);
   const turkey = makeFriend("turkey-1", "turkey", 470, 240);
+  const chocolateMilk = makeFriend("milk-1", "chocolate-milk", 520, 240);
   const accessory = makeFriend("ball-1", "dogtoy-ball", 500, 240);
   const outside = makeFriend("heart-outside", "heart-women", 800, 240);
 
@@ -190,11 +191,13 @@ test("trampoline bounce applies only to overlapping registered friends", () => {
   controller.syncFriend(rabbit.state, rabbit.element);
   controller.syncFriend(squirrel.state, squirrel.element);
   controller.syncFriend(turkey.state, turkey.element);
+  controller.syncFriend(chocolateMilk.state, chocolateMilk.element);
   controller.syncFriend(accessory.state, accessory.element);
   controller.syncFriend(outside.state, outside.element);
 
   assert.equal(outside.element.classes.has("trampoline-bounce-up") || outside.element.classes.has("trampoline-bounce-down"), false);
   assert.equal(accessory.element.classes.has("trampoline-bounce-up") || accessory.element.classes.has("trampoline-bounce-down"), false);
+  assert.equal(chocolateMilk.element.classes.has("trampoline-bounce-up") || chocolateMilk.element.classes.has("trampoline-bounce-down"), true);
   const controllerSource = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
   assert.equal(controllerSource.includes("registerTrampolineFriend"), true);
   assert.equal(controllerSource.includes("const currentFriendOverlaps"), true);
@@ -213,4 +216,5 @@ test("trampoline allows only friend and pet character types", () => {
   assert.equal(controllerSource.includes('"squirrel"'), true);
   assert.equal(controllerSource.includes('"turkey"'), true);
   assert.equal(controllerSource.includes("isAllowedBouncer"), true);
+  assert.equal(controllerSource.includes('"chocolate-milk"'), true);
 });

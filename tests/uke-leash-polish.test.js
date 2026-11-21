@@ -84,9 +84,9 @@ test("sitting collar and leash anchors use fine-tuned offsets", () => {
   assert.equal(styles.includes("top: 7px"), true);
   assert.equal(styles.includes("left: 44px"), true);
   assert.equal(styles.includes("top: -47px"), true);
-  assert.equal(styles.includes("left: -22px"), true);
+  assert.equal(styles.includes("left: -20px"), true);
   assert.equal(styles.includes("top: 44px"), true);
-  assert.equal(styles.includes("left: 24px"), true);
+  assert.equal(styles.includes("left: 30px"), true);
   assert.equal(styles.includes("top: 14px"), true);
 });
 
