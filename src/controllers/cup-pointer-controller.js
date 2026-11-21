@@ -205,6 +205,7 @@
           cupDragState.pointerId = null;
           cupDragState.pointerScale = 1;
           syncTrampolineActivation(cupState, cupElement);
+          syncTrampolineActivation(cupState, cupElement);
           return;
         }
         cupLastTapAt.set(cupId, nowMs);

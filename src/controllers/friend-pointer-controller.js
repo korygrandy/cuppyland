@@ -642,9 +642,9 @@
       if (friendState.type === "golden-puppy" && friendState.hasLeash) {
         const movementDelta = safePosition.worldX - friendState.worldX;
         if (movementDelta < -1) {
-          friendState.walkingFacing = "left";
-        } else if (movementDelta > 1) {
           friendState.walkingFacing = "right";
+        } else if (movementDelta > 1) {
+          friendState.walkingFacing = "left";
         }
         friendState.walkingActive = true;
         friendElement.classList.add("is-walking-puppy");
