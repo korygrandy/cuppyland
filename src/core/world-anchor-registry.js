@@ -43,7 +43,7 @@
       {
         id: "trampoline",
         label: "Trampoline",
-        x: 230,
+        x: 235,
         y: 240,
         width: 440,
         height: 370,
@@ -53,11 +53,10 @@
           up: "./assets/trampoline-up.png",
         },
         frameDurationMs: 420,
+        artOffsetX: 0,
+        artOffsetY: 0,
+        artScale: 1,
 
-        activatorTypes: [
-          "barbie-blonde",
-          "barbie-blonde-baby",
-        ],
       },
       {
         id: "merry-go-round",

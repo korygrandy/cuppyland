@@ -9,7 +9,97 @@
     const fadeTimers = new Map();
     const trampolineTimers = new Map();
     const trampolineFrames = new Map();
+    const trampolineFriends = new Map();
+    const trampolineFriendDelays = new Map();
     let activeWorld = null;
+
+    function restoreTrampolineFriend(friendId, record) {
+      if (!record?.element) {
+        return;
+      }
+      const delayTimer = trampolineFriendDelays.get(friendId);
+      if (delayTimer) {
+        clearTimeout(delayTimer);
+        trampolineFriendDelays.delete(friendId);
+      }
+      record.element.style.transform = record.transform;
+      record.element.style.transition = record.transition;
+      record.element.style.opacity = record.opacity;
+      record.element.classList.remove("trampoline-bounce-up", "trampoline-bounce-down");
+    }
+
+    function restoreTrampolineFriends(objectId) {
+      const friends = trampolineFriends.get(objectId);
+      if (!friends) {
+        return;
+      }
+      friends.forEach((record, friendId) => {
+        restoreTrampolineFriend(friendId, record);
+      });
+      trampolineFriends.delete(objectId);
+    }
+
+    function registerTrampolineFriend(objectId, friendState, friendElement) {
+      let friends = trampolineFriends.get(objectId);
+      if (!friends) {
+        friends = new Map();
+        trampolineFriends.set(objectId, friends);
+      }
+      if (!friends.has(friendState.id)) {
+        friends.set(friendState.id, {
+          state: friendState,
+          element: friendElement,
+          transform: friendElement.style.transform || "",
+          transition: friendElement.style.transition || "",
+          opacity: friendElement.style.opacity || "",
+        });
+      }
+    }
+
+    function unregisterTrampolineFriend(objectId, friendId) {
+      const friends = trampolineFriends.get(objectId);
+      const record = friends?.get(friendId);
+      if (record) {
+        restoreTrampolineFriend(friendId, record);
+        friends.delete(friendId);
+      }
+    }
+
+    function applyTrampolineFriendFrame(objectId, frame) {
+      const friends = trampolineFriends.get(objectId);
+      if (!friends) {
+        return;
+      }
+      friends.forEach((record, friendId) => {
+        const existingDelay = trampolineFriendDelays.get(friendId);
+        if (existingDelay) {
+          clearTimeout(existingDelay);
+          trampolineFriendDelays.delete(friendId);
+        }
+        const element = record.element;
+        if (!element) {
+          return;
+        }
+        const applyFrame = () => {
+          if (frame === "up") {
+            element.style.transition = "transform 90ms ease-out, opacity 90ms ease-out";
+            element.style.transform = "translateY(-24px)";
+            element.style.opacity = "0.92";
+            element.classList.remove("trampoline-bounce-down");
+            element.classList.add("trampoline-bounce-up");
+          } else {
+            element.style.transition = "transform 110ms ease-in, opacity 110ms ease-in";
+            element.style.transform = "translateY(3px)";
+            element.style.opacity = "1";
+            element.classList.remove("trampoline-bounce-up");
+            element.classList.add("trampoline-bounce-down");
+          }
+        };
+        const delayMs = frame === "up" ? 55 : 30;
+        const delayTimer = setTimeout(applyFrame, delayMs);
+        trampolineFriendDelays.set(friendId, delayTimer);
+      });
+    }
 
     function stopTrampolineAnimation(objectId) {
       const timerId = trampolineTimers.get(objectId);
@@ -18,6 +108,7 @@
         trampolineTimers.delete(objectId);
       }
       trampolineFrames.delete(objectId);
+      restoreTrampolineFriends(objectId);
       const anchor = container.querySelector(`[data-object-id="${objectId}"]`);
       if (!anchor) {
         return;
@@ -40,11 +131,11 @@
         return;
       }
 
-      stopTrampolineAnimation(objectId);
       let frame = "down";
       trampolineFrames.set(objectId, frame);
       anchor.classList.add("is-bouncing");
       art.style.backgroundImage = `url("${objectConfig.activatedAssets.down}")`;
+      applyTrampolineFriendFrame(objectId, "down");
 
       const timerId = setInterval(() => {
         frame = frame === "down" ? "up" : "down";
@@ -54,6 +145,7 @@
         art.style.backgroundImage = `url("${frame === "down"
           ? objectConfig.activatedAssets.down
           : objectConfig.activatedAssets.up}")`;
+        applyTrampolineFriendFrame(objectId, frame);
       }, objectConfig.frameDurationMs || 420);
       trampolineTimers.set(objectId, timerId);
     }
@@ -71,6 +163,12 @@
       trampolineTimers.forEach((timerId) => clearInterval(timerId));
       trampolineTimers.clear();
       trampolineFrames.clear();
+      trampolineFriends.forEach((friends) => {
+        friends.forEach((record, friendId) => restoreTrampolineFriend(friendId, record));
+      });
+      trampolineFriends.clear();
+      trampolineFriendDelays.forEach((timerId) => clearTimeout(timerId));
+      trampolineFriendDelays.clear();
 
       getObjects(worldId).forEach((objectConfig) => {
         const anchor = document.createElement("div");
@@ -86,12 +184,11 @@
         activatedArt.className = "world-background-object-art";
         activatedArt.style.backgroundImage = `url("${objectConfig.activatedAsset}")`;
         if (objectConfig.id === "trampoline") {
-          const artScale = objectConfig.artScale || 1;
-          activatedArt.style.left = `${objectConfig.artOffsetX || 0}px`;
-          activatedArt.style.top = `${objectConfig.artOffsetY || 0}px`;
-          activatedArt.style.width = "100%";
-          activatedArt.style.height = "100%";
-          activatedArt.style.setProperty("--trampoline-art-scale", String(objectConfig.artScale || 1));
+          const artScale = objectConfig.artScale ?? 1.425;
+          activatedArt.style.left = `${(objectConfig.artOffsetX ?? -10) - (((artScale - 1) * objectConfig.width) / 2)}px`;
+          activatedArt.style.top = `${(objectConfig.artOffsetY ?? 100) - (((artScale - 1) * objectConfig.height) / 2)}px`;
+          activatedArt.style.width = `${100 * artScale}%`;
+          activatedArt.style.height = `${100 * artScale}%`;
         }
         anchor.appendChild(activatedArt);
         container.appendChild(anchor);
@@ -100,10 +197,6 @@
     }
 
     function friendIntersectsObject(friendState, friendElement, objectConfig) {
-      if (Array.isArray(objectConfig.activatorTypes) && !objectConfig.activatorTypes.includes(friendState.type)) {
-        return false;
-      }
-
       const friendLeft = Number.isFinite(friendState.worldX) ? friendState.worldX : 0;
       const friendTop = Number.isFinite(friendState.worldY) ? friendState.worldY : 0;
       const friendRight = friendLeft + (friendElement?.offsetWidth || 0);
@@ -136,8 +229,19 @@
           anchor?.classList.toggle("active", isActive);
         }
         if (objectConfig.id === "trampoline") {
+          const currentFriendOverlaps = friendIntersectsObject(friendState, friendElement, objectConfig);
+          if (currentFriendOverlaps) {
+            registerTrampolineFriend(objectConfig.id, friendState, friendElement);
+          } else {
+            unregisterTrampolineFriend(objectConfig.id, friendState.id);
+          }
           if (isActive && !trampolineTimers.has(objectConfig.id)) {
             startTrampolineAnimation(objectConfig.id, objectConfig);
+          } else if (isActive && trampolineTimers.has(objectConfig.id)) {
+            applyTrampolineFriendFrame(
+              objectConfig.id,
+              trampolineFrames.get(objectConfig.id) || "down"
+            );
           } else if (!isActive && trampolineTimers.has(objectConfig.id)) {
             stopTrampolineAnimation(objectConfig.id);
           }
@@ -173,6 +277,7 @@
 
       activeFriendsByObject.forEach((activeFriends, objectId) => {
         activeFriends.delete(friendId);
+        unregisterTrampolineFriend(objectId, friendId);
         const anchor = container.querySelector(`[data-object-id="${objectId}"]`);
         const objectConfig = getObjects().find((candidate) => candidate.id === objectId);
         if (!objectConfig?.activatedSfx) {

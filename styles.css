@@ -396,6 +396,18 @@ body {
   }
 }
 
+.friend-character.trampoline-bounce-up {
+  transform: translateY(-24px);
+  opacity: 0.92;
+  transition: transform 90ms ease-out, opacity 90ms ease-out;
+}
+
+.friend-character.trampoline-bounce-down {
+  transform: translateY(3px);
+  opacity: 1;
+  transition: transform 110ms ease-in, opacity 110ms ease-in;
+}
+
 .world-headline-overlay {
   position: absolute;
   left: 50%;
