@@ -320,6 +320,11 @@
       if (!friendElement || !friendState) {
         return;
       }
+      if (friendState.type === "golden-puppy" && friendState.sequenceActive) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
 
       if (friendState.type === "golden-puppy" && friendState.activated !== true) {
         const nowMs = Date.now();
@@ -337,21 +342,6 @@
           friendState.hasLeash = false;
           friendElement.querySelector(".dog-leash-overlay")?.remove();
         }
-      }
-
-      if (friendState.type === "water-bowl") {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-          friendState.lastTapAtMs = nowMs;
-          resetFriendDragState();
-          event.preventDefault();
-          event.stopPropagation();
-          friendState.full = !friendState.full;
-          updateFriendElementAsset(friendState.id);
-          return;
-        }
-        friendState.lastTapAtMs = nowMs;
       }
 
       if (
@@ -648,24 +638,31 @@
         );
         if (puppyElement) {
           const puppyState = resolveFriendStateForElement(puppyElement);
-          if (puppyState?.hasCollar) {
+          const canAttachToPuppy = window.CuppyLandPuppySequenceGuardHelper?.canAttachCompanion
+            ? window.CuppyLandPuppySequenceGuardHelper.canAttachCompanion(puppyState)
+            : !puppyState?.sequenceActive;
+          if (puppyState && canAttachToPuppy) {
             puppyState.hasLeash = true;
             removeFriendInstance(friendState.id, { playRemovedSfx: false });
             const overlay = document.createElement("span");
             overlay.className = "dog-leash-overlay";
-            overlay.style.backgroundImage = `url("${window.CuppyLandGame.friendAssetMap?.dogleash || ""}")`;
+            overlay.style.backgroundImage = `url("${window.CuppyLandGame.friendAssetMap?.["leash-extended"] || window.CuppyLandGame.friendAssetMap?.dogleash || ""}")`;
             puppyElement.querySelector(".dog-leash-overlay")?.remove();
             puppyElement.appendChild(overlay);
+            updateFriendElementAsset?.(puppyState.id);
           }
         } else if (doghouseElement) {
           const doghouseState = resolveFriendStateForElement(doghouseElement);
           const attachedPuppy = doghouseState?.attachedPuppyId
             ? resolveFriendStateForElement(worldCanvas.querySelector(`.friend-character[data-friend-id="${doghouseState.attachedPuppyId}"]`))
             : null;
-          if (attachedPuppy?.hasCollar) {
+          const canAttachToDoghousePuppy = window.CuppyLandPuppySequenceGuardHelper?.canAttachCompanion
+            ? window.CuppyLandPuppySequenceGuardHelper.canAttachCompanion(attachedPuppy)
+            : !attachedPuppy?.sequenceActive;
+          if (attachedPuppy && canAttachToDoghousePuppy) {
             attachedPuppy.hasLeash = true;
             removeFriendInstance(friendState.id, { playRemovedSfx: false });
-            playGoldenPuppyWithLeash?.(attachedPuppy.id);
+            updateFriendElementAsset?.(attachedPuppy.id);
           }
         }
       }
@@ -677,7 +674,10 @@
         );
         if (puppyElement) {
           const puppyState = resolveFriendStateForElement(puppyElement);
-          if (puppyState) {
+          const canAttachCollar = window.CuppyLandPuppySequenceGuardHelper?.canAttachCompanion
+            ? window.CuppyLandPuppySequenceGuardHelper.canAttachCompanion(puppyState)
+            : !puppyState?.sequenceActive;
+          if (canAttachCollar) {
             puppyState.hasCollar = true;
             removeFriendInstance(friendState.id, { playRemovedSfx: false });
             const overlay = document.createElement("span");
@@ -700,6 +700,14 @@
             if (puppyState) {
               friendState.activated = true;
               friendState.attachedPuppyId = null;
+              friendState.bedPuppySnapshot = {
+                hasBall: Boolean(puppyState.hasBall),
+                hasRope: Boolean(puppyState.hasRope),
+                hasBone: Boolean(puppyState.hasBone),
+                hasSquirrel: Boolean(puppyState.hasSquirrel),
+                hasCollar: Boolean(puppyState.hasCollar),
+                hasLeash: Boolean(puppyState.hasLeash),
+              };
               puppyState.dogbedId = friendState.id;
               removeFriendInstance(puppyState.id, { playRemovedSfx: false });
               updateFriendElementAsset(friendState.id);

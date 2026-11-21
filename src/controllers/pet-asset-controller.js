@@ -7,6 +7,9 @@
       if (friendState?.hasBall) {
         return assetMap["golden-puppy-sitting-with-ball"] || assetMap["golden-puppy-sitting"] || assetMap[friendState.type] || "";
       }
+      if (friendState?.hasSquirrel) {
+        return assetMap["golden-puppy-sitting-with-squirrel"] || assetMap["golden-puppy-sitting"] || assetMap[friendState.type] || "";
+      }
       if (friendState?.isDrinking) {
         return assetMap["golden-puppy-drinking"] || assetMap["golden-puppy-sitting"] || assetMap[friendState.type] || "";
       }
@@ -34,6 +37,12 @@
       const attachedPuppy = getWorldFriendList(state.activeWorld).find((friend) => (
         friend.type === "golden-puppy" && friend.doghouseId === friendState.id
       ));
+      if (attachedPuppy?.hasBall) {
+        return assetMap["doghouse-with-ball"] || assetMap["doghouse-with-dog"] || assetMap.doghouse || "";
+      }
+      if (attachedPuppy?.hasCollar) {
+        return assetMap["doghouse-with-collar"] || assetMap["doghouse-with-dog"] || assetMap.doghouse || "";
+      }
       if (attachedPuppy?.hasBone) {
         return assetMap["doghouse-with-bone"] || assetMap["doghouse-with-dog"] || assetMap.doghouse || "";
       }

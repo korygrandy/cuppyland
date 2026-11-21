@@ -15,6 +15,12 @@
       if (!friendState || friendState.type !== "golden-puppy") {
         return false;
       }
+      const canStartSequence = window.CuppyLandPuppySequenceGuardHelper?.canStartSequence
+        ? window.CuppyLandPuppySequenceGuardHelper.canStartSequence(friendState)
+        : !friendState.sequenceActive;
+      if (!canStartSequence) {
+        return false;
+      }
 
       const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"]`);
       friendElement?.querySelector(".puppy-playing-ball")?.remove();
@@ -22,6 +28,14 @@
       if (!friendElement || !art) {
         return false;
       }
+      const previousPose = {
+        worldX: Number.isFinite(friendState.worldX) ? friendState.worldX : 0,
+        worldY: Number.isFinite(friendState.worldY) ? friendState.worldY : 0,
+        transform: art.style.transform || "",
+        transformOrigin: art.style.transformOrigin || "",
+      };
+      friendState.preSequencePose = previousPose;
+      friendState.sequenceActive = true;
 
       if (friendState.puppyPlayTimer) {
         clearTimeout(friendState.puppyPlayTimer);
@@ -111,87 +125,54 @@
           return;
         }
 
+        const finalizeSequence = () => {
+          if (!isLeash) {
+            friendState.hasBone = isBone;
+            friendState.hasRope = isRope;
+            friendState.hasBall = isBall;
+          }
+          if (isLeash) {
+            friendState.hasLeash = true;
+          }
+          friendState.activated = false;
+          art.style.transition = "";
+          art.style.opacity = "1";
+          const restoredPose = friendState.preSequencePose || previousPose;
+          art.style.transform = restoredPose.transform || "";
+          art.style.transformOrigin = restoredPose.transformOrigin || "";
+          ballOverlay?.remove();
+          const finalAsset = friendState.hasBall
+            ? assetMap["golden-puppy-sitting-with-ball"]
+            : friendState.hasRope
+              ? assetMap["golden-puppy-with-rope-sitting"]
+              : friendState.hasBone
+                ? assetMap["golden-puppy-with-bone-sitting"]
+                : assetMap["golden-puppy-sitting"];
+          art.style.backgroundImage = `url("${finalAsset || assetMap["golden-puppy-sitting"] || ""}")`;
+          if (friendState.hasCollar) {
+            const collarOverlay = document.createElement("span");
+            collarOverlay.className = "dog-collar-overlay";
+            collarOverlay.style.backgroundImage = `url("${assetMap["dog-collar-anchored"] || assetMap["dog-collar"] || ""}")`;
+            friendElement.appendChild(collarOverlay);
+          }
+          if (friendState.hasLeash) {
+            const leashOverlay = document.createElement("span");
+            leashOverlay.className = "dog-leash-overlay";
+            leashOverlay.style.backgroundImage = `url("${assetMap["leash-extended"] || assetMap.dogleash || ""}")`;
+            friendElement.appendChild(leashOverlay);
+          }
+          friendState.worldX = restoredPose.worldX;
+          friendState.worldY = restoredPose.worldY;
+          friendElement.style.left = `${restoredPose.worldX}px`;
+          friendElement.style.top = `${restoredPose.worldY}px`;
+          friendState.puppyPlayTimer = null;
+          friendState.preSequencePose = null;
+          friendState.sequenceActive = false;
+        };
+
         art.style.transition = "opacity 420ms ease";
         art.style.opacity = "0";
-        friendState.puppyPlayTimer = timerLifecycle?.set(`puppy:${friendId}:finish`, () => {
-          if (!isLeash) {
-            friendState.hasBone = isBone;
-            friendState.hasRope = isRope;
-            friendState.hasBall = isBall;
-          }
-          if (isLeash) {
-            friendState.hasLeash = true;
-          }
-          friendState.activated = false;
-          art.style.transition = "";
-          art.style.opacity = "1";
-          art.style.transform = "";
-          ballOverlay?.remove();
-          ballOverlay?.remove();
-          const finalAsset = friendState.hasBall
-            ? assetMap["golden-puppy-sitting-with-ball"]
-            : friendState.hasRope
-              ? assetMap["golden-puppy-with-rope-sitting"]
-              : friendState.hasBone
-                ? assetMap["golden-puppy-with-bone-sitting"]
-                : assetMap["golden-puppy-sitting"];
-          art.style.backgroundImage = `url("${finalAsset || assetMap["golden-puppy-sitting"] || ""}")`;
-          if (friendState.hasCollar) {
-            const collarOverlay = document.createElement("span");
-            collarOverlay.className = "dog-collar-overlay";
-            collarOverlay.style.backgroundImage = `url("${assetMap["dog-collar-anchored"] || assetMap["dog-collar"] || ""}")`;
-            friendElement.appendChild(collarOverlay);
-          }
-          if (friendState.hasLeash) {
-            const leashOverlay = document.createElement("span");
-            leashOverlay.className = "dog-leash-overlay";
-            leashOverlay.style.backgroundImage = `url("${assetMap.dogleash || ""}")`;
-            friendElement.appendChild(leashOverlay);
-          }
-          friendState.worldX = anchorX;
-          friendState.worldY = anchorY;
-          friendElement.style.left = `${anchorX}px`;
-          friendElement.style.top = `${anchorY}px`;
-          friendState.puppyPlayTimer = null;
-        }, 420) || setTimeout(() => {
-          if (!isLeash) {
-            friendState.hasBone = isBone;
-            friendState.hasRope = isRope;
-            friendState.hasBall = isBall;
-          }
-          if (isLeash) {
-            friendState.hasLeash = true;
-          }
-          friendState.activated = false;
-          art.style.transition = "";
-          art.style.opacity = "1";
-          art.style.transform = "";
-          const finalAsset = friendState.hasBall
-            ? assetMap["golden-puppy-sitting-with-ball"]
-            : friendState.hasRope
-              ? assetMap["golden-puppy-with-rope-sitting"]
-              : friendState.hasBone
-                ? assetMap["golden-puppy-with-bone-sitting"]
-                : assetMap["golden-puppy-sitting"];
-          art.style.backgroundImage = `url("${finalAsset || assetMap["golden-puppy-sitting"] || ""}")`;
-          if (friendState.hasCollar) {
-            const collarOverlay = document.createElement("span");
-            collarOverlay.className = "dog-collar-overlay";
-            collarOverlay.style.backgroundImage = `url("${assetMap["dog-collar-anchored"] || assetMap["dog-collar"] || ""}")`;
-            friendElement.appendChild(collarOverlay);
-          }
-          if (friendState.hasLeash) {
-            const leashOverlay = document.createElement("span");
-            leashOverlay.className = "dog-leash-overlay";
-            leashOverlay.style.backgroundImage = `url("${assetMap.dogleash || ""}")`;
-            friendElement.appendChild(leashOverlay);
-          }
-          friendState.worldX = anchorX;
-          friendState.worldY = anchorY;
-          friendElement.style.left = `${anchorX}px`;
-          friendElement.style.top = `${anchorY}px`;
-          friendState.puppyPlayTimer = null;
-        }, 420);
+        friendState.puppyPlayTimer = timerLifecycle?.set(`puppy:${friendId}:finish`, finalizeSequence, 420) || setTimeout(finalizeSequence, 420);
       };
 
       applyPose();
@@ -208,13 +189,23 @@
         return;
       }
       friendState.puppyPlayTimer = null;
+      friendState.sequenceActive = false;
+      const restoredPose = friendState.preSequencePose;
       const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"]`);
       const art = friendElement?.querySelector(".friend-character-art");
       if (art) {
-        art.style.transform = "";
+        art.style.transform = restoredPose?.transform || "";
+        art.style.transformOrigin = restoredPose?.transformOrigin || "";
         art.style.transition = "";
         art.style.opacity = "1";
       }
+      if (friendElement && restoredPose) {
+        friendState.worldX = restoredPose.worldX;
+        friendState.worldY = restoredPose.worldY;
+        friendElement.style.left = `${restoredPose.worldX}px`;
+        friendElement.style.top = `${restoredPose.worldY}px`;
+      }
+      friendState.preSequencePose = null;
     }
 
     return {

@@ -19,6 +19,7 @@
       syncBackgroundObjectActivation = () => {},
       removeBackgroundObjectActivation = () => {},
       onDoghousePointerDown = () => {},
+      onDogbedPointerDown = () => {},
       getWorldPointFromClient = () => ({ worldX: 0, worldY: 0 }),
       petAssetController = null,
       doghouseController = null,
@@ -196,6 +197,29 @@
       return getFriendAssetMap()?.[friendState.type] || "";
     }
 
+    function syncDogbedExtractionZone(friendState) {
+      if (!friendState || friendState.type !== "dogbed") {
+        return;
+      }
+      const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`);
+      if (!friendElement) {
+        return;
+      }
+      friendElement.querySelector(".dogbed-extraction-zone")?.remove();
+      if (!friendState.sleeping) {
+        return;
+      }
+      const extractionZone = document.createElement("span");
+      extractionZone.className = "dogbed-extraction-zone";
+      extractionZone.setAttribute("aria-hidden", "true");
+      extractionZone.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onDogbedPointerDown(friendState, event);
+      });
+      friendElement.appendChild(extractionZone);
+    }
+
     function updateFriendElementAsset(friendId) {
       const friendState = findFriendById(friendId);
       const asset = resolveFriendAsset(friendState);
@@ -203,6 +227,7 @@
       if (friendArt) {
         friendArt.style.backgroundImage = `url("${asset}")`;
       }
+      syncDogbedExtractionZone(friendState);
     }
 
     function findFriendById(friendId, worldId = state.activeWorld) {
@@ -392,6 +417,45 @@
 
     function extractPuppyFromDoghouse(doghouseState, event) {
       return doghouseController?.extract(doghouseState, event) || null;
+    }
+
+    function extractPuppyFromDogbed(dogbedState, event) {
+      if (!dogbedState || dogbedState.type !== "dogbed" || !dogbedState.sleeping) {
+        return null;
+      }
+      const worldFriends = getWorldFriendList(state.activeWorld);
+      const point = getWorldPointFromClient(event.clientX, event.clientY);
+      const snapshot = dogbedState.bedPuppySnapshot || {};
+      const nextZ = worldFriends.reduce((maxZ, friend) => {
+        const z = Number.isFinite(friend?.zIndex) ? friend.zIndex : 90;
+        return z > maxZ ? z : maxZ;
+      }, 90) + 1;
+      const puppyState = {
+        id: `friend-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+        type: "golden-puppy",
+        worldX: Math.max(0, Math.min(worldCanvas.offsetWidth - 120, point.worldX - 60)),
+        worldY: Math.max(12, Math.min(worldCanvas.offsetHeight - 120, point.worldY - 60)),
+        zIndex: nextZ,
+        activated: false,
+        puppyAttachmentPending: false,
+        hasBall: Boolean(snapshot.hasBall),
+        hasRope: Boolean(snapshot.hasRope),
+        hasBone: Boolean(snapshot.hasBone),
+        hasSquirrel: Boolean(snapshot.hasSquirrel),
+        hasCollar: Boolean(snapshot.hasCollar),
+        hasLeash: Boolean(snapshot.hasLeash),
+      };
+      if (dogbedState.sleepTimer) {
+        clearTimeout(dogbedState.sleepTimer);
+        dogbedState.sleepTimer = null;
+      }
+      dogbedState.sleeping = false;
+      dogbedState.activated = false;
+      dogbedState.attachedPuppyId = null;
+      dogbedState.bedPuppySnapshot = null;
+      worldFriends.push(puppyState);
+      onRenderWorldCups();
+      return puppyState;
     }
 
     function cancelPuppyExtraction(puppyState) {
@@ -622,16 +686,27 @@
         art.style.transformOrigin = "center bottom";
       }
       friendElement.appendChild(art);
-      if (friendState.type === "golden-puppy" && friendState.hasCollar) {
+      const shouldRenderCompanionOverlay = window.CuppyLandPuppySequenceGuardHelper?.shouldRenderCompanionOverlay
+        ? window.CuppyLandPuppySequenceGuardHelper.shouldRenderCompanionOverlay(friendState)
+        : !friendState.sequenceActive;
+      if (
+        friendState.type === "golden-puppy"
+        && friendState.hasCollar
+        && shouldRenderCompanionOverlay
+      ) {
         const collarOverlay = document.createElement("span");
         collarOverlay.className = "dog-collar-overlay";
         collarOverlay.style.backgroundImage = `url("${getFriendAssetMap()?.["dog-collar-anchored"] || getFriendAssetMap()?.["dog-collar"] || ""}")`;
         friendElement.appendChild(collarOverlay);
       }
-      if (friendState.type === "golden-puppy" && friendState.hasLeash) {
+      if (
+        friendState.type === "golden-puppy"
+        && friendState.hasLeash
+        && shouldRenderCompanionOverlay
+      ) {
         const leashOverlay = document.createElement("span");
         leashOverlay.className = "dog-leash-overlay";
-        leashOverlay.style.backgroundImage = `url("${getFriendAssetMap()?.dogleash || ""}")`;
+        leashOverlay.style.backgroundImage = `url("${getFriendAssetMap()?.["leash-extended"] || getFriendAssetMap()?.dogleash || ""}")`;
         friendElement.appendChild(leashOverlay);
       }
       if (friendState.type === "fishbowl") {
@@ -664,6 +739,9 @@
           onDoghousePointerDown(friendState, event);
         });
         friendElement.appendChild(extractionZone);
+      }
+      if (friendState.type === "dogbed" && friendState.sleeping) {
+        syncDogbedExtractionZone(friendState);
       }
       friendElement.addEventListener("pointerdown", onFriendPointerDown);
       friendElement.addEventListener("pointermove", onFriendPointerMove);
@@ -740,6 +818,7 @@
       syncMerryGoRoundActivations,
       syncDoghouseActivations,
       extractPuppyFromDoghouse,
+      extractPuppyFromDogbed,
       cancelPuppyExtraction,
       pauseFishbowlSequence,
       startFishbowlSequence,

@@ -34,8 +34,8 @@
         if (!puppyState) {
           return false;
         }
-        if (removeFriendInstance(friendState.id, { playRemovedSfx: false })) {
-          playGoldenPuppyWithBone?.(puppyState.id);
+        const started = playGoldenPuppyWithBone?.(puppyState.id);
+        if (started && removeFriendInstance(friendState.id, { playRemovedSfx: false })) {
           return true;
         }
       }
@@ -49,8 +49,8 @@
         if (!puppyState) {
           return false;
         }
-        if (removeFriendInstance(friendState.id, { playRemovedSfx: false })) {
-          playGoldenPuppyWithRope?.(puppyState.id);
+        const started = playGoldenPuppyWithRope?.(puppyState.id);
+        if (started && removeFriendInstance(friendState.id, { playRemovedSfx: false })) {
           return true;
         }
       }
@@ -63,10 +63,17 @@
         if (!puppyState) {
           return false;
         }
-        if (removeFriendInstance(friendState.id, { playRemovedSfx: false })) {
-          playGoldenPuppyWithBall?.(puppyState.id, { ballOrigin: "canvas" });
+        const claimed = window.CuppyLandPuppyBallClaimHelper?.tryClaim
+          ? window.CuppyLandPuppyBallClaimHelper.tryClaim(friendState, puppyState.id)
+          : true;
+        if (!claimed) {
+          return false;
+        }
+        const started = playGoldenPuppyWithBall?.(puppyState.id, { ballOrigin: "canvas" });
+        if (started && removeFriendInstance(friendState.id, { playRemovedSfx: false })) {
           return true;
         }
+        window.CuppyLandPuppyBallClaimHelper?.release?.(friendState, puppyState.id);
       }
       return false;
     }

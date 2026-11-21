@@ -119,9 +119,17 @@
         }
 
         if (distance < 115) {
-          if (removeFriendInstance(ballState.id, { playRemovedSfx: false })) {
-            playGoldenPuppyWithBall(dogState.id, { ballOrigin: "canvas" });
+          const claimed = window.CuppyLandPuppyBallClaimHelper?.tryClaim
+            ? window.CuppyLandPuppyBallClaimHelper.tryClaim(ballState, dogState.id)
+            : true;
+          if (!claimed) {
+            return;
           }
+          const started = playGoldenPuppyWithBall(dogState.id, { ballOrigin: "canvas" });
+          if (started && removeFriendInstance(ballState.id, { playRemovedSfx: false })) {
+            return;
+          }
+          window.CuppyLandPuppyBallClaimHelper?.release?.(ballState, dogState.id);
           return;
         }
 

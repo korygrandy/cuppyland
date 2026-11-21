@@ -215,6 +215,14 @@ const inventoryInteractionController = window.CuppyLandInventoryInteraction.crea
     }
     bedState.activated = true;
     bedState.attachedPuppyId = null;
+    bedState.bedPuppySnapshot = {
+      hasBall: false,
+      hasRope: false,
+      hasBone: false,
+      hasSquirrel: false,
+      hasCollar: false,
+      hasLeash: false,
+    };
     if (bedState.sleepTimer) {
       clearTimeout(bedState.sleepTimer);
     }
@@ -404,6 +412,19 @@ friendWorldController = window.CuppyLandWorldFriendController.createController({
   puppySequenceController,
   onDoghousePointerDown: (doghouseState, event) => {
     const puppyState = friendWorldController.extractPuppyFromDoghouse(doghouseState, event);
+    if (!puppyState) {
+      return;
+    }
+    window.CuppyLandAudio?.playSfxClip?.("goldenPuppyActivated");
+    requestAnimationFrame(() => {
+      const puppyElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${puppyState.id}"]`);
+      if (puppyElement) {
+        friendPointerController.onPointerDown(event, { friendElement: puppyElement, friendState: puppyState });
+      }
+    });
+  },
+  onDogbedPointerDown: (dogbedState, event) => {
+    const puppyState = friendWorldController.extractPuppyFromDogbed(dogbedState, event);
     if (!puppyState) {
       return;
     }
