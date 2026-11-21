@@ -7,7 +7,56 @@
 
     const activeFriendsByObject = new Map();
     const fadeTimers = new Map();
+    const trampolineTimers = new Map();
+    const trampolineFrames = new Map();
     let activeWorld = null;
+
+    function stopTrampolineAnimation(objectId) {
+      const timerId = trampolineTimers.get(objectId);
+      if (timerId) {
+        clearInterval(timerId);
+        trampolineTimers.delete(objectId);
+      }
+      trampolineFrames.delete(objectId);
+      const anchor = container.querySelector(`[data-object-id="${objectId}"]`);
+      if (!anchor) {
+        return;
+      }
+      anchor.classList.remove("is-bouncing", "trampoline-up", "trampoline-down");
+      const art = anchor.querySelector(".world-background-object-art");
+      if (art) {
+        const objectConfig = getObjects(activeWorld).find((item) => item.id === objectId);
+        art.style.backgroundImage = `url("${objectConfig?.activatedAsset || objectConfig?.activatedAssets?.down || ""}")`;
+      }
+    }
+
+    function startTrampolineAnimation(objectId, objectConfig) {
+      if (!objectConfig?.activatedAssets) {
+        return;
+      }
+      const anchor = container.querySelector(`[data-object-id="${objectId}"]`);
+      const art = anchor?.querySelector(".world-background-object-art");
+      if (!anchor || !art) {
+        return;
+      }
+
+      stopTrampolineAnimation(objectId);
+      let frame = "down";
+      trampolineFrames.set(objectId, frame);
+      anchor.classList.add("is-bouncing");
+      art.style.backgroundImage = `url("${objectConfig.activatedAssets.down}")`;
+
+      const timerId = setInterval(() => {
+        frame = frame === "down" ? "up" : "down";
+        trampolineFrames.set(objectId, frame);
+        anchor.classList.toggle("trampoline-up", frame === "up");
+        anchor.classList.toggle("trampoline-down", frame === "down");
+        art.style.backgroundImage = `url("${frame === "down"
+          ? objectConfig.activatedAssets.down
+          : objectConfig.activatedAssets.up}")`;
+      }, objectConfig.frameDurationMs || 420);
+      trampolineTimers.set(objectId, timerId);
+    }
 
     function getObjects(worldId = activeWorld) {
       return window.CuppyLandGame?.backgroundObjectAnchors?.[worldId] || [];
@@ -19,6 +68,9 @@
       activeFriendsByObject.clear();
       fadeTimers.forEach((timerId) => clearTimeout(timerId));
       fadeTimers.clear();
+      trampolineTimers.forEach((timerId) => clearInterval(timerId));
+      trampolineTimers.clear();
+      trampolineFrames.clear();
 
       getObjects(worldId).forEach((objectConfig) => {
         const anchor = document.createElement("div");
@@ -33,6 +85,14 @@
         const activatedArt = document.createElement("div");
         activatedArt.className = "world-background-object-art";
         activatedArt.style.backgroundImage = `url("${objectConfig.activatedAsset}")`;
+        if (objectConfig.id === "trampoline") {
+          const artScale = objectConfig.artScale || 1;
+          activatedArt.style.left = `${objectConfig.artOffsetX || 0}px`;
+          activatedArt.style.top = `${objectConfig.artOffsetY || 0}px`;
+          activatedArt.style.width = "100%";
+          activatedArt.style.height = "100%";
+          activatedArt.style.setProperty("--trampoline-art-scale", String(objectConfig.artScale || 1));
+        }
         anchor.appendChild(activatedArt);
         container.appendChild(anchor);
         activeFriendsByObject.set(objectConfig.id, new Set());
@@ -75,6 +135,13 @@
         if (!objectConfig.activatedSfx) {
           anchor?.classList.toggle("active", isActive);
         }
+        if (objectConfig.id === "trampoline") {
+          if (isActive && !trampolineTimers.has(objectConfig.id)) {
+            startTrampolineAnimation(objectConfig.id, objectConfig);
+          } else if (!isActive && trampolineTimers.has(objectConfig.id)) {
+            stopTrampolineAnimation(objectConfig.id);
+          }
+        }
 
         if (!wasActive && isActive && objectConfig.activatedSfx) {
           const previousTimer = fadeTimers.get(objectConfig.id);
@@ -110,6 +177,9 @@
         const objectConfig = getObjects().find((candidate) => candidate.id === objectId);
         if (!objectConfig?.activatedSfx) {
           anchor?.classList.toggle("active", activeFriends.size > 0);
+        }
+        if (objectConfig?.id === "trampoline" && activeFriends.size === 0) {
+          stopTrampolineAnimation(objectId);
         }
       });
     }

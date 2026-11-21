@@ -379,6 +379,23 @@ body {
   transition-duration: 450ms;
 }
 
+.world-background-object[data-object-id="trampoline"] .world-background-object-art {
+  transform-origin: center bottom;
+}
+
+.world-background-object[data-object-id="trampoline"].is-bouncing .world-background-object-art {
+  animation: trampoline-bounce 420ms ease-in-out infinite alternate;
+}
+
+@keyframes trampoline-bounce {
+  0% {
+    transform: translateY(-10px) rotate(-1deg) scale(var(--trampoline-art-scale, 1));
+  }
+  100% {
+    transform: translateY(2px) rotate(1deg) scale(var(--trampoline-art-scale, 1));
+  }
+}
+
 .world-headline-overlay {
   position: absolute;
   left: 50%;
