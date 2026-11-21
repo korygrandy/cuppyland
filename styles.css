@@ -845,15 +845,15 @@ body {
 
 .friend-character.is-puppy-playing .dog-collar-overlay,
 .friend-character.is-walking-puppy .dog-collar-overlay {
-  left: -12px;
-  top: 25px;
+  left: -6px;
+  top: 39px;
   transform: scale(0.5);
   transform-origin: center center;
 }
 
 .friend-character.is-puppy-playing .dog-leash-overlay,
 .friend-character.is-walking-puppy .dog-leash-overlay {
-  left: 14px;
+  left: 24px;
   top: 8px;
   width: 100%;
   height: 100%;
