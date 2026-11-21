@@ -625,6 +625,32 @@ body {
   transform-origin: center bottom;
 }
 
+.friend-character[data-friend-type="uke"].is-dancing .friend-character-art {
+  transform-origin: center bottom;
+  animation: uke-dance-shake 260ms ease-in-out infinite;
+}
+
+@keyframes uke-dance-shake {
+  0% { transform: rotate(-8deg) translateY(0) scale(1); }
+  25% { transform: rotate(6deg) translateY(-4px) scale(1.02); }
+  50% { transform: rotate(-4deg) translateY(0) scale(1); }
+  75% { transform: rotate(8deg) translateY(-3px) scale(1.03); }
+  100% { transform: rotate(-8deg) translateY(0) scale(1); }
+}
+
+.friend-character[data-friend-type="pizza-man-craft"].is-wobbling .friend-character-art {
+  transform-origin: center bottom;
+  animation: pizza-man-wobble-walk 840ms ease-in-out infinite;
+}
+
+@keyframes pizza-man-wobble-walk {
+  0% { transform: translateX(-5px) skewX(-6deg) rotate(-3deg); }
+  25% { transform: translateX(5px) skewX(7deg) rotate(3deg); }
+  50% { transform: translateX(-4px) skewX(-5deg) rotate(-2deg); }
+  75% { transform: translateX(6px) skewX(8deg) rotate(3deg); }
+  100% { transform: translateX(-5px) skewX(-6deg) rotate(-3deg); }
+}
+
 .puppy-playing-ball {
   position: absolute;
   width: 58px;

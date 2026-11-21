@@ -65,6 +65,7 @@
         id: `friend-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
         type: friendType,
         hasFood: friendType === "dogbowl-with-food",
+        pizzaWobbleActive: friendType === "pizza-man-craft",
         worldX,
         worldY,
         zIndex: typeof getNextWorldZIndex === "function" ? getNextWorldZIndex(state.activeWorld) : (90 + fallbackIndex),

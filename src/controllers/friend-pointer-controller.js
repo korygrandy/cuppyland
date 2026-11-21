@@ -357,6 +357,32 @@
           event.preventDefault();
           event.stopPropagation();
           window.CuppyLandAudio?.playSfxClip?.("ukuleleActivated");
+          friendState.ukeDancing = true;
+          if (friendState.ukeDanceTimer) {
+            clearTimeout(friendState.ukeDanceTimer);
+          }
+          updateFriendElementAsset?.(friendState.id);
+          const danceDurationMs = window.CuppyLandGame?.friendAnimationConfig?.ukuleleDanceMs ?? 2300;
+          friendState.ukeDanceTimer = setTimeout(() => {
+            friendState.ukeDancing = false;
+            friendState.ukeDanceTimer = null;
+            updateFriendElementAsset?.(friendState.id);
+          }, danceDurationMs);
+          return;
+        }
+        friendState.lastTapAtMs = nowMs;
+      }
+
+      if (friendState?.type === "pizza-man-craft" && !friendDragState.moved) {
+        const nowMs = Date.now();
+        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
+        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
+          friendState.lastTapAtMs = nowMs;
+          resetFriendDragState();
+          event.preventDefault();
+          event.stopPropagation();
+          window.CuppyLandFriendAnimationHelper?.togglePizzaWobble?.(friendState);
+          updateFriendElementAsset?.(friendState.id);
           return;
         }
         friendState.lastTapAtMs = nowMs;
