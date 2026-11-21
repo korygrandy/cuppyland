@@ -1,0 +1,90 @@
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+
+test("uke shake is slowed and music notes use an S-curve", () => {
+  const styles = fs.readFileSync("styles.css", "utf8");
+
+  assert.equal(styles.includes("uke-dance-shake 1165ms"), true);
+  assert.equal(styles.includes("is-dancing-fast"), true);
+  assert.equal(styles.includes("uke-snap-dance 500ms ease-in-out 6"), true);
+  assert.equal(styles.includes("uke-snap-shake 750ms ease-in-out 4"), true);
+  assert.equal(styles.includes(".uke-music-notes"), true);
+  assert.equal(styles.includes(".uke-music-note"), true);
+  assert.equal(styles.includes("@keyframes uke-note-s-curve"), true);
+  assert.equal(styles.includes("--note-direction"), true);
+});
+
+test("leash overlay is anchored right 50px and up 50px", () => {
+  const styles = fs.readFileSync("styles.css", "utf8");
+
+  assert.equal(styles.includes(".dog-leash-overlay"), true);
+  assert.equal(styles.includes("left: 50px"), true);
+  assert.equal(styles.includes("top: -50px"), true);
+  assert.equal(styles.includes("width: 100%"), true);
+});
+
+test("uke animation is controlled by SFX completion rather than fixed timers", () => {
+  const pointerSource = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
+  const worldSource = fs.readFileSync("src/controllers/world-friend-controller.js", "utf8");
+
+  assert.equal(pointerSource.includes('playSfxClip?.("ukuleleActivated"'), true);
+  assert.equal(pointerSource.includes("ukuleleDanceMs"), false);
+  assert.equal(worldSource.includes('playSfxClip("ukuleleActivated", finishUkeDance)'), true);
+  assert.equal(worldSource.includes("ukuleleDanceMs"), false);
+});
+
+test("uke inventory snap queues a one-shot fast dance after render", () => {
+  const gameRulesSource = fs.readFileSync("src/controllers/game-rules-controller.js", "utf8");
+  const worldSource = fs.readFileSync("src/controllers/world-friend-controller.js", "utf8");
+  const releaseSource = fs.readFileSync("src/controllers/friend-release-controller.js", "utf8");
+
+  assert.equal(gameRulesSource.includes("ukeDancePending"), true);
+  assert.equal(worldSource.includes("ukeDancePending"), true);
+  assert.equal(worldSource.includes("startUkeDance(friendState.id, { fast: true })"), true);
+  assert.equal(releaseSource.includes("friendState?.type === \"uke\""), false);
+  assert.equal(worldSource.includes('playSfxClip("uke", finishUkeDance)'), true);
+  assert.equal(worldSource.includes('playSfxClip("ukuleleActivated", finishUkeDance)'), true);
+});
+
+test("uke removal stops the active ukulele SFX", () => {
+  const removalSource = fs.readFileSync("src/controllers/friend-removal-controller.js", "utf8");
+  const worldSource = fs.readFileSync("src/controllers/world-friend-controller.js", "utf8");
+
+  assert.equal(removalSource.includes('stopSfxClip("ukuleleActivated")'), true);
+  assert.equal(worldSource.includes("stopSfxClip"), true);
+});
+
+test("leash attachment requires the puppy collar", () => {
+  const vm = require("node:vm");
+  const source = fs.readFileSync("src/controllers/puppy-sequence-guard-helper.js", "utf8");
+  const context = { window: {} };
+  vm.runInNewContext(source, context, { filename: "puppy-sequence-guard-helper.js" });
+  const guard = context.window.CuppyLandPuppySequenceGuardHelper;
+
+  assert.equal(guard.canAttachLeash({ hasCollar: false, sequenceActive: false }), false);
+  assert.equal(guard.canAttachLeash({ hasCollar: true, sequenceActive: false }), true);
+  assert.equal(guard.canAttachLeash({ hasCollar: true, sequenceActive: true }), false);
+});
+
+test("double-tap plays only ukuleleActivated while snap plays only uke", () => {
+  const pointerSource = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
+  const worldSource = fs.readFileSync("src/controllers/world-friend-controller.js", "utf8");
+  const gameRulesSource = fs.readFileSync("src/controllers/game-rules-controller.js", "utf8");
+
+  assert.equal(pointerSource.includes('playSfxClip?.("ukuleleActivated"'), true);
+  assert.equal(pointerSource.includes('playSfxClip?.("uke"'), false);
+  assert.equal(worldSource.includes('playSfxClip("uke", finishUkeDance)'), true);
+  assert.equal(worldSource.includes('playSfxClip("ukuleleActivated", finishUkeDance)'), true);
+  assert.equal(gameRulesSource.includes('playSfxClip?.("uke")'), false);
+});
+
+test("fast uke snap has a 3000ms particle and animation cap", () => {
+  const worldSource = fs.readFileSync("src/controllers/world-friend-controller.js", "utf8");
+  const styles = fs.readFileSync("styles.css", "utf8");
+
+  assert.equal(worldSource.includes("ukeMusicStopTimer"), true);
+  assert.equal(worldSource.includes("3000"), true);
+  assert.equal(styles.includes("uke-snap-dance"), true);
+  assert.equal(styles.includes("uke-snap-shake"), true);
+});
