@@ -2,6 +2,7 @@
   function createController(options) {
     const {
       container,
+      worldCanvas = null,
       playSfxClip = () => {},
     } = options;
 
@@ -53,7 +54,12 @@
           transition: friendElement.style.transition || "",
           opacity: friendElement.style.opacity || "",
         });
+        return true;
       }
+      const record = friends.get(friendState.id);
+      record.state = friendState;
+      record.element = friendElement;
+      return false;
     }
 
     function unregisterTrampolineFriend(objectId, friendId) {
@@ -197,6 +203,27 @@
     }
 
     function friendIntersectsObject(friendState, friendElement, objectConfig) {
+      if (worldCanvas && friendElement?.getBoundingClientRect) {
+        const canvasRect = worldCanvas.getBoundingClientRect();
+        const friendRect = friendElement.getBoundingClientRect();
+        const scaleX = worldCanvas.offsetWidth
+          ? canvasRect.width / worldCanvas.offsetWidth
+          : 1;
+        const scaleY = worldCanvas.offsetHeight
+          ? canvasRect.height / worldCanvas.offsetHeight
+          : 1;
+        if (canvasRect.width > 0 && canvasRect.height > 0) {
+          const friendLeft = (friendRect.left - canvasRect.left) / scaleX;
+          const friendTop = (friendRect.top - canvasRect.top) / scaleY;
+          const friendRight = (friendRect.right - canvasRect.left) / scaleX;
+          const friendBottom = (friendRect.bottom - canvasRect.top) / scaleY;
+          return friendRight >= objectConfig.x
+            && friendLeft <= objectConfig.x + objectConfig.width
+            && friendBottom >= objectConfig.y
+            && friendTop <= objectConfig.y + objectConfig.height;
+        }
+      }
+
       const friendLeft = Number.isFinite(friendState.worldX) ? friendState.worldX : 0;
       const friendTop = Number.isFinite(friendState.worldY) ? friendState.worldY : 0;
       const friendRight = friendLeft + (friendElement?.offsetWidth || 0);
@@ -230,14 +257,15 @@
         }
         if (objectConfig.id === "trampoline") {
           const currentFriendOverlaps = friendIntersectsObject(friendState, friendElement, objectConfig);
+          let newlyRegistered = false;
           if (currentFriendOverlaps) {
-            registerTrampolineFriend(objectConfig.id, friendState, friendElement);
+            newlyRegistered = registerTrampolineFriend(objectConfig.id, friendState, friendElement);
           } else {
             unregisterTrampolineFriend(objectConfig.id, friendState.id);
           }
           if (isActive && !trampolineTimers.has(objectConfig.id)) {
             startTrampolineAnimation(objectConfig.id, objectConfig);
-          } else if (isActive && trampolineTimers.has(objectConfig.id)) {
+          } else if (isActive && trampolineTimers.has(objectConfig.id) && newlyRegistered) {
             applyTrampolineFriendFrame(
               objectConfig.id,
               trampolineFrames.get(objectConfig.id) || "down"

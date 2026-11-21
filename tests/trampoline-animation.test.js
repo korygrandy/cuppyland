@@ -137,8 +137,19 @@ test("trampoline bounce applies only to overlapping registered friends", () => {
     querySelector: () => anchor,
     appendChild: () => {},
   };
+  const worldCanvas = {
+    offsetWidth: 6000,
+    offsetHeight: 700,
+    getBoundingClientRect: () => ({
+      left: 0,
+      top: 0,
+      width: 6000,
+      height: 700,
+    }),
+  };
   const controller = context.window.CuppyLandBackgroundObjectController.createController({
     container,
+    worldCanvas,
   });
 
   controller.render("playground");
@@ -170,4 +181,6 @@ test("trampoline bounce applies only to overlapping registered friends", () => {
   const controllerSource = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
   assert.equal(controllerSource.includes("registerTrampolineFriend"), true);
   assert.equal(controllerSource.includes("const currentFriendOverlaps"), true);
+  assert.equal(controllerSource.includes("getBoundingClientRect"), true);
+  assert.equal(controllerSource.includes("newlyRegistered"), true);
 });
