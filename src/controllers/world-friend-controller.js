@@ -31,6 +31,7 @@
       state,
       getWorldFriendList,
       playSfxClip,
+      stopSfxClip: (clipName) => window.CuppyLandAudio?.stopSfxClip?.(clipName),
       motionController,
       puppySequenceController,
       removeBackgroundObjectActivation,
@@ -225,26 +226,70 @@
       friendElement.classList.toggle("is-wobbling", isPizzaWobbling);
     }
 
-    function startUkeDance(friendState) {
+    function startUkeDance(friendStateOrId, options = {}) {
+      const friendState = typeof friendStateOrId === "string"
+        ? findFriendById(friendStateOrId)
+        : friendStateOrId;
       if (!friendState || friendState.type !== "uke") {
         return false;
       }
-      friendState.ukeDancing = true;
-      if (friendState.ukeDanceTimer) {
-        clearTimeout(friendState.ukeDanceTimer);
+      friendState.ukeDancePending = false;
+      const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`);
+      if (options.fast === true) {
+        window.CuppyLandAudio?.stopSfxClip?.("ukuleleActivated");
+      } else {
+        window.CuppyLandAudio?.stopSfxClip?.("uke");
       }
+      friendElement?.classList.toggle("is-dancing-fast", options.fast === true);
+      friendElement?.querySelector(".uke-music-notes")?.remove();
+      if (friendElement) {
+        const notes = document.createElement("span");
+        notes.className = "uke-music-notes";
+        notes.setAttribute("aria-hidden", "true");
+        friendElement.appendChild(notes);
+        const symbols = ["\u266A", "\u266B", "\u2669", "\u266C"];
+        let noteIndex = 0;
+        const spawnNote = () => {
+          const note = document.createElement("i");
+          note.className = "uke-music-note";
+          note.textContent = symbols[noteIndex % symbols.length];
+          note.style.setProperty("--note-direction", noteIndex % 2 === 0 ? "-1" : "1");
+          notes.appendChild(note);
+          noteIndex += 1;
+          setTimeout(() => note.remove(), 1700);
+        };
+        spawnNote();
+        friendElement.ukeMusicSpawnTimer = setInterval(spawnNote, 300);
+      }
+      friendState.ukeDancing = true;
       updateFriendElementAsset(friendState.id);
-      playSfxClip("ukuleleActivated");
-      const durationMs = window.CuppyLandGame?.friendAnimationConfig?.ukuleleDanceMs ?? 2300;
-      friendState.ukeDanceTimer = setTimeout(() => {
+      const finishUkeDance = () => {
         const active = findFriendById(friendState.id);
         if (!active) {
           return;
         }
         active.ukeDancing = false;
-        active.ukeDanceTimer = null;
+        const activeElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${active.id}"]`);
+        activeElement?.querySelector(".uke-music-notes")?.remove();
+        activeElement?.classList.remove("is-dancing-fast");
+        if (activeElement?.ukeMusicSpawnTimer) {
+          clearInterval(activeElement.ukeMusicSpawnTimer);
+          activeElement.ukeMusicSpawnTimer = null;
+        }
+        if (activeElement?.ukeMusicStopTimer) {
+          clearTimeout(activeElement.ukeMusicStopTimer);
+          activeElement.ukeMusicStopTimer = null;
+        }
         updateFriendElementAsset(active.id);
-      }, durationMs);
+      };
+      if (options.fast === true) {
+        friendElement.ukeMusicStopTimer = setTimeout(finishUkeDance, 3000);
+      }
+      if (options.fast === true) {
+        playSfxClip("uke", finishUkeDance);
+      } else {
+        playSfxClip("ukuleleActivated", finishUkeDance);
+      }
       return true;
     }
 
@@ -823,6 +868,10 @@
           if (friendState.type === "pizza-man-craft" && friendState.pizzaWobbleActive) {
             motionController?.startPizzaManAnimation?.(friendState.id);
           }
+          if (friendState.type === "uke" && friendState.ukeDancePending) {
+            friendState.ukeDancePending = false;
+            window.setTimeout(() => startUkeDance(friendState.id, { fast: true }), 0);
+          }
           if (friendState.type === "fishbowl") {
             startFishbowlSequence(friendState.id);
           }
@@ -849,6 +898,7 @@
       stopTriceratopsAnimation: (friendId) => motionController?.stopTriceratopsAnimation?.(friendId),
       startRocketManAnimation: (friendId) => motionController?.startRocketManAnimation?.(friendId),
       stopRocketManAnimation: (friendId) => motionController?.stopRocketManAnimation?.(friendId),
+      startUkeDance,
       syncMerryGoRoundActivations,
       syncDoghouseActivations,
       extractPuppyFromDoghouse,

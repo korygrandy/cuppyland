@@ -268,9 +268,6 @@
         sleeveToCup: 120,
         hairstyleToLid: 90,
       },
-      friendAnimationConfig: {
-        ukuleleDanceMs: 2300,
-      },
       dragClamp: {
         lid: { minLeft: -60, maxLeft: 200, minTop: -80, maxTop: 120 },
         sleeve: { minLeft: -60, maxLeft: 200, minTop: -20, maxTop: 220 },

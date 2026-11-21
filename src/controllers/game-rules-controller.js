@@ -102,6 +102,7 @@
         flipped: friendType === "flower-bead-craft" ? Math.random() < 0.5 : false,
         flowerCelebrationPending: friendType === "flower-bead-craft",
         puppyAttachmentPending: friendType === "golden-puppy",
+        ukeDancePending: friendType === "uke",
       });
       renderWorldCups();
       if (friendType === "rocketman-craft") {
@@ -115,9 +116,6 @@
       }
       if (friendType === "furball-guy") {
         window.CuppyLandAudio?.playSfxClip?.("furballGuy");
-      }
-      if (friendType === "uke") {
-        window.CuppyLandAudio?.playSfxClip?.("uke");
       }
       if (friendType === "golden-puppy") {
         window.CuppyLandAudio?.playSfxClip?.("goldenPuppyActivated");

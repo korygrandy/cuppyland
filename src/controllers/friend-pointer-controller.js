@@ -89,6 +89,49 @@
       window.CuppyLandAudio?.stopSfxClip?.("squirrelRunning");
     }
 
+    function stopUkeMusicNotes(friendElement) {
+      if (!friendElement) {
+        return;
+      }
+      friendElement.querySelector(".uke-music-notes")?.remove();
+      if (friendElement.ukeMusicSpawnTimer) {
+        clearInterval(friendElement.ukeMusicSpawnTimer);
+        friendElement.ukeMusicSpawnTimer = null;
+      }
+      if (friendElement.ukeMusicStopTimer) {
+        clearTimeout(friendElement.ukeMusicStopTimer);
+        friendElement.ukeMusicStopTimer = null;
+      }
+    }
+
+    function startUkeMusicNotes(friendElement) {
+      stopUkeMusicNotes(friendElement);
+      if (!friendElement) {
+        return;
+      }
+      const notes = document.createElement("span");
+      notes.className = "uke-music-notes";
+      notes.setAttribute("aria-hidden", "true");
+      friendElement.appendChild(notes);
+
+      const symbols = ["\u266A", "\u266B", "\u2669", "\u266C"];
+      let noteIndex = 0;
+      const spawnNote = () => {
+        const note = document.createElement("i");
+        note.className = "uke-music-note";
+        note.textContent = symbols[noteIndex % symbols.length];
+        note.style.setProperty("--note-direction", noteIndex % 2 === 0 ? "-1" : "1");
+        note.style.setProperty("--note-delay", `${(noteIndex % 3) * 90}ms`);
+        notes.appendChild(note);
+        noteIndex += 1;
+        setTimeout(() => note.remove(), 1700);
+      };
+
+      spawnNote();
+      friendElement.ukeMusicSpawnTimer = setInterval(spawnNote, 300);
+      setTimeout(() => stopUkeMusicNotes(friendElement), Math.max(300, durationMs));
+    }
+
     function clampFriendPosition(friendElement, friendState, nextX, nextY) {
       if (!friendElement || !friendState) {
         return { worldX: 0, worldY: 12 };
@@ -586,21 +629,29 @@
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
-          window.CuppyLandAudio?.playSfxClip?.("ukuleleActivated");
+          window.CuppyLandAudio?.stopSfxClip?.("uke");
+          friendState.ukeDancePending = false;
+          window.CuppyLandAudio?.playSfxClip?.("ukuleleActivated", () => {
+            if (friendElement) {
+              if (friendState.ukeDanceTimer) {
+                clearTimeout(friendState.ukeDanceTimer);
+                friendState.ukeDanceTimer = null;
+              }
+              friendState.ukeDancing = false;
+              friendState.ukeDanceTimer = null;
+              friendElement.classList.remove("is-dancing");
+              friendElement.classList.remove("is-dancing-fast");
+              stopUkeMusicNotes(friendElement);
+              updateFriendElementAsset?.(friendState.id);
+            }
+          });
           friendState.ukeDancing = true;
           friendElement?.classList.add("is-dancing");
-          if (friendState.ukeDanceTimer) {
-            clearTimeout(friendState.ukeDanceTimer);
+          friendElement?.classList.remove("is-dancing-fast");
+          if (friendElement) {
+            startUkeMusicNotes(friendElement);
           }
           updateFriendElementAsset?.(friendState.id);
-          const danceDurationMs = window.CuppyLandGame?.friendAnimationConfig?.ukuleleDanceMs ?? 2300;
-          friendState.ukeDanceTimer = setTimeout(() => {
-            friendState.ukeDancing = false;
-            friendState.ukeDanceTimer = null;
-            const activeUkeElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`);
-            activeUkeElement?.classList.remove("is-dancing");
-            updateFriendElementAsset?.(friendState.id);
-          }, danceDurationMs);
           return;
         }
         friendState.lastTapAtMs = nowMs;
@@ -691,9 +742,9 @@
         );
         if (puppyElement) {
           const puppyState = resolveFriendStateForElement(puppyElement);
-          const canAttachToPuppy = window.CuppyLandPuppySequenceGuardHelper?.canAttachCompanion
-            ? window.CuppyLandPuppySequenceGuardHelper.canAttachCompanion(puppyState)
-            : !puppyState?.sequenceActive;
+          const canAttachToPuppy = window.CuppyLandPuppySequenceGuardHelper?.canAttachLeash
+            ? window.CuppyLandPuppySequenceGuardHelper.canAttachLeash(puppyState)
+            : Boolean(puppyState?.hasCollar && !puppyState?.sequenceActive);
           if (puppyState && canAttachToPuppy) {
             puppyState.hasLeash = true;
             removeFriendInstance(friendState.id, { playRemovedSfx: false });
@@ -712,7 +763,10 @@
           const canAttachToDoghousePuppy = window.CuppyLandPuppySequenceGuardHelper?.canAttachCompanion
             ? window.CuppyLandPuppySequenceGuardHelper.canAttachCompanion(attachedPuppy)
             : !attachedPuppy?.sequenceActive;
-          if (attachedPuppy && canAttachToDoghousePuppy) {
+          const canAttachLeashToDoghousePuppy = window.CuppyLandPuppySequenceGuardHelper?.canAttachLeash
+            ? window.CuppyLandPuppySequenceGuardHelper.canAttachLeash(attachedPuppy)
+            : Boolean(attachedPuppy?.hasCollar && !attachedPuppy?.sequenceActive);
+          if (attachedPuppy && canAttachToDoghousePuppy && canAttachLeashToDoghousePuppy) {
             attachedPuppy.hasLeash = true;
             removeFriendInstance(friendState.id, { playRemovedSfx: false });
             updateFriendElementAsset?.(attachedPuppy.id);

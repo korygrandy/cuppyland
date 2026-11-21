@@ -4,6 +4,7 @@
       state,
       getWorldFriendList,
       playSfxClip = () => {},
+      stopSfxClip = () => {},
       motionController = null,
       puppySequenceController = null,
       removeBackgroundObjectActivation = () => {},
@@ -64,6 +65,11 @@
           friendState[timerName] = null;
         }
       });
+
+      if (friendState?.type === "uke") {
+        stopSfxClip("ukuleleActivated");
+        stopSfxClip("uke");
+      }
 
       motionController?.stopForFriend?.(friendId);
       puppySequenceController?.stop?.(friendId);
