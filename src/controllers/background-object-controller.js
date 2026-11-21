@@ -338,7 +338,51 @@
     }
 
     function syncCup(cupState, cupElement) {
-      return;
+      if (!cupState || !cupElement || !activeWorld) {
+        return;
+      }
+
+      getObjects().forEach((objectConfig) => {
+        if (objectConfig.id !== "trampoline") {
+          return;
+        }
+
+        const registeredCupId = `cup:${cupElement.dataset?.cupId || cupState.id || "active"}`;
+        const activeFriends = activeFriendsByObject.get(objectConfig.id) || new Set();
+        activeFriends.delete(registeredCupId);
+
+        const overlaps = friendIntersectsObject(
+          { worldX: cupState.worldX, worldY: cupState.worldY },
+          cupElement,
+          objectConfig
+        );
+        let newlyRegistered = false;
+        if (overlaps) {
+          activeFriends.add(registeredCupId);
+          newlyRegistered = registerTrampolineFriend(
+            objectConfig.id,
+            { id: registeredCupId, type: "cup" },
+            cupElement
+          );
+        } else {
+          unregisterTrampolineFriend(objectConfig.id, registeredCupId);
+        }
+
+        activeFriendsByObject.set(objectConfig.id, activeFriends);
+        const isActive = activeFriends.size > 0;
+        const anchor = container.querySelector(`[data-object-id="${objectConfig.id}"]`);
+        anchor?.classList.toggle("active", isActive);
+        if (isActive && !trampolineTimers.has(objectConfig.id)) {
+          startTrampolineAnimation(objectConfig.id, objectConfig);
+        } else if (isActive && trampolineTimers.has(objectConfig.id) && newlyRegistered) {
+          applyTrampolineFriendFrame(
+            objectConfig.id,
+            trampolineFrames.get(objectConfig.id) || "down"
+          );
+        } else if (!isActive && trampolineTimers.has(objectConfig.id)) {
+          stopTrampolineAnimation(objectConfig.id);
+        }
+      });
     }
 
     function removeFriend(friendId) {

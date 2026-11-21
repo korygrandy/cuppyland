@@ -408,6 +408,18 @@ body {
   transition: transform 110ms ease-in, opacity 110ms ease-in;
 }
 
+.cup-character.trampoline-bounce-up {
+  transform: translateY(-24px) !important;
+  opacity: 0.92;
+  transition: transform 90ms ease-out, opacity 90ms ease-out;
+}
+
+.cup-character.trampoline-bounce-down {
+  transform: translateY(3px) !important;
+  opacity: 1;
+  transition: transform 110ms ease-in, opacity 110ms ease-in;
+}
+
 
 .world-headline-overlay {
   position: absolute;

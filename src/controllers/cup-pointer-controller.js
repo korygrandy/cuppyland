@@ -30,6 +30,7 @@
       refreshChocolateMilkSequences,
       startChocolateMilkSpill,
       ensureChocolateMilkForCup,
+      syncTrampolineActivation = () => {},
       cupPartDragController = null,
     } = options;
     const dragClamp = gameplayConfig?.dragClamp || {};
@@ -176,6 +177,7 @@
       cupState.worldX = clamped.worldX;
       cupState.worldY = clamped.worldY;
       syncCupWorldPosition(cupElement);
+      syncTrampolineActivation(cupState, cupElement);
     }
 
     function onCupPointerUp(event) {
@@ -202,6 +204,7 @@
           cupDragState.active = false;
           cupDragState.pointerId = null;
           cupDragState.pointerScale = 1;
+          syncTrampolineActivation(cupState, cupElement);
           return;
         }
         cupLastTapAt.set(cupId, nowMs);

@@ -160,6 +160,9 @@ const cupPointerController = window.CuppyLandCupPointerController.createControll
   refreshChocolateMilkSequences: () => refreshChocolateMilkSequences(),
   startChocolateMilkSpill: (friendId, cupId) => chocolateMilkSequenceController.startForCup(friendId, cupId),
   ensureChocolateMilkForCup: (cupId) => ensureChocolateMilkForCup(cupId),
+  syncTrampolineActivation: (cupState, cupElement) => {
+    backgroundObjectController?.syncCup?.(cupState, cupElement);
+  },
 });
 const inventoryInteractionController = window.CuppyLandInventoryInteraction.createController({
   state,
@@ -717,6 +720,10 @@ function resolveCupStateForElement(cupElement) {
 
 function syncCupWorldPosition(cupElement = cupCharacter) {
   cupPositionController.syncCupWorldPosition(cupElement);
+  const cupState = resolveCupStateForElement(cupElement);
+  if (cupState) {
+    backgroundObjectController?.syncCup?.(cupState, cupElement);
+  }
 }
 
 function syncLidPosition(cupElement = cupCharacter) {

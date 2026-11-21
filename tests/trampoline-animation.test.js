@@ -205,6 +205,21 @@ test("trampoline bounce applies only to overlapping registered friends", () => {
   assert.equal(controllerSource.includes("newlyRegistered"), true);
   assert.equal(controllerSource.includes("function syncCup"), true);
   assert.equal(controllerSource.includes("trampoline-bounce-up"), true);
+  assert.equal(controllerSource.includes("syncCup(cupState, cupElement)"), true);
+  assert.equal(controllerSource.includes("registeredCupId"), true);
+});
+
+test("cup and attached Mr Chocolate Milk use trampoline bouncing", () => {
+  const styles = fs.readFileSync("styles.css", "utf8");
+  const cupControllerSource = fs.readFileSync("src/controllers/cup-pointer-controller.js", "utf8");
+  const appSource = fs.readFileSync("src/core/app.js", "utf8");
+  const bouncerSource = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
+
+  assert.equal(styles.includes(".cup-character.trampoline-bounce-up"), true);
+  assert.equal(styles.includes(".cup-character.trampoline-bounce-down"), true);
+  assert.equal(cupControllerSource.includes("syncTrampolineActivation(cupState, cupElement)"), true);
+  assert.equal(appSource.includes("backgroundObjectController?.syncCup"), true);
+  assert.equal(bouncerSource.includes('"chocolate-milk"'), true);
 });
 
 test("trampoline allows only friend and pet character types", () => {
