@@ -105,6 +105,7 @@ test("trampoline debug line is removed and puppy overlay poses are separated", (
   assert.equal(styles.includes('[data-object-id="trampoline"]::after'), false);
   assert.equal(styles.includes(".friend-character.is-puppy-playing"), true);
   assert.equal(styles.includes(".friend-character.is-walking-puppy"), true);
+  assert.equal(styles.includes("transform: scale(0.5)"), true);
   assert.equal(pointerSource.includes("is-walking-puppy"), true);
   assert.equal(sequenceSource.includes("is-puppy-playing"), true);
 });

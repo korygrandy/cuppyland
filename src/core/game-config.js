@@ -178,6 +178,7 @@
       "golden-puppy-activated": "./assets/golden-puppy-activated.png",
       "golden-puppy-sitting": "./assets/golden-puppy-sitting.png",
       "golden-puppy-playing": "./assets/golden-puppy-playing.png",
+      "golden-puppy-playing-with-leash": "./assets/golden-puppy-playing.png",
       "golden-puppy-playing-bone": "./assets/golden-puppy-with-bone-playing.png",
       "golden-puppy-with-bone-sitting": "./assets/golden-puppy-with-bone-sitting.png",
       "doghouse": "./assets/doghouse.png",

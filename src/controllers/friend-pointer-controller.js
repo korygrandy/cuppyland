@@ -430,9 +430,14 @@
         if (friendState.hasLeash) {
           friendState.walkingActive = true;
           friendElement.classList.add("is-walking-puppy");
-          friendState.sequencePlayingAsset = window.CuppyLandGame?.friendAssetMap?.["golden-puppy-playing"]
-            || window.CuppyLandGame?.friendAssetMap?.[friendState.type]
-            || "";
+          const assetMap = window.CuppyLandGame?.friendAssetMap || {};
+          friendState.sequencePlayingAsset = friendState.hasBall
+            ? (assetMap["golden-puppy-playing-with-ball"] || assetMap["golden-puppy-playing-with-leash"] || assetMap["golden-puppy-playing"] || "")
+            : friendState.hasRope
+              ? (assetMap["golden-puppy-playing-rope"] || assetMap["golden-puppy-playing-with-leash"] || assetMap["golden-puppy-playing"] || "")
+              : friendState.hasBone
+                ? (assetMap["golden-puppy-playing-bone"] || assetMap["golden-puppy-playing-with-leash"] || assetMap["golden-puppy-playing"] || "")
+                : (assetMap["golden-puppy-playing-with-leash"] || assetMap["golden-puppy-playing"] || "");
           startWalkingPuppyAudio(friendState);
           updateFriendElementAsset?.(friendState.id);
         }

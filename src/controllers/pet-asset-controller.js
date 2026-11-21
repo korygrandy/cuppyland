@@ -4,6 +4,29 @@
 
     function resolveGoldenPuppy(friendState) {
       const assetMap = getFriendAssetMap();
+      if (friendState?.walkingActive && friendState?.hasLeash) {
+        if (friendState.hasBall) {
+          return assetMap["golden-puppy-playing-with-ball"]
+            || assetMap["golden-puppy-playing-with-leash"]
+            || assetMap["golden-puppy-playing"]
+            || "";
+        }
+        if (friendState.hasRope) {
+          return assetMap["golden-puppy-playing-rope"]
+            || assetMap["golden-puppy-playing-with-leash"]
+            || assetMap["golden-puppy-playing"]
+            || "";
+        }
+        if (friendState.hasBone) {
+          return assetMap["golden-puppy-playing-bone"]
+            || assetMap["golden-puppy-playing-with-leash"]
+            || assetMap["golden-puppy-playing"]
+            || "";
+        }
+        return assetMap["golden-puppy-playing-with-leash"]
+          || assetMap["golden-puppy-playing"]
+          || "";
+      }
       if (friendState?.sequenceActive && friendState?.sequencePlayingAsset) {
         return friendState.sequencePlayingAsset;
       }

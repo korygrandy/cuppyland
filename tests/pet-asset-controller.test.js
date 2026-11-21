@@ -75,6 +75,71 @@ test("golden puppy active sequence preserves the playing asset", () => {
   assert.equal(asset, "puppy-playing-ball");
 });
 
+test("golden puppy walking state uses the leash playing asset", () => {
+  const context = { window: {} };
+  loadBrowserScript("src/controllers/pet-asset-controller.js", context);
+
+  const controller = context.window.CuppyLandPetAssetController.createController({
+    state: { activeWorld: "playground" },
+    getWorldFriendList: () => [],
+    getFriendAssetMap: () => ({
+      "golden-puppy-playing": "puppy-playing",
+      "golden-puppy-playing-with-leash": "puppy-playing-leash",
+      "golden-puppy-sitting": "puppy-sitting",
+    }),
+  });
+
+  const walkingAsset = controller.resolveGoldenPuppy({
+    type: "golden-puppy",
+    hasLeash: true,
+    walkingActive: true,
+  });
+  const sittingAsset = controller.resolveGoldenPuppy({
+    type: "golden-puppy",
+    hasLeash: true,
+    walkingActive: false,
+  });
+
+  assert.equal(walkingAsset, "puppy-playing-leash");
+  assert.equal(sittingAsset, "puppy-sitting");
+});
+
+test("golden puppy walking variants preserve ball rope and bone playing assets", () => {
+  const context = { window: {} };
+  loadBrowserScript("src/controllers/pet-asset-controller.js", context);
+
+  const controller = context.window.CuppyLandPetAssetController.createController({
+    state: { activeWorld: "playground" },
+    getWorldFriendList: () => [],
+    getFriendAssetMap: () => ({
+      "golden-puppy-playing": "puppy-playing",
+      "golden-puppy-playing-with-leash": "puppy-playing-leash",
+      "golden-puppy-playing-with-ball": "puppy-playing-ball",
+      "golden-puppy-playing-rope": "puppy-playing-rope",
+      "golden-puppy-playing-bone": "puppy-playing-bone",
+    }),
+  });
+
+  assert.equal(controller.resolveGoldenPuppy({
+    type: "golden-puppy",
+    hasLeash: true,
+    walkingActive: true,
+    hasBall: true,
+  }), "puppy-playing-ball");
+  assert.equal(controller.resolveGoldenPuppy({
+    type: "golden-puppy",
+    hasLeash: true,
+    walkingActive: true,
+    hasRope: true,
+  }), "puppy-playing-rope");
+  assert.equal(controller.resolveGoldenPuppy({
+    type: "golden-puppy",
+    hasLeash: true,
+    walkingActive: true,
+    hasBone: true,
+  }), "puppy-playing-bone");
+});
+
 test("doghouse resolves every puppy variant and the collar-added matrix", () => {
   const context = { window: {} };
   loadBrowserScript("src/controllers/pet-asset-controller.js", context);
