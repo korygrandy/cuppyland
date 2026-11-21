@@ -43,3 +43,16 @@ test("reported chocolate milk scenarios are covered", () => {
   assert.equal(helper.isCupOpen(closedCup), false);
   assert.equal(helper.canStartSpill(closedCup, chocolate), false);
 });
+
+test("double-tap on a closed-lid cup snaps lid off before spill starts", () => {
+  const context = { window: {} };
+  loadBrowserScript("src/controllers/chocolate-milk-spill-helper.js", context);
+  const helper = context.window.CuppyLandChocolateMilkSpillHelper;
+  const closedCup = { lidVisible: true, lidDetached: false };
+
+  assert.equal(helper.isCupOpen(closedCup), false);
+  closedCup.lidVisible = false;
+  closedCup.lidDetached = true;
+  assert.equal(helper.isCupOpen(closedCup), true);
+  assert.equal(helper.canStartSpill(closedCup, { type: "chocolate-milk" }), true);
+});

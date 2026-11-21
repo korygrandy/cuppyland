@@ -192,6 +192,13 @@
         const lastTapAt = cupLastTapAt.get(cupId) || 0;
         if (lastTapAt && nowMs - lastTapAt <= 450) {
           cupLastTapAt.delete(cupId);
+          if (cupState.lidVisible !== false || cupState.lidDetached !== true) {
+            cupState.lidVisible = false;
+            cupState.lidDetached = true;
+            window.CuppyLandAudio?.playSfxClip?.("lidSnapOff");
+            syncLidPosition(cupElement);
+            renderWorldCups();
+          }
           triggerChocolateMilkSpill(cupElement, cupState);
           cupDragState.active = false;
           cupDragState.pointerId = null;
