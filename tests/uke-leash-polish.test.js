@@ -15,12 +15,12 @@ test("uke shake is slowed and music notes use an S-curve", () => {
   assert.equal(styles.includes("--note-direction"), true);
 });
 
-test("leash overlay is anchored right 50px and up 50px", () => {
+test("leash overlay is anchored left 10px and down 25px", () => {
   const styles = fs.readFileSync("styles.css", "utf8");
 
   assert.equal(styles.includes(".dog-leash-overlay"), true);
-  assert.equal(styles.includes("left: 50px"), true);
-  assert.equal(styles.includes("top: -50px"), true);
+  assert.equal(styles.includes("left: 40px"), true);
+  assert.equal(styles.includes("top: -25px"), true);
   assert.equal(styles.includes("width: 100%"), true);
 });
 
@@ -65,6 +65,36 @@ test("leash attachment requires the puppy collar", () => {
   assert.equal(guard.canAttachLeash({ hasCollar: false, sequenceActive: false }), false);
   assert.equal(guard.canAttachLeash({ hasCollar: true, sequenceActive: false }), true);
   assert.equal(guard.canAttachLeash({ hasCollar: true, sequenceActive: true }), false);
+});
+
+test("puppy leash starts walking on drag and returns to sitting on release", () => {
+  const pointerSource = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
+  const petSource = fs.readFileSync("src/controllers/pet-asset-controller.js", "utf8");
+
+  assert.equal(pointerSource.includes("friendState.walkingActive = true"), true);
+  assert.equal(pointerSource.includes("friendState.walkingActive = false"), true);
+  assert.equal(pointerSource.includes("friendState.sequencePlayingAsset = null"), true);
+  assert.equal(petSource.includes("walkingActive && friendState?.hasLeash"), true);
+});
+
+test("collar and leash anchors move left 10px and down 25px", () => {
+  const styles = fs.readFileSync("styles.css", "utf8");
+
+  assert.equal(styles.includes("left: -10px"), true);
+  assert.equal(styles.includes("top: 25px"), true);
+  assert.equal(styles.includes("left: 40px"), true);
+  assert.equal(styles.includes("top: -25px"), true);
+});
+
+test("walking puppy loops panting and randomized barking until release", () => {
+  const pointerSource = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
+  const worldSource = fs.readFileSync("src/controllers/world-friend-controller.js", "utf8");
+
+  assert.equal(pointerSource.includes('playLoopingSfxClip?.("goldenPuppyActivated")'), true);
+  assert.equal(pointerSource.includes('playSfxClip?.("puppyBarking")'), true);
+  assert.equal(pointerSource.includes("900 + Math.floor(Math.random() * 1100)"), true);
+  assert.equal(pointerSource.includes("stopWalkingPuppyAudio(friendState)"), true);
+  assert.equal(worldSource.includes("leashOverlay.addEventListener(\"pointerdown\""), true);
 });
 
 test("double-tap plays only ukuleleActivated while snap plays only uke", () => {

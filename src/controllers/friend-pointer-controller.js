@@ -64,6 +64,36 @@
     let hoverMonitorIntervalId = null;
     let activeSquirrelChases = 0;
 
+    function startWalkingPuppyAudio(friendState) {
+      if (!friendState?.id || friendState.walkingAudioActive) {
+        return;
+      }
+      friendState.walkingAudioActive = true;
+      window.CuppyLandAudio?.playLoopingSfxClip?.("goldenPuppyActivated");
+      const scheduleBark = () => {
+        if (!friendState.walkingAudioActive) {
+          return;
+        }
+        window.CuppyLandAudio?.playSfxClip?.("puppyBarking");
+        const nextDelayMs = 900 + Math.floor(Math.random() * 1100);
+        friendState.walkingBarkTimer = window.setTimeout(scheduleBark, nextDelayMs);
+      };
+      friendState.walkingBarkTimer = window.setTimeout(scheduleBark, 650);
+    }
+
+    function stopWalkingPuppyAudio(friendState) {
+      if (!friendState) {
+        return;
+      }
+      friendState.walkingAudioActive = false;
+      if (friendState.walkingBarkTimer) {
+        window.clearTimeout(friendState.walkingBarkTimer);
+        friendState.walkingBarkTimer = null;
+      }
+      window.CuppyLandAudio?.stopSfxClip?.("goldenPuppyActivated");
+      window.CuppyLandAudio?.stopSfxClip?.("puppyBarking");
+    }
+
     function setSquirrelRunningSfx(isRunning) {
       if (isRunning) {
         activeSquirrelChases = Math.max(1, activeSquirrelChases + 1);
@@ -398,8 +428,12 @@
         }
         friendState.lastTapAtMs = nowMs;
         if (friendState.hasLeash) {
-          friendState.hasLeash = false;
-          friendElement.querySelector(".dog-leash-overlay")?.remove();
+          friendState.walkingActive = true;
+          friendState.sequencePlayingAsset = window.CuppyLandGame?.friendAssetMap?.["golden-puppy-playing"]
+            || window.CuppyLandGame?.friendAssetMap?.[friendState.type]
+            || "";
+          startWalkingPuppyAudio(friendState);
+          updateFriendElementAsset?.(friendState.id);
         }
       }
 
@@ -706,6 +740,13 @@
         return;
       }
 
+      if (friendState?.type === "golden-puppy" && friendState.hasLeash) {
+        friendState.walkingActive = false;
+        friendState.sequencePlayingAsset = null;
+        stopWalkingPuppyAudio(friendState);
+        updateFriendElementAsset?.(friendState.id);
+      }
+
       if (typeof syncBarbieActivationState === "function") {
         syncBarbieActivationState(friendState);
       }
@@ -751,6 +792,12 @@
             const overlay = document.createElement("span");
             overlay.className = "dog-leash-overlay";
             overlay.style.backgroundImage = `url("${window.CuppyLandGame.friendAssetMap?.["leash-extended"] || window.CuppyLandGame.friendAssetMap?.dogleash || ""}")`;
+            overlay.style.pointerEvents = "auto";
+            overlay.addEventListener("pointerdown", (event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onPointerDown(event, { friendElement: puppyElement, friendState: puppyState });
+            });
             puppyElement.querySelector(".dog-leash-overlay")?.remove();
             puppyElement.appendChild(overlay);
             updateFriendElementAsset?.(puppyState.id);

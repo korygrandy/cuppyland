@@ -70,6 +70,15 @@
         stopSfxClip("ukuleleActivated");
         stopSfxClip("uke");
       }
+      if (friendState?.type === "golden-puppy") {
+        stopSfxClip("goldenPuppyActivated");
+        stopSfxClip("puppyBarking");
+        if (friendState.walkingBarkTimer) {
+          clearTimeout(friendState.walkingBarkTimer);
+          friendState.walkingBarkTimer = null;
+        }
+        friendState.walkingAudioActive = false;
+      }
 
       motionController?.stopForFriend?.(friendId);
       puppySequenceController?.stop?.(friendId);

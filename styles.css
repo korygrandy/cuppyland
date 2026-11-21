@@ -841,11 +841,17 @@ body {
   background-size: contain;
 }
 
+.dog-collar-overlay {
+  left: -10px;
+  top: 25px;
+}
+
 .dog-leash-overlay {
-  left: 50px;
-  top: -50px;
+  left: 40px;
+  top: -25px;
   width: 100%;
   height: calc(100% + 50px);
+  pointer-events: auto;
 }
 
 .dog-collar-overlay {

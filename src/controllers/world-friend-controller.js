@@ -782,6 +782,11 @@
         const leashOverlay = document.createElement("span");
         leashOverlay.className = "dog-leash-overlay";
         leashOverlay.style.backgroundImage = `url("${getFriendAssetMap()?.["leash-extended"] || getFriendAssetMap()?.dogleash || ""}")`;
+        leashOverlay.addEventListener("pointerdown", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          onFriendPointerDown(event, { friendElement, friendState });
+        });
         friendElement.appendChild(leashOverlay);
       }
       if (friendState.type === "fishbowl") {
