@@ -383,21 +383,6 @@ body {
   transform-origin: center bottom;
 }
 
-.world-background-object[data-object-id="trampoline"]::after {
-  content: "";
-  position: absolute;
-  left: var(--trampoline-hitbox-left, 0);
-  top: var(--trampoline-hitbox-top, 0);
-  width: var(--trampoline-hitbox-width, 100%);
-  height: var(--trampoline-hitbox-height, 100%);
-  border: 2px dashed rgba(255, 255, 255, 0.95);
-  box-shadow:
-    0 0 0 1px rgba(25, 25, 25, 0.7),
-    inset 0 0 0 1px rgba(25, 25, 25, 0.7);
-  pointer-events: none;
-  z-index: 250;
-}
-
 .world-background-object[data-object-id="trampoline"].is-bouncing .world-background-object-art {
   animation: trampoline-bounce 420ms ease-in-out infinite alternate;
 }
@@ -861,6 +846,22 @@ body {
   left: -8px;
   transform: scale(0.5);
   transform-origin: center center;
+}
+
+.friend-character.is-puppy-playing .dog-collar-overlay,
+.friend-character.is-walking-puppy .dog-collar-overlay {
+  left: 0;
+  top: 0;
+  transform: none;
+}
+
+.friend-character.is-puppy-playing .dog-leash-overlay,
+.friend-character.is-walking-puppy .dog-leash-overlay {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  transform: none;
 }
 
 .friend-character[data-friend-type="squirrel"].is-running .friend-character-art {

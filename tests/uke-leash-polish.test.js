@@ -97,6 +97,18 @@ test("walking puppy loops panting and randomized barking until release", () => {
   assert.equal(worldSource.includes("leashOverlay.addEventListener(\"pointerdown\""), true);
 });
 
+test("trampoline debug line is removed and puppy overlay poses are separated", () => {
+  const styles = fs.readFileSync("styles.css", "utf8");
+  const pointerSource = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
+  const sequenceSource = fs.readFileSync("src/controllers/puppy-sequence-controller.js", "utf8");
+
+  assert.equal(styles.includes('[data-object-id="trampoline"]::after'), false);
+  assert.equal(styles.includes(".friend-character.is-puppy-playing"), true);
+  assert.equal(styles.includes(".friend-character.is-walking-puppy"), true);
+  assert.equal(pointerSource.includes("is-walking-puppy"), true);
+  assert.equal(sequenceSource.includes("is-puppy-playing"), true);
+});
+
 test("double-tap plays only ukuleleActivated while snap plays only uke", () => {
   const pointerSource = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
   const worldSource = fs.readFileSync("src/controllers/world-friend-controller.js", "utf8");

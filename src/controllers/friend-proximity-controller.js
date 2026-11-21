@@ -84,6 +84,7 @@
             art.style.transformOrigin = "";
             art.style.backgroundImage = `url("${getFriendAssetMap().squirrel || ""}")`;
             squirrelState.squirrelRunningTimer = null;
+            syncFriendActivation(squirrelState, squirrelElement);
             activeSquirrelChases = Math.max(0, activeSquirrelChases - 1);
             if (activeSquirrelChases === 0) {
               stopSfxClip("squirrelRunning");

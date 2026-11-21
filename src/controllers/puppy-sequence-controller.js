@@ -36,6 +36,7 @@
       };
       friendState.preSequencePose = previousPose;
       friendState.sequenceActive = true;
+      friendElement?.classList?.add("is-puppy-playing");
 
       if (friendState.puppyPlayTimer) {
         clearTimeout(friendState.puppyPlayTimer);
@@ -183,6 +184,7 @@
           friendState.preSequencePose = null;
           friendState.sequencePlayingAsset = null;
           friendState.sequenceActive = false;
+          friendElement?.classList?.remove("is-puppy-playing");
         };
 
         art.style.transition = "opacity 420ms ease";
@@ -207,6 +209,7 @@
       friendState.sequenceActive = false;
       const restoredPose = friendState.preSequencePose;
       const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"]`);
+      friendElement?.classList?.remove("is-puppy-playing");
       const art = friendElement?.querySelector(".friend-character-art");
       if (art) {
         art.style.transform = restoredPose?.transform || "";

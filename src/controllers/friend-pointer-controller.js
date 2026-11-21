@@ -429,6 +429,7 @@
         friendState.lastTapAtMs = nowMs;
         if (friendState.hasLeash) {
           friendState.walkingActive = true;
+          friendElement.classList.add("is-walking-puppy");
           friendState.sequencePlayingAsset = window.CuppyLandGame?.friendAssetMap?.["golden-puppy-playing"]
             || window.CuppyLandGame?.friendAssetMap?.[friendState.type]
             || "";
@@ -743,6 +744,7 @@
       if (friendState?.type === "golden-puppy" && friendState.hasLeash) {
         friendState.walkingActive = false;
         friendState.sequencePlayingAsset = null;
+        friendElement?.classList.remove("is-walking-puppy");
         stopWalkingPuppyAudio(friendState);
         updateFriendElementAsset?.(friendState.id);
       }
