@@ -3,6 +3,7 @@
     dogbone: "bone",
     "rope-dogtoy": "rope",
     "dogtoy-ball": "ball",
+    squirrel: "squirrel",
   };
 
   const barbieTypes = new Set([

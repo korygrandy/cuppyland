@@ -174,6 +174,24 @@
 
     const accessoryTypes = new Set(["lavalamp", "chocolate-milk", "uke", "flower-bead-craft", "merry-go-round"]);
     const petTypes = new Set(["golden-puppy", "doghouse", "dogbone", "rope-dogtoy", "dogtoy-ball", "dogleash", "dog-collar", "dogbed", "dogbowl", "dogfood", "water-bowl", "squirrel", "fishbowl", "rabbit-bead-craft", "triceratops-bead-craft", "turkey"]);
+    const petOrder = [
+      "golden-puppy",
+      "squirrel",
+      "rabbit-bead-craft",
+      "triceratops-bead-craft",
+      "turkey",
+      "fishbowl",
+      "doghouse",
+      "dogbed",
+      "dogbowl",
+      "dogfood",
+      "water-bowl",
+      "dogtoy-ball",
+      "rope-dogtoy",
+      "dogbone",
+      "dog-collar",
+      "dogleash",
+    ];
 
     colorItems.innerHTML = "";
     expressionItems.innerHTML = "";
@@ -213,7 +231,7 @@
         accessoriesItems.appendChild(createFriendItem(friendName));
       });
 
-    friendTypes
+    petOrder
       .filter((friendName) => petTypes.has(friendName))
       .forEach((friendName) => {
         petsItems.appendChild(createFriendItem(friendName));

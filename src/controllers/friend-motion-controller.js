@@ -256,6 +256,127 @@
       friendState.triceratopsAnimationTimer = setTimeout(crawl, 100);
     }
 
+    function stopPizzaManAnimation(friendId) {
+      const friendState = findFriendById(friendId);
+      if (!friendState || friendState.type !== "pizza-man-craft") {
+        return;
+      }
+      if (friendState.pizzaAnimationFrameId) {
+        cancelAnimationFrame(friendState.pizzaAnimationFrameId);
+        friendState.pizzaAnimationFrameId = null;
+      }
+      if (friendState.pizzaPauseTimer) {
+        clearTimeout(friendState.pizzaPauseTimer);
+        friendState.pizzaPauseTimer = null;
+      }
+      const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`);
+      const art = friendElement?.querySelector(".friend-character-art");
+      if (art) {
+        art.style.transform = "";
+        art.style.transformOrigin = "";
+      }
+    }
+
+    function getPizzaManStepConfig() {
+      return {
+        legDurationMs: 1200,
+        pauseMs: 1000,
+        stepDistancePx: 100,
+        skewDeg: 18,
+        rotateDeg: 8,
+      };
+    }
+
+    function startPizzaManAnimation(friendId) {
+      const friendState = findFriendById(friendId);
+      if (!friendState || friendState.type !== "pizza-man-craft") {
+        return;
+      }
+      if (!friendState.pizzaWobbleActive) {
+        stopPizzaManAnimation(friendId);
+        return;
+      }
+      if (friendState.pizzaAnimationFrameId || friendState.pizzaPauseTimer) {
+        return;
+      }
+
+      const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"]`);
+      if (!friendElement) {
+        return;
+      }
+      const art = friendElement.querySelector(".friend-character-art");
+      if (!Number.isFinite(friendState.pizzaAnchorWorldX)) {
+        friendState.pizzaAnchorWorldX = friendState.worldX;
+      }
+      if (!Number.isFinite(friendState.pizzaAnchorWorldY)) {
+        friendState.pizzaAnchorWorldY = friendState.worldY;
+      }
+
+      const {
+        legDurationMs,
+        pauseMs,
+        stepDistancePx,
+        skewDeg,
+        rotateDeg,
+      } = getPizzaManStepConfig();
+
+      const runLeg = (fromX, toX, facingScaleX) => {
+        const legStart = performance.now();
+        const step = (now) => {
+          const active = findFriendById(friendId);
+          if (!active || active.type !== "pizza-man-craft" || !active.pizzaWobbleActive) {
+            stopPizzaManAnimation(friendId);
+            return;
+          }
+          const element = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"]`);
+          const activeArt = element?.querySelector(".friend-character-art");
+          if (!element || !activeArt) {
+            stopPizzaManAnimation(friendId);
+            return;
+          }
+          const progress = Math.min(1, (now - legStart) / legDurationMs);
+          const eased = progress * progress * (3 - (2 * progress));
+          const nextX = fromX + ((toX - fromX) * eased);
+          active.worldX = Math.max(0, Math.min(worldCanvas.offsetWidth - element.offsetWidth, nextX));
+          active.worldY = Number.isFinite(active.pizzaAnchorWorldY) ? active.pizzaAnchorWorldY : active.worldY;
+          element.style.left = `${active.worldX}px`;
+          element.style.top = `${active.worldY}px`;
+
+          const wobbleWave = Math.sin(progress * Math.PI * 4);
+          const stepSkewDeg = wobbleWave * skewDeg;
+          const stepRotateDeg = wobbleWave * rotateDeg;
+          const bouncePx = Math.sin(progress * Math.PI * 6) * 4;
+          activeArt.style.transformOrigin = "center bottom";
+          activeArt.style.transform = `translateY(${bouncePx.toFixed(2)}px) scaleX(${facingScaleX}) skewX(${stepSkewDeg.toFixed(2)}deg) rotate(${stepRotateDeg.toFixed(2)}deg)`;
+
+          if (progress < 1) {
+            active.pizzaAnimationFrameId = requestAnimationFrame(step);
+            return;
+          }
+
+          active.pizzaAnimationFrameId = null;
+          activeArt.style.transform = `scaleX(${facingScaleX})`;
+          activeArt.style.transformOrigin = "center bottom";
+          active.pizzaPauseTimer = setTimeout(() => {
+            active.pizzaPauseTimer = null;
+            const loopAnchor = Number.isFinite(active.pizzaAnchorWorldX) ? active.pizzaAnchorWorldX : active.worldX;
+            const leftTarget = Math.max(0, Math.min(worldCanvas.offsetWidth - element.offsetWidth, loopAnchor - stepDistancePx));
+            const rightTarget = Math.max(0, Math.min(worldCanvas.offsetWidth - element.offsetWidth, loopAnchor));
+            if (Math.abs(active.worldX - leftTarget) < 1) {
+              runLeg(active.worldX, rightTarget, -1);
+            } else {
+              runLeg(active.worldX, leftTarget, 1);
+            }
+          }, pauseMs);
+        };
+        friendState.pizzaAnimationFrameId = requestAnimationFrame(step);
+      };
+
+      const anchorX = Number.isFinite(friendState.pizzaAnchorWorldX) ? friendState.pizzaAnchorWorldX : friendState.worldX;
+      const leftTarget = Math.max(0, Math.min(worldCanvas.offsetWidth - friendElement.offsetWidth, anchorX - stepDistancePx));
+      runLeg(friendState.worldX, leftTarget, 1);
+    }
+
     function getRocketLaunchDelayMs() {
       return 60000 + Math.floor(Math.random() * 120001);
     }
@@ -450,6 +571,7 @@
       stopRabbitAnimation(friendId);
       stopTriceratopsAnimation(friendId);
       stopRocketManAnimation(friendId);
+      stopPizzaManAnimation(friendId);
     }
 
     return {
@@ -457,10 +579,13 @@
       stopRabbitAnimation,
       startTriceratopsAnimation,
       stopTriceratopsAnimation,
+      startPizzaManAnimation,
+      stopPizzaManAnimation,
       startRocketManAnimation,
       stopRocketManAnimation,
       triggerRocketManAnimation,
       stopForFriend,
+      getPizzaManStepConfig,
     };
   }
 
