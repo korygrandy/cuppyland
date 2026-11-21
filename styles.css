@@ -837,7 +837,7 @@ body {
 
 .dog-leash-overlay {
   left: 44px;
-  top: -63px;
+  top: -53px;
   width: 100%;
   height: calc(100% + 50px);
   pointer-events: auto;

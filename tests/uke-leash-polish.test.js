@@ -20,7 +20,7 @@ test("leash overlay uses fine-tuned sitting pose offsets", () => {
 
   assert.equal(styles.includes(".dog-leash-overlay"), true);
   assert.equal(styles.includes("left: 44px"), true);
-  assert.equal(styles.includes("top: -63px"), true);
+  assert.equal(styles.includes("top: -53px"), true);
   assert.equal(styles.includes("width: 100%"), true);
 });
 
@@ -83,7 +83,7 @@ test("sitting collar and leash anchors use fine-tuned offsets", () => {
   assert.equal(styles.includes("left: -10px"), true);
   assert.equal(styles.includes("top: 7px"), true);
   assert.equal(styles.includes("left: 44px"), true);
-  assert.equal(styles.includes("top: -63px"), true);
+  assert.equal(styles.includes("top: -53px"), true);
 });
 
 test("walking puppy loops panting and randomized barking until release", () => {
