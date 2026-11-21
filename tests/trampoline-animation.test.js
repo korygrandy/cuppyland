@@ -17,9 +17,6 @@ test("trampoline anchor and assets are configured", () => {
   assert.equal(trampoline.activatedAssets.down, "./assets/trampoline-down.png");
   assert.equal(trampoline.activatedAssets.up, "./assets/trampoline-up.png");
   assert.equal(trampoline.frameDurationMs, 420);
-  assert.equal(trampoline.artOffsetX, -10);
-  assert.equal(trampoline.artOffsetY, 100);
-  assert.equal(trampoline.artScale, 1.425);
   assert.ok(trampoline.activatorTypes.includes("barbie-blonde"));
   assert.ok(trampoline.activatorTypes.includes("barbie-blonde-baby"));
 });

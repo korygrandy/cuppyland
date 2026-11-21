@@ -53,9 +53,6 @@
           up: "./assets/trampoline-up.png",
         },
         frameDurationMs: 420,
-        artOffsetX: -10,
-        artOffsetY: 100,
-        artScale: 1.425,
 
         activatorTypes: [
           "barbie-blonde",
