@@ -11,8 +11,8 @@ test("cup and lid polish sources contain drag, snap, and boundary behavior", () 
   assert.equal(styles.includes(".cup-character.lid-detached"), true);
   assert.equal(cupPointer.includes("nowMs - lastTapAt <= 300"), true);
   assert.equal(cupPointer.includes("atWorldLeft || atWorldRight"), true);
-  assert.equal(inventory.includes('if (target.dataset.itemType === "cup-create")'), false);
-  assert.equal(inventory.includes('dragState.type === "cup-create"'), true);
+  assert.equal(inventory.includes('if (target.dataset.itemType === "cup-create")'), true);
+  assert.equal(inventory.includes('dragState.type === "cup-create"'), false);
   assert.equal(rules.includes("lid-already-snapped"), true);
   assert.equal(rules.includes("lidDetached = false"), true);
 });
@@ -42,13 +42,13 @@ test("cup removal checks every world canvas edge", () => {
   assert.equal(cupPointer.includes("const nextY ="), true);
 });
 
-test("cup inventory tap instantiates at viewport drop point", () => {
+test("cup inventory tap instantiates at viewport center", () => {
   const inventory = fs.readFileSync("src/controllers/inventory-interaction-controller.js", "utf8");
   const store = fs.readFileSync("src/state/cup-state-store.js", "utf8");
-  assert.equal(inventory.includes('target.dataset.itemType === "friend" || target.dataset.itemType === "cup-create"'), true);
-  assert.equal(inventory.includes("if (dragState.type === \"cup-create\")"), true);
-  assert.equal(store.includes("Number.isFinite(dropPoint?.worldX)"), true);
-  assert.equal(store.includes("Number.isFinite(dropPoint?.worldY)"), true);
+  assert.equal(inventory.includes("applyInventorySelection(target.dataset.itemType"), true);
+  assert.equal(inventory.includes('target.dataset.itemType === "cup-create"'), true);
+  assert.equal(store.includes("addCupToWorld()"), true);
+  assert.equal(store.includes("getViewportSpawnPoint(worldCups.length)"), true);
 });
 
 test("water bottle is in accessories and remains a snap source", () => {

@@ -20,8 +20,8 @@
       schedulePuppyRequest = () => false,
     } = options;
 
-    function addCupToWorld(dropPoint = null) {
-      const newCup = cupStateStore.addCupToWorld(dropPoint);
+    function addCupToWorld() {
+      const newCup = cupStateStore.addCupToWorld();
       if (!newCup) {
         return false;
       }
@@ -128,7 +128,7 @@
 
     function applyDrop(itemType, value, targetZone, targetCupId = state.activeCupId, dropPoint = null) {
       if (itemType === "cup-create") {
-        return addCupToWorld(dropPoint) ? { valid: true } : { valid: false, reason: "no-world" };
+        return addCupToWorld() ? { valid: true } : { valid: false, reason: "no-world" };
       }
 
       if (itemType === "friend") {
