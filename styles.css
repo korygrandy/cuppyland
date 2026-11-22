@@ -913,14 +913,14 @@ body {
 
 .friend-character.is-facing-left.is-puppy-playing .dog-collar-overlay,
 .friend-character.is-facing-left.is-walking-puppy .dog-collar-overlay {
-  left: -1px;
+  left: 24px;
   transform: scaleX(-1) scale(0.5);
   transform-origin: center center;
 }
 
 .friend-character.is-facing-left.is-puppy-playing .dog-leash-overlay,
 .friend-character.is-facing-left.is-walking-puppy .dog-leash-overlay {
-  left: 75px;
+  left: -30px;
   transform: scaleX(-1);
   transform-origin: center center;
 }
