@@ -408,6 +408,45 @@ body {
   transition: transform 110ms ease-in, opacity 110ms ease-in;
 }
 
+.tube-slide-entering,
+.tube-slide-exiting {
+  filter: contrast(1.12) saturate(1.12);
+  transform-origin: center center;
+  will-change: transform, opacity, filter;
+  animation: tube-slide-pinched 650ms cubic-bezier(.2,.7,.2,1);
+}
+
+.tube-slide-exiting {
+  animation-direction: reverse;
+}
+
+@keyframes tube-slide-pinched {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(.18) translateY(-24px) rotate(8deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(.08) translateY(-32px) rotate(10deg);
+    opacity: 0;
+  }
+}
+
+.tube-slide-entering {
+  filter: contrast(1.2) saturate(1.25);
+  transform-origin: center center;
+  will-change: transform, opacity, filter;
+}
+
+.tube-slide-exiting {
+  filter: saturate(1.12) brightness(1.08);
+  transform-origin: center center;
+  will-change: transform, opacity, filter;
+}
+
 .cup-character.trampoline-bounce-up {
   transform: translateY(-24px) !important;
   opacity: 0.92;

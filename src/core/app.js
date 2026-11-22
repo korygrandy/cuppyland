@@ -303,6 +303,11 @@ const backgroundObjectController = window.CuppyLandBackgroundObjectController.cr
   worldCanvas,
   playSfxClip: (clipName, onEnded) => window.CuppyLandAudio?.playSfxClip?.(clipName, onEnded),
 });
+const tubeSlideController = window.CuppyLandTubeSlideController.createController({
+  container: worldBackgroundObjects,
+  worldCanvas,
+  findFriendById: (friendId) => findFriendById(friendId, state.activeWorld),
+});
 const friendMotionController = window.CuppyLandFriendMotionController.createController({
   state,
   worldCanvas,
@@ -399,7 +404,10 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   playGoldenPuppyWithBall: (friendId, options) => puppySequenceController.playWithBall(friendId, options),
   syncBarbieActivationState: (friendState) => friendWorldController?.syncBarbieActivationState?.(friendState),
   updateFriendElementAsset: (friendId) => friendWorldController?.updateFriendElementAsset?.(friendId),
-  syncBackgroundObjectActivation: (friendState, friendElement) => backgroundObjectController.syncFriend(friendState, friendElement),
+  syncBackgroundObjectActivation: (friendState, friendElement) => {
+    backgroundObjectController.syncFriend(friendState, friendElement);
+    tubeSlideController.syncFriend(friendState, friendElement);
+  },
   syncMerryGoRoundActivations: () => friendWorldController?.syncMerryGoRoundActivations?.(),
   syncDoghouseActivations: (commitAttachment, draggedFriendState) => (
     friendWorldController?.syncDoghouseActivations?.(commitAttachment, draggedFriendState)
@@ -511,7 +519,10 @@ friendWorldController = window.CuppyLandWorldFriendController.createController({
   onRefreshChocolateMilkSequences: () => refreshChocolateMilkSequences(),
   onFlowerPlaced: (friendState, friendElement) => sparkleEffectController.triggerFriendSparkle(friendState, friendElement),
   motionController: friendMotionController,
-  syncBackgroundObjectActivation: (friendState, friendElement) => backgroundObjectController.syncFriend(friendState, friendElement),
+  syncBackgroundObjectActivation: (friendState, friendElement) => {
+    backgroundObjectController.syncFriend(friendState, friendElement);
+    tubeSlideController.syncFriend(friendState, friendElement);
+  },
   removeBackgroundObjectActivation: (friendId) => backgroundObjectController.removeFriend(friendId),
   getWorldPointFromClient,
   petAssetController,
@@ -812,6 +823,7 @@ function syncCupWorldPosition(cupElement = cupCharacter) {
   const cupState = resolveCupStateForElement(cupElement);
   if (cupState) {
     backgroundObjectController?.syncCup?.(cupState, cupElement);
+    tubeSlideController?.syncCup?.(cupState, cupElement);
   }
 }
 
@@ -898,6 +910,7 @@ function ensureWorldCupState(worldId) {
 
 function openWorld(worldId) {
   backgroundObjectController.render(worldId);
+  tubeSlideController.render(worldId);
   screenWorldController.openWorld(worldId);
   showWorldHeadlineOverlay(worldId);
   if (worldId === "playground") {
