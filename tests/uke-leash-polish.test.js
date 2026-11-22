@@ -150,6 +150,15 @@ test("walking puppy flips left and right without changing overlay offsets", () =
   assert.equal(styles.includes("left: 30px"), true);
 });
 
+test("walking puppy displays tail-wag wind particles", () => {
+  const styles = fs.readFileSync("styles.css", "utf8");
+  assert.equal(styles.includes(".friend-character.is-walking-puppy::before"), true);
+  assert.equal(styles.includes(".friend-character.is-walking-puppy::after"), true);
+  assert.equal(styles.includes("@keyframes puppy-tail-wind-right"), true);
+  assert.equal(styles.includes("@keyframes puppy-tail-wind-left"), true);
+  assert.equal(styles.includes("puppy-tail-wind-right 620ms ease-out infinite"), true);
+});
+
 test("double-tap plays only ukuleleActivated while snap plays only uke", () => {
   const pointerSource = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
   const worldSource = fs.readFileSync("src/controllers/world-friend-controller.js", "utf8");

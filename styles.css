@@ -667,6 +667,67 @@ body {
   height: 120px;
 }
 
+.friend-character.is-walking-puppy::before,
+.friend-character.is-walking-puppy::after {
+  content: "";
+  position: absolute;
+  right: -18px;
+  bottom: 18px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow:
+    -18px 8px 0 -1px rgba(255, 255, 255, 0.68),
+    -34px -4px 0 -2px rgba(255, 255, 255, 0.58),
+    -48px 12px 0 -2px rgba(255, 255, 255, 0.48);
+  pointer-events: none;
+  animation: puppy-tail-wind-right 620ms ease-out infinite;
+}
+
+.friend-character.is-walking-puppy::after {
+  right: 18px;
+  transform: scaleX(-1);
+  opacity: 0.68;
+  animation-delay: 310ms;
+}
+
+.friend-character.is-facing-left.is-walking-puppy::before,
+.friend-character.is-facing-left.is-walking-puppy::after {
+  right: auto;
+  left: -18px;
+  transform: scaleX(-1);
+  animation-name: puppy-tail-wind-left;
+}
+
+@keyframes puppy-tail-wind-right {
+  0% {
+    opacity: 0;
+    transform: translate(8px, 2px) scale(0.7);
+  }
+  35% {
+    opacity: 0.82;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(46px, -10px) scale(1.15);
+  }
+}
+
+@keyframes puppy-tail-wind-left {
+  0% {
+    opacity: 0;
+    transform: translate(-8px, 2px) scale(0.7);
+  }
+  35% {
+    opacity: 0.82;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-46px, -10px) scale(1.15);
+  }
+}
+
 .friend-character[data-friend-type="golden-puppy"].is-eating .friend-character-art {
   transform: scale(1.75);
   transform-origin: center bottom;
