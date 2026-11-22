@@ -14,8 +14,9 @@ test("tube slide is configured on playground panel 3", () => {
   assert.equal(tube.y, 170);
   assert.equal(tube.hitboxWidth, 130);
   assert.equal(tube.hitboxHeight, 70);
-  assert.equal(tube.hitboxOffsetX, 240);
-  assert.equal(tube.reanchorOffsetX, 510);
+  assert.equal(tube.hitboxOffsetX, 290);
+  assert.equal(tube.hitboxOffsetY, 70);
+  assert.equal(tube.reanchorOffsetX, 560);
   assert.equal(tube.reanchorOffsetY, 380);
   assert.equal(tube.reanchorWidth, 132);
   assert.equal(tube.reanchorHeight, 132);
