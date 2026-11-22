@@ -103,9 +103,9 @@ test("right-facing sitting and playing puppy overlays use separate offsets", () 
   assert.equal(styles.includes(".friend-character.is-facing-left .dog-leash-overlay"), true);
   assert.equal(styles.includes("left: 67px"), true);
   assert.equal(styles.includes(".friend-character.is-facing-right.is-puppy-playing .dog-collar-overlay"), true);
-  assert.equal(styles.includes("left: 0"), true);
+  assert.equal(styles.includes("left: 15px"), true);
   assert.equal(styles.includes(".friend-character.is-facing-right.is-puppy-playing .dog-leash-overlay"), true);
-  assert.equal(styles.includes("left: 5px"), true);
+  assert.equal(styles.includes("left: -10px"), true);
   assert.equal(pointerSource.includes('friendElement.classList.toggle("is-facing-right"'), true);
 });
 
