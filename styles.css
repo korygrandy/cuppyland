@@ -870,11 +870,11 @@ body {
 }
 
 .friend-character.is-facing-left .dog-collar-overlay {
-  left: -9px;
+  left: 11px;
 }
 
 .friend-character.is-facing-left .dog-leash-overlay {
-  left: 45px;
+  left: 65px;
 }
 
 .friend-character.is-puppy-playing .dog-collar-overlay,

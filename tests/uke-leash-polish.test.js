@@ -99,9 +99,9 @@ test("right-facing sitting and playing puppy overlays use separate offsets", () 
   assert.equal(styles.includes(".friend-character.is-facing-right .dog-leash-overlay"), true);
   assert.equal(styles.includes("left: 54px"), true);
   assert.equal(styles.includes(".friend-character.is-facing-left .dog-collar-overlay"), true);
-  assert.equal(styles.includes("left: -9px"), true);
+  assert.equal(styles.includes("left: 11px"), true);
   assert.equal(styles.includes(".friend-character.is-facing-left .dog-leash-overlay"), true);
-  assert.equal(styles.includes("left: 45px"), true);
+  assert.equal(styles.includes("left: 65px"), true);
   assert.equal(styles.includes(".friend-character.is-facing-right.is-puppy-playing .dog-collar-overlay"), true);
   assert.equal(styles.includes("left: 0"), true);
   assert.equal(styles.includes(".friend-character.is-facing-right.is-puppy-playing .dog-leash-overlay"), true);
