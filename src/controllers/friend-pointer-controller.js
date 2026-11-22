@@ -241,6 +241,7 @@
       }
       const facing = friendState.walkingFacing === "left" ? "left" : "right";
       friendElement.classList.toggle("is-facing-left", facing === "left");
+      friendElement.classList.toggle("is-facing-right", facing === "right");
       const art = friendElement.querySelector(".friend-character-art");
       if (art) {
         art.style.transform = facing === "left" ? "scaleX(-1)" : "";
