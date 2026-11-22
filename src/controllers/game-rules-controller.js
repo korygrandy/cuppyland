@@ -20,8 +20,8 @@
       schedulePuppyRequest = () => false,
     } = options;
 
-    function addCupToWorld() {
-      const newCup = cupStateStore.addCupToWorld();
+    function addCupToWorld(dropPoint = null) {
+      const newCup = cupStateStore.addCupToWorld(dropPoint);
       if (!newCup) {
         return false;
       }
@@ -68,6 +68,7 @@
         "dogbone": { width: 110, height: 56 },
         "dog-collar": { width: 120, height: 72 },
         dogleash: { width: 120, height: 72 },
+        "water-bottle": { width: 120, height: 120 },
         dogbed: { width: 220, height: 150 },
         doghouse: { width: 180, height: 140 },
         uke: { width: 72, height: 220 },
@@ -127,7 +128,7 @@
 
     function applyDrop(itemType, value, targetZone, targetCupId = state.activeCupId, dropPoint = null) {
       if (itemType === "cup-create") {
-        return addCupToWorld() ? { valid: true } : { valid: false, reason: "no-world" };
+        return addCupToWorld(dropPoint) ? { valid: true } : { valid: false, reason: "no-world" };
       }
 
       if (itemType === "friend") {
@@ -154,7 +155,14 @@
       }
 
       if (itemType === "lid") {
+        if (activeCupState.lidVisible !== false && activeCupState.lidDetached !== true) {
+          return { valid: false, reason: "lid-already-snapped" };
+        }
         activeCupState.lidColor = value;
+        activeCupState.lidVisible = true;
+        activeCupState.lidDetached = false;
+        activeCupState.lidOffsetX = defaultCupState?.lidOffsetX ?? 17;
+        activeCupState.lidOffsetY = defaultCupState?.lidOffsetY ?? 0;
         return { valid: true };
       }
 

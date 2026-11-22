@@ -160,6 +160,7 @@ const cupPointerController = window.CuppyLandCupPointerController.createControll
   refreshChocolateMilkSequences: () => refreshChocolateMilkSequences(),
   startChocolateMilkSpill: (friendId, cupId) => chocolateMilkSequenceController.startForCup(friendId, cupId),
   ensureChocolateMilkForCup: (cupId) => ensureChocolateMilkForCup(cupId),
+  removeFriendInstance,
   syncTrampolineActivation: (cupState, cupElement) => {
     backgroundObjectController?.syncCup?.(cupState, cupElement);
   },
@@ -215,21 +216,39 @@ const inventoryInteractionController = window.CuppyLandInventoryInteraction.crea
     window.CuppyLandAudio?.playSfxClip?.("dogfoodPour");
     return true;
   },
-  onDirectPuppyToBed: (bedId) => {
+  onDirectWaterSource: (bowlId, sourceType) => {
+    const bowlState = findFriendById(bowlId, state.activeWorld);
+    if (!bowlState || bowlState.type !== "water-bowl") {
+      return false;
+    }
+    bowlState.full = true;
+    bowlState.type = "water-bowl";
+    updateFriendElementAsset(bowlId);
+    window.CuppyLandAudio?.playSfxClip?.("drinkingFountainActivated");
+    if (sourceType === "fishbowl") {
+      window.CuppyLandAudio?.playSfxClip?.("fishbowlActivated");
+    }
+    return true;
+  },
+  onDirectPuppyToBed: (bedId, puppyId = null) => {
     const bedState = findFriendById(bedId, state.activeWorld);
     if (!bedState || bedState.type !== "dogbed") {
       return false;
     }
+    const puppyState = puppyId ? findFriendById(puppyId, state.activeWorld) : null;
     bedState.activated = true;
     bedState.attachedPuppyId = null;
     bedState.bedPuppySnapshot = {
-      hasBall: false,
-      hasRope: false,
-      hasBone: false,
-      hasSquirrel: false,
-      hasCollar: false,
-      hasLeash: false,
+      hasBall: Boolean(puppyState?.hasBall),
+      hasRope: Boolean(puppyState?.hasRope),
+      hasBone: Boolean(puppyState?.hasBone),
+      hasSquirrel: Boolean(puppyState?.hasSquirrel),
+      hasCollar: Boolean(puppyState?.hasCollar),
+      hasLeash: Boolean(puppyState?.hasLeash),
     };
+    if (puppyState) {
+      removeFriendInstance(puppyState.id, { playRemovedSfx: false });
+    }
     if (bedState.sleepTimer) {
       clearTimeout(bedState.sleepTimer);
     }
@@ -392,6 +411,48 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   pauseFishbowlSequence: (friendId) => friendWorldController?.pauseFishbowlSequence?.(friendId),
   resumeFishbowlSequence: (friendId) => friendWorldController?.startFishbowlSequence?.(friendId),
   toggleFishbowlSequence: (friendId) => friendWorldController?.toggleFishbowlSequence?.(friendId),
+  onDirectPuppyToBed: (bedId, puppyId) => {
+    const bedState = findFriendById(bedId, state.activeWorld);
+    const puppyState = puppyId ? findFriendById(puppyId, state.activeWorld) : null;
+    if (!bedState || bedState.type !== "dogbed") {
+      return false;
+    }
+    bedState.activated = true;
+    bedState.attachedPuppyId = null;
+    bedState.bedPuppySnapshot = {
+      hasBall: Boolean(puppyState?.hasBall),
+      hasRope: Boolean(puppyState?.hasRope),
+      hasBone: Boolean(puppyState?.hasBone),
+      hasSquirrel: Boolean(puppyState?.hasSquirrel),
+      hasCollar: Boolean(puppyState?.hasCollar),
+      hasLeash: Boolean(puppyState?.hasLeash),
+    };
+    if (bedState.sleepTimer) {
+      clearTimeout(bedState.sleepTimer);
+    }
+    if (puppyState) {
+      removeFriendInstance(puppyState.id, { playRemovedSfx: false });
+    }
+    updateFriendElementAsset(bedId);
+    bedState.sleepTimer = setTimeout(() => {
+      bedState.sleeping = true;
+      updateFriendElementAsset(bedId);
+    }, 4000);
+    return true;
+  },
+  onDirectWaterSource: (bowlId, sourceType) => {
+    const bowlState = findFriendById(bowlId, state.activeWorld);
+    if (!bowlState || bowlState.type !== "water-bowl") {
+      return false;
+    }
+    bowlState.full = true;
+    updateFriendElementAsset(bowlId);
+    window.CuppyLandAudio?.playSfxClip?.("drinkingFountainActivated");
+    if (sourceType === "fishbowl") {
+      window.CuppyLandAudio?.playSfxClip?.("fishbowlActivated");
+    }
+    return true;
+  },
   onChocolateMilkFillStart,
   onChocolateMilkFillTick,
   onChocolateMilkFillCancel,
@@ -399,6 +460,34 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   onChocolateMilkFillEnd,
   refreshChocolateMilkSequences: () => refreshChocolateMilkSequences(),
   completePuppyRequest: (puppyState, requestType) => puppyRequestController.complete(puppyState, requestType),
+  onDirectPuppyToBed: (bedId) => {
+    const bedState = findFriendById(bedId, state.activeWorld);
+    if (!bedState || bedState.type !== "dogbed") {
+      return false;
+    }
+    bedState.activated = true;
+    bedState.attachedPuppyId = null;
+    bedState.sleepTimer = bedState.sleepTimer ? bedState.sleepTimer : null;
+    updateFriendElementAsset(bedId);
+    bedState.sleepTimer = setTimeout(() => {
+      bedState.sleeping = true;
+      updateFriendElementAsset(bedId);
+    }, 4000);
+    return true;
+  },
+  onDirectWaterSource: (bowlId, sourceType) => {
+    const bowlState = findFriendById(bowlId, state.activeWorld);
+    if (!bowlState || bowlState.type !== "water-bowl") {
+      return false;
+    }
+    bowlState.full = true;
+    updateFriendElementAsset(bowlId);
+    window.CuppyLandAudio?.playSfxClip?.("drinkingFountainActivated");
+    if (sourceType === "fishbowl") {
+      window.CuppyLandAudio?.playSfxClip?.("fishbowlActivated");
+    }
+    return true;
+  },
   startChocolateMilkSpill: (friendId, cupId) => chocolateMilkSequenceController.startForCup(friendId, cupId),
   friendReleaseController,
   timerLifecycle: timerLifecycleController,

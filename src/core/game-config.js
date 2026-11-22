@@ -100,6 +100,7 @@
       "dogbowl",
       "dogfood",
       "water-bowl",
+      "water-bottle",
       "squirrel",
     ],
     expressionAssetMap: {
@@ -197,6 +198,7 @@
       "dogfood": "./assets/dogfood.png",
       "water-bowl": "./assets/water-bowl.png",
       "water-bowl-full": "./assets/water-bowl-full.png",
+      "water-bottle": "./assets/water-bottle.png",
       "golden-puppy-drinking": "./assets/golden-puppy-drinking.png",
       "golden-puppy-eating": "./assets/golden-puppy-eating.png",
       "drinking-fountain-activated": "./assets/drinking-fountain-activated.png",

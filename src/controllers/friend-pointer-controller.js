@@ -52,6 +52,8 @@
       onChocolateMilkFillEnd,
       triggerFriendCelebration = () => {},
       completePuppyRequest = () => false,
+      onDirectPuppyToBed = null,
+      onDirectWaterSource = null,
       timerLifecycle = null,
     } = options;
     const chocolateMilkFillDurationMs = getSequenceConfig?.().durationMs || 5000;
@@ -492,6 +494,23 @@
         friendState.fishbowlSuppressPointerDrag = false;
       }
 
+      if (friendState.type === "water-bowl") {
+        const nowMs = Date.now();
+        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
+        if (lastTapAtMs && nowMs - lastTapAtMs <= 300) {
+          friendState.lastTapAtMs = 0;
+          friendState.full = true;
+          friendState.type = "water-bowl";
+          updateFriendElementAsset?.(friendState.id);
+          window.CuppyLandAudio?.playSfxClip?.("drinkingFountainActivated");
+          resetFriendDragState();
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+        friendState.lastTapAtMs = nowMs;
+      }
+
       if (friendState.type === "rocketman-craft") {
         const nowMs = Date.now();
         const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
@@ -771,6 +790,29 @@
         resetChocolateMilkFill("pointer-end");
         resetFriendDragState();
         return;
+      }
+
+      if (friendState?.type === "golden-puppy" && friendDragState.moved) {
+        const bedElement = window.CuppyLandFriendOverlap?.findOverlappingElement(
+          worldCanvas,
+          friendElement,
+          '.friend-character[data-friend-type="dogbed"]'
+        );
+        if (bedElement) {
+          onDirectPuppyToBed?.(bedElement.dataset.friendId, friendState.id);
+        }
+      }
+
+      if ((friendState?.type === "fishbowl" || friendState?.type === "water-bottle") && friendDragState.moved) {
+        const bowlElement = window.CuppyLandFriendOverlap?.findOverlappingElement(
+          worldCanvas,
+          friendElement,
+          '.friend-character[data-friend-type="water-bowl"]'
+        );
+        if (bowlElement) {
+          onDirectWaterSource?.(bowlElement.dataset.friendId, friendState.type);
+          removeFriendInstance(friendState.id, { playRemovedSfx: false });
+        }
       }
 
       if (friendState?.type === "golden-puppy" && friendState.hasLeash) {

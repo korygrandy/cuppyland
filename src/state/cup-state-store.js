@@ -186,7 +186,7 @@
       return state.worlds[worldId];
     }
 
-    function addCupToWorld() {
+    function addCupToWorld(dropPoint = null) {
       if (!state.activeWorld) {
         return null;
       }
@@ -198,8 +198,12 @@
       const cupState = createDefaultCupState();
       const newCup = { id: nextId, state: cupState };
       const viewportSpawn = getViewportSpawnPoint(worldCups.length);
-      newCup.state.worldX = viewportSpawn.worldX;
-      newCup.state.worldY = viewportSpawn.worldY;
+      newCup.state.worldX = Number.isFinite(dropPoint?.worldX)
+        ? dropPoint.worldX
+        : viewportSpawn.worldX;
+      newCup.state.worldY = Number.isFinite(dropPoint?.worldY)
+        ? dropPoint.worldY
+        : viewportSpawn.worldY;
       bringCupToFront(newCup.state);
       worldCups.push(newCup);
       state.activeCupId = nextId;

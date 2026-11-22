@@ -30,6 +30,7 @@
       refreshChocolateMilkSequences,
       startChocolateMilkSpill,
       ensureChocolateMilkForCup,
+      removeFriendInstance = () => false,
       syncTrampolineActivation = () => {},
       cupPartDragController = null,
     } = options;
@@ -148,10 +149,18 @@
         return;
       }
 
-      if (isPointerOutsideWorldCanvas(event.clientX, event.clientY)) {
-        if (cupElement.dataset.cupId) {
-          removeCupInstance(cupElement.dataset.cupId);
-        }
+      const atWorldLeft = cupState.worldX <= 12;
+      const atWorldRight = cupState.worldX >= worldCanvas.offsetWidth - cupElement.offsetWidth - 12;
+      if (atWorldLeft || atWorldRight) {
+        const cupId = cupElement.dataset.cupId;
+        const chocolateElements = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="chocolate-milk"]'));
+        chocolateElements.forEach((element) => {
+          const candidate = findFriendById?.(element.dataset.friendId);
+          if (candidate?.attachedCupId === cupId) {
+            removeFriendInstance(candidate.id, { playRemovedSfx: false });
+          }
+        });
+        removeCupInstance?.(cupId);
         return;
       }
 
@@ -191,7 +200,7 @@
       if (cupId && !cupDragState.moved) {
         const nowMs = Date.now();
         const lastTapAt = cupLastTapAt.get(cupId) || 0;
-        if (lastTapAt && nowMs - lastTapAt <= 450) {
+        if (lastTapAt && nowMs - lastTapAt <= 300) {
           cupLastTapAt.delete(cupId);
           if (cupState.lidVisible !== false || cupState.lidDetached !== true) {
             cupState.lidVisible = false;

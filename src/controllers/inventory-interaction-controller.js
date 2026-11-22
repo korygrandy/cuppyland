@@ -29,6 +29,7 @@
       onDirectPuppyToy = null,
       onDirectDogFood = null,
       onDirectPuppyToBed = null,
+      onDirectWaterSource = null,
     } = options;
     const chocolateMilkFillDurationMs = game.chocolateMilkSequence?.durationMs || 5000;
     const chocolateMilkFillState = {
@@ -90,6 +91,25 @@
     }
 
     function createVisualGhost(type, value, sourceItem) {
+      if (type === "cup-create") {
+        const cup = document.createElement("canvas");
+        cup.className = "drag-ghost-object";
+        cup.width = 260;
+        cup.height = 360;
+        cup.style.width = "260px";
+        cup.style.height = "360px";
+        const context = cup.getContext("2d");
+        if (context) {
+          context.fillStyle = "#3e80ff";
+          context.fillRect(20, 88, 220, 230);
+          context.fillStyle = "#ff3c3c";
+          context.beginPath();
+          context.roundRect(14, 0, 232, 149, 40);
+          context.fill();
+        }
+        return cup;
+      }
+
       if (type === "lid") {
         return createTintedGhostCanvas("lid", value, 232, 149);
       }
@@ -279,10 +299,6 @@
         return;
       }
 
-      if (target.dataset.itemType === "cup-create") {
-        return;
-      }
-
       event.preventDefault();
       dragState.active = true;
       dragState.type = target.dataset.itemType;
@@ -337,6 +353,22 @@
       const targetCupId = hoveredCup?.dataset.cupId || getActiveCupId();
       const zone = zoneForPoint(event.clientX, event.clientY);
       const isFriendDrop = dragState.type === "friend";
+      if (dragState.type === "cup-create") {
+        const dropPoint = getWorldDropPoint(event.clientX, event.clientY);
+        const result = applyDrop("cup-create", "new-cup", "friend", getActiveCupId(), dropPoint);
+        if (result.valid) {
+          renderWorldCups();
+        }
+        dragState.suppressClick = true;
+        dragState.active = false;
+        dragState.type = "";
+        dragState.value = "";
+        dragState.pointerId = null;
+        dragState.moved = false;
+        hideDragGhost();
+        clearZoneHighlights();
+        return;
+      }
       if (isFriendDrop && dragState.value === "golden-puppy") {
         const targetedElement = document.elementFromPoint(event.clientX, event.clientY);
         const bedElement = targetedElement?.closest?.('.friend-character[data-friend-type="dogbed"]');
@@ -370,6 +402,24 @@
             hideDragGhost();
             clearZoneHighlights();
             return;
+          }
+        }
+        if (isFriendDrop && (dragState.value === "fishbowl" || dragState.value === "water-bottle")) {
+          const targetedElement = document.elementFromPoint(event.clientX, event.clientY);
+          const bowlElement = targetedElement?.closest?.('.friend-character[data-friend-type="water-bowl"]');
+          if (bowlElement) {
+            const activated = onDirectWaterSource?.(bowlElement.dataset.friendId, dragState.value);
+            if (activated) {
+              dragState.suppressClick = true;
+              dragState.active = false;
+              dragState.type = "";
+              dragState.value = "";
+              dragState.pointerId = null;
+              dragState.moved = false;
+              hideDragGhost();
+              clearZoneHighlights();
+              return;
+            }
           }
         }
       }
