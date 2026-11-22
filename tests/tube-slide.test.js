@@ -16,6 +16,8 @@ test("tube slide is configured on playground panel 3", () => {
   assert.equal(tube.hitboxHeight, 220);
   assert.equal(tube.reanchorOffsetX, 300);
   assert.equal(tube.reanchorOffsetY, 430);
+  assert.equal(tube.reanchorWidth, 132);
+  assert.equal(tube.reanchorHeight, 132);
 });
 
 test("tube slide pinch sequence and controller are wired", () => {

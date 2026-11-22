@@ -151,6 +151,31 @@
     function render(worldId) {
       activeWorld = worldId;
       activeSequences.forEach((sequence, id) => cancelSequence(id));
+
+      container.querySelectorAll(".tube-slide-debug-hitbox, .tube-slide-debug-reanchor").forEach((node) => node.remove());
+      if (activeWorld !== "playground") {
+        return;
+      }
+      const config = getConfig();
+      if (!config) {
+        return;
+      }
+
+      const hitbox = document.createElement("div");
+      hitbox.className = "tube-slide-debug-hitbox";
+      hitbox.style.left = `${config.x + (config.hitboxOffsetX ?? 0)}px`;
+      hitbox.style.top = `${config.y + (config.hitboxOffsetY ?? 0)}px`;
+      hitbox.style.width = `${config.hitboxWidth ?? config.width}px`;
+      hitbox.style.height = `${config.hitboxHeight ?? config.height}px`;
+      container.appendChild(hitbox);
+
+      const reanchor = document.createElement("div");
+      reanchor.className = "tube-slide-debug-reanchor";
+      reanchor.style.left = `${config.x + (config.reanchorOffsetX ?? 0)}px`;
+      reanchor.style.top = `${config.y + (config.reanchorOffsetY ?? 0)}px`;
+      reanchor.style.width = `${config.reanchorWidth ?? 132}px`;
+      reanchor.style.height = `${config.reanchorHeight ?? 132}px`;
+      container.appendChild(reanchor);
     }
 
     return {

@@ -420,6 +420,24 @@ body {
   animation-direction: reverse;
 }
 
+.tube-slide-debug-hitbox,
+.tube-slide-debug-reanchor {
+  position: absolute;
+  z-index: 250;
+  border: 3px dashed rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 0 0 1px rgba(25, 25, 25, 0.75),
+    inset 0 0 0 1px rgba(25, 25, 25, 0.75);
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.tube-slide-debug-reanchor {
+  border-color: rgba(255, 208, 72, 0.95);
+  border-style: dotted;
+  border-radius: 12px;
+}
+
 @keyframes tube-slide-pinched {
   0% {
     transform: scale(1) rotate(0deg);
