@@ -10,7 +10,7 @@ test("cup and lid polish sources contain drag, snap, and boundary behavior", () 
 
   assert.equal(styles.includes(".cup-character.lid-detached"), true);
   assert.equal(cupPointer.includes("nowMs - lastTapAt <= 300"), true);
-  assert.equal(cupPointer.includes("atWorldLeft || atWorldRight"), true);
+  assert.equal(cupPointer.includes("movedOutsideViewport"), true);
   assert.equal(inventory.includes('if (target.dataset.itemType === "cup-create")'), true);
   assert.equal(inventory.includes('dragState.type === "cup-create"'), false);
   assert.equal(rules.includes("lid-already-snapped"), true);
@@ -32,14 +32,11 @@ test("water, puppy, and toy interactions are registered", () => {
   assert.equal(ui.includes('"water-bottle"'), true);
 });
 
-test("cup removal checks every world canvas edge", () => {
+test("cup removal requires movement outside the visible viewport edge", () => {
   const cupPointer = fs.readFileSync("src/controllers/cup-pointer-controller.js", "utf8");
-  assert.equal(cupPointer.includes("atWorldTop"), true);
-  assert.equal(cupPointer.includes("atWorldBottom"), true);
-  assert.equal(cupPointer.includes("atWorldLeft"), true);
-  assert.equal(cupPointer.includes("atWorldRight"), true);
-  assert.equal(cupPointer.includes("const nextX ="), true);
-  assert.equal(cupPointer.includes("const nextY ="), true);
+  assert.equal(cupPointer.includes("cupDragState.moved"), true);
+  assert.equal(cupPointer.includes("isPointerOutsideWorldCanvas"), true);
+  assert.equal(cupPointer.includes("movedOutsideViewport"), true);
 });
 
 test("cup inventory tap instantiates at viewport center", () => {

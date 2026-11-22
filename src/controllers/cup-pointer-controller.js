@@ -159,11 +159,9 @@
       const maxY = Math.max(0, worldCanvas.offsetHeight - cupElement.offsetHeight);
       const nextX = Math.min(maxX, Math.max(0, cupDragState.startWorldX + deltaX));
       const nextY = Math.min(maxY, Math.max(0, cupDragState.startWorldY + deltaY));
-      const atWorldLeft = nextX <= 12;
-      const atWorldRight = nextX >= worldCanvas.offsetWidth - cupElement.offsetWidth - 12;
-      const atWorldTop = nextY <= 12;
-      const atWorldBottom = nextY >= worldCanvas.offsetHeight - cupElement.offsetHeight - 12;
-      if (atWorldLeft || atWorldRight || atWorldTop || atWorldBottom) {
+      const movedOutsideViewport = cupDragState.moved
+        && isPointerOutsideWorldCanvas(event.clientX, event.clientY, 24);
+      if (movedOutsideViewport) {
         const cupId = cupElement.dataset.cupId;
         const chocolateElements = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="chocolate-milk"]'));
         chocolateElements.forEach((element) => {
