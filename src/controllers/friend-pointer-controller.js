@@ -238,17 +238,7 @@
     }
 
     function syncPuppyFacing(friendState, friendElement) {
-      if (!friendState || friendState.type !== "golden-puppy" || !friendElement) {
-        return;
-      }
-      const facing = friendState.walkingFacing === "left" ? "left" : "right";
-      friendElement.classList.toggle("is-facing-left", facing === "left");
-      friendElement.classList.toggle("is-facing-right", facing === "right");
-      const art = friendElement.querySelector(".friend-character-art");
-      if (art) {
-        art.style.transform = facing === "left" ? "scaleX(-1)" : "";
-        art.style.transformOrigin = facing === "left" ? "center bottom" : "";
-      }
+      window.CuppyLandPuppyFacingHelper?.syncFacing(friendState, friendElement);
     }
 
 
@@ -664,12 +654,11 @@
       const nextY = worldY - friendDragState.pointerOffsetY;
       const safePosition = clampFriendPosition(friendElement, friendState, nextX, nextY);
       if (friendState.type === "golden-puppy" && friendState.hasLeash) {
-        const movementDelta = safePosition.worldX - friendState.worldX;
-        if (movementDelta < -1) {
-          friendState.walkingFacing = "right";
-        } else if (movementDelta > 1) {
-          friendState.walkingFacing = "left";
-        }
+        window.CuppyLandPuppyFacingHelper?.updateFacingFromMovement(
+          friendState,
+          friendState.worldX,
+          safePosition.worldX
+        );
         friendState.walkingActive = true;
         friendElement.classList.add("is-walking-puppy");
         syncPuppyFacing(friendState, friendElement);

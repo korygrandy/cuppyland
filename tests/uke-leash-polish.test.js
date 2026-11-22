@@ -92,7 +92,7 @@ test("sitting collar and leash anchors use fine-tuned offsets", () => {
 
 test("right-facing sitting and playing puppy overlays use separate offsets", () => {
   const styles = fs.readFileSync("styles.css", "utf8");
-  const pointerSource = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
+  const facingSource = fs.readFileSync("src/controllers/puppy-facing-helper.js", "utf8");
 
   assert.equal(styles.includes(".friend-character.is-facing-right .dog-collar-overlay"), true);
   assert.equal(styles.includes("left: -7px"), true);
@@ -106,7 +106,7 @@ test("right-facing sitting and playing puppy overlays use separate offsets", () 
   assert.equal(styles.includes("left: -10px"), true);
   assert.equal(styles.includes(".friend-character.is-facing-right.is-puppy-playing .dog-leash-overlay"), true);
   assert.equal(styles.includes("left: 30px"), true);
-  assert.equal(pointerSource.includes('friendElement.classList.toggle("is-facing-right"'), true);
+  assert.equal(facingSource.includes("is-facing-right"), true);
 });
 
 test("walking puppy loops panting and randomized barking until release", () => {
@@ -136,12 +136,12 @@ test("trampoline debug line is removed and puppy overlay poses are separated", (
 test("walking puppy flips left and right without changing overlay offsets", () => {
   const styles = fs.readFileSync("styles.css", "utf8");
   const pointerSource = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
+  const facingSource = fs.readFileSync("src/controllers/puppy-facing-helper.js", "utf8");
 
-  assert.equal(pointerSource.includes("walkingFacing"), true);
-  assert.equal(pointerSource.includes("movementDelta"), true);
-  assert.equal(pointerSource.includes('walkingFacing = "left"'), true);
-  assert.equal(pointerSource.includes('walkingFacing = "right"'), true);
-  assert.equal(pointerSource.includes("syncPuppyFacing"), true);
+  assert.equal(pointerSource.includes("CuppyLandPuppyFacingHelper"), true);
+  assert.equal(facingSource.includes("updateFacingFromMovement"), true);
+  assert.equal(facingSource.includes('walkingFacing = "left"'), true);
+  assert.equal(facingSource.includes('walkingFacing = "right"'), true);
   assert.equal(styles.includes(".friend-character.is-facing-left .friend-character-art"), true);
   assert.equal(styles.includes("transform: scaleX(-1) scale(0.5)"), true);
   assert.equal(styles.includes("left: 24px"), true);
