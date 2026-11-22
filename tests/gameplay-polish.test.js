@@ -38,6 +38,8 @@ test("cup removal checks every world canvas edge", () => {
   assert.equal(cupPointer.includes("atWorldBottom"), true);
   assert.equal(cupPointer.includes("atWorldLeft"), true);
   assert.equal(cupPointer.includes("atWorldRight"), true);
+  assert.equal(cupPointer.includes("const nextX ="), true);
+  assert.equal(cupPointer.includes("const nextY ="), true);
 });
 
 test("cup inventory tap instantiates at viewport drop point", () => {
@@ -57,7 +59,11 @@ test("water bottle is in accessories and remains a snap source", () => {
 
 test("trampoline stops when trampolineFriends map is empty", () => {
   const source = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
+  const pointerSource = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
   assert.equal(source.includes("const hasRegisteredTrampolineFriend"), true);
   assert.equal(source.includes("Boolean(trampolineFriends.get(objectConfig.id)?.size)"), true);
   assert.equal(source.includes("stopTrampolineAnimation(objectConfig.id)"), true);
+  assert.equal(pointerSource.includes("friendState.attachedCupId = null"), true);
+  assert.equal(pointerSource.includes("friendState.sequenceFrame = null"), true);
+  assert.equal(pointerSource.includes("friendState.attachedOffsetX = 0"), true);
 });

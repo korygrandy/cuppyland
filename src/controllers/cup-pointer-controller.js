@@ -149,6 +149,16 @@
         return;
       }
 
+      const pointerScale = cupDragState.pointerScale || getElementDragScale(cupElement);
+      const deltaX = (event.clientX - cupDragState.startClientX) / pointerScale;
+      const deltaY = (event.clientY - cupDragState.startClientY) / pointerScale;
+      if (Math.hypot(deltaX, deltaY) > dragMovementThreshold) {
+        cupDragState.moved = true;
+      }
+      const maxX = Math.max(0, worldCanvas.offsetWidth - cupElement.offsetWidth);
+      const maxY = Math.max(0, worldCanvas.offsetHeight - cupElement.offsetHeight);
+      const nextX = Math.min(maxX, Math.max(0, cupDragState.startWorldX + deltaX));
+      const nextY = Math.min(maxY, Math.max(0, cupDragState.startWorldY + deltaY));
       const atWorldLeft = nextX <= 12;
       const atWorldRight = nextX >= worldCanvas.offsetWidth - cupElement.offsetWidth - 12;
       const atWorldTop = nextY <= 12;
@@ -165,17 +175,6 @@
         removeCupInstance?.(cupId);
         return;
       }
-
-      const pointerScale = cupDragState.pointerScale || getElementDragScale(cupElement);
-      const deltaX = (event.clientX - cupDragState.startClientX) / pointerScale;
-      const deltaY = (event.clientY - cupDragState.startClientY) / pointerScale;
-      if (Math.hypot(deltaX, deltaY) > dragMovementThreshold) {
-        cupDragState.moved = true;
-      }
-      const maxX = Math.max(0, worldCanvas.offsetWidth - cupElement.offsetWidth);
-      const maxY = Math.max(0, worldCanvas.offsetHeight - cupElement.offsetHeight);
-      const nextX = Math.min(maxX, Math.max(0, cupDragState.startWorldX + deltaX));
-      const nextY = Math.min(maxY, Math.max(0, cupDragState.startWorldY + deltaY));
       if (cupState.lidVisible && !cupState.lidDetached && deltaY >= 100) {
         cupState.lidVisible = false;
         cupState.lidDetached = true;

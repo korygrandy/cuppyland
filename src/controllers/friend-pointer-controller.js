@@ -626,6 +626,10 @@
       if (friendState.type === "chocolate-milk") {
         friendState.attachedCupId = null;
         friendState.sequenceCompleted = false;
+        friendState.sequenceFrame = null;
+        friendState.activated = false;
+        friendState.attachedOffsetX = 0;
+        friendState.attachedOffsetY = 0;
         stopChocolateMilkSequence(friendState.id);
         startHoverMonitor();
       }
