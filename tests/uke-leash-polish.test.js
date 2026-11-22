@@ -152,6 +152,7 @@ test("walking puppy flips left and right without changing overlay offsets", () =
 
 test("walking puppy displays tail-wag wind particles", () => {
   const styles = fs.readFileSync("styles.css", "utf8");
+  assert.equal(styles.includes("bottom: 92px"), true);
   assert.equal(styles.includes(".friend-character.is-walking-puppy::before"), true);
   assert.equal(styles.includes(".friend-character.is-walking-puppy::after"), true);
   assert.equal(styles.includes("@keyframes puppy-tail-wind-right"), true);
