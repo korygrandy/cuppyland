@@ -149,9 +149,11 @@
         return;
       }
 
-      const atWorldLeft = cupState.worldX <= 12;
-      const atWorldRight = cupState.worldX >= worldCanvas.offsetWidth - cupElement.offsetWidth - 12;
-      if (atWorldLeft || atWorldRight) {
+      const atWorldLeft = nextX <= 12;
+      const atWorldRight = nextX >= worldCanvas.offsetWidth - cupElement.offsetWidth - 12;
+      const atWorldTop = nextY <= 12;
+      const atWorldBottom = nextY >= worldCanvas.offsetHeight - cupElement.offsetHeight - 12;
+      if (atWorldLeft || atWorldRight || atWorldTop || atWorldBottom) {
         const cupId = cupElement.dataset.cupId;
         const chocolateElements = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="chocolate-milk"]'));
         chocolateElements.forEach((element) => {

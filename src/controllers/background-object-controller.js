@@ -302,14 +302,15 @@
           } else {
             unregisterTrampolineFriend(objectConfig.id, friendState.id);
           }
-          if (isActive && !trampolineTimers.has(objectConfig.id)) {
+          const hasRegisteredTrampolineFriend = Boolean(trampolineFriends.get(objectConfig.id)?.size);
+          if (hasRegisteredTrampolineFriend && !trampolineTimers.has(objectConfig.id)) {
             startTrampolineAnimation(objectConfig.id, objectConfig);
-          } else if (isActive && trampolineTimers.has(objectConfig.id) && newlyRegistered) {
+          } else if (hasRegisteredTrampolineFriend && trampolineTimers.has(objectConfig.id) && newlyRegistered) {
             applyTrampolineFriendFrame(
               objectConfig.id,
               trampolineFrames.get(objectConfig.id) || "down"
             );
-          } else if (!isActive && trampolineTimers.has(objectConfig.id)) {
+          } else if (!hasRegisteredTrampolineFriend && trampolineTimers.has(objectConfig.id)) {
             stopTrampolineAnimation(objectConfig.id);
           }
         }
@@ -370,6 +371,7 @@
 
         activeFriendsByObject.set(objectConfig.id, activeFriends);
         const isActive = activeFriends.size > 0;
+        const hasRegisteredTrampolineFriend = (trampolineFriends.get(objectConfig.id)?.size || 0) > 0;
         const anchor = container.querySelector(`[data-object-id="${objectConfig.id}"]`);
         anchor?.classList.toggle("active", isActive);
         if (isActive && !trampolineTimers.has(objectConfig.id)) {

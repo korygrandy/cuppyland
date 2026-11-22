@@ -325,7 +325,9 @@
 
       event.preventDefault();
       const targetCupId = getActiveCupId() || getActiveCupInstance()?.id || null;
-      const dropPoint = target.dataset.itemType === "friend" ? getDefaultFriendDropPoint() : null;
+      const dropPoint = target.dataset.itemType === "friend" || target.dataset.itemType === "cup-create"
+        ? getWorldDropPoint(event.clientX, event.clientY)
+        : null;
       applyInventorySelection(target.dataset.itemType, target.dataset.value, targetCupId, dropPoint);
     }
 
@@ -354,12 +356,7 @@
       const zone = zoneForPoint(event.clientX, event.clientY);
       const isFriendDrop = dragState.type === "friend";
       if (dragState.type === "cup-create") {
-        const dropPoint = getWorldDropPoint(event.clientX, event.clientY);
-        const result = applyDrop("cup-create", "new-cup", "friend", getActiveCupId(), dropPoint);
-        if (result.valid) {
-          renderWorldCups();
-        }
-        dragState.suppressClick = true;
+        dragState.suppressClick = Boolean(dragState.moved);
         dragState.active = false;
         dragState.type = "";
         dragState.value = "";
