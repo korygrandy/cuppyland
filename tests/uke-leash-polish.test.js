@@ -144,8 +144,8 @@ test("walking puppy flips left and right without changing overlay offsets", () =
   assert.equal(pointerSource.includes("syncPuppyFacing"), true);
   assert.equal(styles.includes(".friend-character.is-facing-left .friend-character-art"), true);
   assert.equal(styles.includes("transform: scaleX(-1) scale(0.5)"), true);
-  assert.equal(styles.includes("left: -31px"), true);
-  assert.equal(styles.includes("left: 45px"), true);
+  assert.equal(styles.includes("left: -1px"), true);
+  assert.equal(styles.includes("left: 75px"), true);
   assert.equal(styles.includes("left: -20px"), true);
   assert.equal(styles.includes("left: 30px"), true);
 });
