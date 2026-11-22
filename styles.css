@@ -854,7 +854,7 @@ body {
 }
 
 .friend-character.is-facing-right .dog-collar-overlay {
-  left: -5px;
+  left: -7px;
 }
 
 .dog-leash-overlay {
@@ -866,15 +866,15 @@ body {
 }
 
 .friend-character.is-facing-right .dog-leash-overlay {
-  left: 49px;
+  left: 47px;
 }
 
 .friend-character.is-facing-left .dog-collar-overlay {
-  left: 11px;
+  left: 13px;
 }
 
 .friend-character.is-facing-left .dog-leash-overlay {
-  left: 65px;
+  left: 67px;
 }
 
 .friend-character.is-puppy-playing .dog-collar-overlay,

@@ -95,13 +95,13 @@ test("right-facing sitting and playing puppy overlays use separate offsets", () 
   const pointerSource = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
 
   assert.equal(styles.includes(".friend-character.is-facing-right .dog-collar-overlay"), true);
-  assert.equal(styles.includes("left: -5px"), true);
+  assert.equal(styles.includes("left: -7px"), true);
   assert.equal(styles.includes(".friend-character.is-facing-right .dog-leash-overlay"), true);
-  assert.equal(styles.includes("left: 49px"), true);
+  assert.equal(styles.includes("left: 47px"), true);
   assert.equal(styles.includes(".friend-character.is-facing-left .dog-collar-overlay"), true);
-  assert.equal(styles.includes("left: 11px"), true);
+  assert.equal(styles.includes("left: 13px"), true);
   assert.equal(styles.includes(".friend-character.is-facing-left .dog-leash-overlay"), true);
-  assert.equal(styles.includes("left: 65px"), true);
+  assert.equal(styles.includes("left: 67px"), true);
   assert.equal(styles.includes(".friend-character.is-facing-right.is-puppy-playing .dog-collar-overlay"), true);
   assert.equal(styles.includes("left: 0"), true);
   assert.equal(styles.includes(".friend-character.is-facing-right.is-puppy-playing .dog-leash-overlay"), true);
