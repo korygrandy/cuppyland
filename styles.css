@@ -396,21 +396,6 @@ body {
   transition: opacity 210ms ease, transform 210ms ease;
 }
 
-.world-background-object.has-bounce.trampoline-down .world-background-object-art-down {
-  opacity: 1;
-}
-
-.world-background-object.has-bounce.trampoline-down .world-background-object-art-up {
-  opacity: 0;
-}
-
-.world-background-object.has-bounce.trampoline-up .world-background-object-art-down {
-  opacity: 0;
-}
-
-.world-background-object.has-bounce.trampoline-up .world-background-object-art-up {
-  opacity: 1;
-}
 
 @keyframes trampoline-bounce {
   0% {

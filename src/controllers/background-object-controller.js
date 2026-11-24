@@ -46,8 +46,11 @@
       const downArt = anchor.querySelector(".world-background-object-art-down");
       const upArt = anchor.querySelector(".world-background-object-art-up");
       if (downArt && upArt) {
-        downArt.style.opacity = frame === "down" ? "1" : "0";
-        upArt.style.opacity = frame === "up" ? "1" : "0";
+        const isActive = typeof anchor.classList?.contains === "function"
+          ? anchor.classList.contains("is-bouncing")
+          : true;
+        downArt.style.opacity = isActive && frame === "down" ? "1" : "0";
+        upArt.style.opacity = isActive && frame === "up" ? "1" : "0";
         return;
       }
       const art = anchor.querySelector(".world-background-object-art");
@@ -166,7 +169,14 @@
       }
       anchor.classList.remove("is-bouncing", "trampoline-up", "trampoline-down");
       const objectConfig = getObjects(activeWorld).find((item) => item.id === objectId);
-      applyBounceArtFrame(anchor, objectConfig, "down");
+      const downArt = anchor.querySelector(".world-background-object-art-down");
+      const upArt = anchor.querySelector(".world-background-object-art-up");
+      if (downArt && upArt) {
+        downArt.style.opacity = "0";
+        upArt.style.opacity = "0";
+      } else {
+        applyBounceArtFrame(anchor, objectConfig, "down");
+      }
     }
 
     function startTrampolineAnimation(objectId, objectConfig) {
@@ -230,7 +240,7 @@
           anchor.style.setProperty("--trampoline-hitbox-top", `${objectConfig.hitboxOffsetY ?? 0}px`);
           anchor.style.setProperty("--trampoline-hitbox-width", `${objectConfig.hitboxWidth ?? objectConfig.width}px`);
           anchor.style.setProperty("--trampoline-hitbox-height", `${objectConfig.hitboxHeight ?? objectConfig.height}px`);
-          anchor.classList.add("has-bounce", "trampoline-down");
+          anchor.classList.add("has-bounce");
         }
 
         const activatedAssets = isBounceObject(objectConfig)
@@ -255,6 +265,8 @@
             activatedArt.style.width = `${100 * artScale}%`;
             activatedArt.style.height = `${100 * artScale}%`;
             if (assetConfig.frame === "up") {
+              activatedArt.style.opacity = "0";
+            } else if (assetConfig.frame === "down") {
               activatedArt.style.opacity = "0";
             }
           }

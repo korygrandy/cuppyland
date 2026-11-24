@@ -67,6 +67,17 @@ test("bed bounce assets use distinct down and up animation frames", () => {
   assert.ok(up.size > 0);
 });
 
+test("bed bounce frames remain hidden until hitbox activation and fade on stop", () => {
+  const styles = fs.readFileSync("styles.css", "utf8");
+  const controller = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
+
+  assert.equal(styles.includes(".world-background-object[data-object-id=\"bed-bg\"]"), true);
+  assert.equal(controller.includes('assetConfig.frame === "down"'), true);
+  assert.equal(controller.includes('downArt.style.opacity = "0"'), true);
+  assert.equal(controller.includes('upArt.style.opacity = "0"'), true);
+  assert.equal(controller.includes('anchor.classList.remove("is-bouncing"'), true);
+});
+
 test("trampoline CSS defines a down/up bounce and alignment hook", () => {
   const styles = fs.readFileSync("styles.css", "utf8");
   const controller = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
@@ -82,8 +93,8 @@ test("trampoline CSS defines a down/up bounce and alignment hook", () => {
   assert.equal(controller.includes("trampoline-bounce-up"), true);
   assert.equal(controller.includes("trampoline-bounce-down"), true);
   assert.equal(styles.includes("[data-object-id=\"bed-bg\"]"), true);
-  assert.equal(styles.includes("world-background-object-art-down"), true);
-  assert.equal(styles.includes("world-background-object-art-up"), true);
+  assert.equal(controller.includes("world-background-object-art-down"), true);
+  assert.equal(controller.includes("world-background-object-art-up"), true);
   assert.equal(styles.includes(".world-background-object-hitbox-debug"), true);
   assert.equal(controller.includes("showHitbox"), true);
   assert.equal(controller.includes("applyBounceArtFrame"), true);
