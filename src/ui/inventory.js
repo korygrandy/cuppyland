@@ -238,7 +238,16 @@
       hairstyleItems.appendChild(createHairstyleItem(hairstyleName));
     });
 
-    friendTypes
+    const accessoryOrder = [
+      "baby-mr-chocolate-milk",
+      "chocolate-milk",
+      "lavalamp",
+      "uke",
+      "flower-bead-craft",
+      "merry-go-round",
+      "water-bottle",
+    ];
+    accessoryOrder
       .filter((friendName) => accessoryTypes.has(friendName))
       .forEach((friendName) => {
         accessoriesItems.appendChild(createFriendItem(friendName));
