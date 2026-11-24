@@ -17,6 +17,21 @@ test("cup and lid polish sources contain drag, snap, and boundary behavior", () 
   assert.equal(rules.includes("lidDetached = false"), true);
 });
 
+test("water bowl double-tap and fountain hitbox activate immediately", () => {
+  const pointer = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
+  const app = fs.readFileSync("src/core/app.js", "utf8");
+  const background = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
+  const anchor = fs.readFileSync("src/core/world-anchor-registry.js", "utf8");
+
+  assert.equal(pointer.includes('friendState.full = true'), true);
+  assert.equal(pointer.includes('syncBackgroundObjectActivation(friendState, friendElement)'), true);
+  assert.equal(pointer.includes('playSfxClip?.("drinkingFountainActivated")'), true);
+  assert.equal(app.includes("syncBackgroundObjectActivation(bowlState"), true);
+  assert.equal(background.includes('anchor?.classList.add("active")'), true);
+  assert.equal(background.includes('playSfxClip(objectConfig.activatedSfx'), true);
+  assert.equal(anchor.includes('"drinkingFountainActivated"'), true);
+});
+
 test("water, puppy, and toy interactions are registered", () => {
   const app = fs.readFileSync("src/core/app.js", "utf8");
   const pointer = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");

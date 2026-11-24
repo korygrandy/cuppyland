@@ -552,6 +552,7 @@
           friendState.full = true;
           friendState.type = "water-bowl";
           updateFriendElementAsset?.(friendState.id);
+          syncBackgroundObjectActivation(friendState, friendElement);
           window.CuppyLandAudio?.playSfxClip?.("drinkingFountainActivated");
           resetFriendDragState();
           event.preventDefault();

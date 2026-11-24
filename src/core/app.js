@@ -251,6 +251,7 @@ const inventoryInteractionController = window.CuppyLandInventoryInteraction.crea
     }
     bowlState.full = true;
     bowlState.type = "water-bowl";
+    syncBackgroundObjectActivation(bowlState, worldCanvas.querySelector(`.friend-character[data-friend-id="${bowlId}"]`));
     updateFriendElementAsset(bowlId);
     window.CuppyLandAudio?.playSfxClip?.("drinkingFountainActivated");
     if (sourceType === "fishbowl") {
@@ -483,6 +484,7 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
     }
     bowlState.full = true;
     updateFriendElementAsset(bowlId);
+    syncBackgroundObjectActivation(bowlState, worldCanvas.querySelector(`.friend-character[data-friend-id="${bowlId}"]`));
     window.CuppyLandAudio?.playSfxClip?.("drinkingFountainActivated");
     if (sourceType === "fishbowl") {
       window.CuppyLandAudio?.playSfxClip?.("fishbowlActivated");
@@ -517,6 +519,7 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
       return false;
     }
     bowlState.full = true;
+    syncBackgroundObjectActivation(bowlState, worldCanvas.querySelector(`.friend-character[data-friend-id="${bowlId}"]`));
     updateFriendElementAsset(bowlId);
     window.CuppyLandAudio?.playSfxClip?.("drinkingFountainActivated");
     if (sourceType === "fishbowl") {
@@ -866,6 +869,11 @@ function updateWorldBackground() {
 
 function resolveCupStateForElement(cupElement) {
   return cupPositionController.resolveCupStateForElement(cupElement);
+}
+
+function syncBackgroundObjectActivation(friendState, friendElement) {
+  backgroundObjectController?.syncFriend?.(friendState, friendElement);
+  tubeSlideController?.syncFriend?.(friendState, friendElement);
 }
 
 function syncCupWorldPosition(cupElement = cupCharacter) {
