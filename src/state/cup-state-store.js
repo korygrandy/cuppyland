@@ -194,7 +194,13 @@
       const worldCups = getWorldCupList(state.activeWorld);
       worldCups.forEach((cupInfo, index) => ensureCupLayerOrder(cupInfo.state, index + 1));
 
-      const nextId = `cup-${state.activeWorld}-${worldCups.length + 1}`;
+      let nextIndex = worldCups.length + 1;
+      let nextId = `cup-${state.activeWorld}-${nextIndex}`;
+      const existingIds = new Set(worldCups.map((cupInfo) => cupInfo.id));
+      while (existingIds.has(nextId)) {
+        nextIndex += 1;
+        nextId = `cup-${state.activeWorld}-${nextIndex}`;
+      }
       const cupState = createDefaultCupState();
       const newCup = { id: nextId, state: cupState };
       const viewportSpawn = getViewportSpawnPoint(worldCups.length);

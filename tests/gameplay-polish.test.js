@@ -56,6 +56,38 @@ test("cup inventory tap instantiates at viewport center", () => {
   assert.equal(store.includes("getViewportSpawnPoint(worldCups.length)"), true);
 });
 
+test("re-added cups receive unique IDs after a middle cup is removed", () => {
+  const { loadBrowserScript } = require("./test-helpers");
+  const context = { window: {} };
+  loadBrowserScript("src/state/cup-state-store.js", context);
+
+  const state = {
+    activeWorld: "olivia-room",
+    activeCupId: "cup-olivia-room-1",
+    cup: {},
+    worlds: {
+      "olivia-room": {
+        cups: [
+          { id: "cup-olivia-room-1", state: { worldX: 500, worldY: 430, zIndex: 1 } },
+          { id: "cup-olivia-room-2", state: { worldX: 900, worldY: 430, zIndex: 2 } },
+        ],
+      },
+    },
+  };
+  const store = context.window.CuppyLandCupState.createStore({
+    state,
+    gameConfig: {
+      defaultCupState: { worldX: 920, worldY: 430, zIndex: 1 },
+    },
+    worldCanvas: { offsetWidth: 2200, offsetHeight: 800 },
+    worldViewport: { scrollLeft: 0, clientWidth: 1280, clientHeight: 800 },
+  });
+
+  assert.equal(store.removeCupInstance("cup-olivia-room-1").removed, true);
+  const readded = store.addCupToWorld();
+  assert.equal(readded.id, "cup-olivia-room-3");
+});
+
 test("water bottle is in accessories and remains a snap source", () => {
   const ui = fs.readFileSync("src/ui/inventory.js", "utf8");
   assert.equal(ui.includes('"lavalamp", "chocolate-milk", "uke", "flower-bead-craft", "merry-go-round", "water-bottle"'), true);
