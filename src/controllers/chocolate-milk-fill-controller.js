@@ -11,6 +11,7 @@
 
     const fillState = {
       cupId: null,
+      characterType: "chocolate-milk",
       intervalId: null,
       completionLocked: false,
       frame: 2,
@@ -24,6 +25,7 @@
       fillState.intervalId = null;
       fillState.completionLocked = false;
       fillState.cupId = null;
+      fillState.characterType = "chocolate-milk";
       fillState.frame = 2;
       if (fillState.overlay) {
         fillState.overlay.remove();
@@ -68,7 +70,7 @@
       overlay.style.backgroundImage = `url("${frameAsset}")`;
     }
 
-    function onFillStart(cupId) {
+    function onFillStart(cupId, characterType = "chocolate-milk") {
       if (!cupId || fillState.completionLocked) {
         return;
       }
@@ -78,6 +80,7 @@
         clearPreview();
         fillState.cupId = cupId;
       }
+      fillState.characterType = characterType;
 
       paintFillFrame(cupId, 2);
       fillState.intervalId = setInterval(() => {
@@ -110,7 +113,7 @@
       fillState.completionLocked = true;
       stopSfxClip("milkPour");
       clearPreview();
-      onComplete(cupId);
+      onComplete(cupId, fillState.characterType);
     }
 
     function onFillEnd() {

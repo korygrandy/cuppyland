@@ -77,7 +77,8 @@
           getFriendAssetMap()?.["turkey-sequence-2"],
         );
       }
-      if (friendState.type === "chocolate-milk") {
+      if (friendState.type === "chocolate-milk"
+        || friendState.type === "baby-mr-chocolate-milk") {
         targets.push(
           getSequenceConfig?.().frame2Asset,
           getSequenceConfig?.().frame3Asset,

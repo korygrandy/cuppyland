@@ -74,7 +74,8 @@
       const centerClientX = viewportRect.left + (worldViewport?.clientWidth || 1280) / 2;
       const centerClientY = viewportRect.top + (worldViewport?.clientHeight || 800) / 2;
       const basePoint = getWorldDropPoint(centerClientX, centerClientY);
-      if (state?.activeWorld === "olivia-room" && friendType === "chocolate-milk") {
+      if (state?.activeWorld === "olivia-room"
+        && (friendType === "chocolate-milk" || friendType === "baby-mr-chocolate-milk")) {
         return {
           worldX: Math.max(0, basePoint.worldX - 500),
           worldY: basePoint.worldY,

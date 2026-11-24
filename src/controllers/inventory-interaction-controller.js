@@ -121,7 +121,7 @@
         if (value === "uke") {
           friend.className = "drag-ghost-object drag-ghost-friend drag-ghost-uke";
         }
-        if (value === "chocolate-milk") {
+        if (value === "chocolate-milk" || value === "baby-mr-chocolate-milk") {
           friend.style.transform = "rotate(-45deg)";
         }
         return friend;
@@ -199,7 +199,7 @@
       hideDragGhost();
       clearZoneHighlights();
       if (typeof onChocolateMilkFillComplete === "function") {
-        onChocolateMilkFillComplete(cupId);
+        onChocolateMilkFillComplete(cupId, dragState.value);
       }
 
       chocolateMilkFillState.cupId = null;
@@ -219,7 +219,8 @@
     }
 
     function updateChocolateMilkFill(pointerX, pointerY) {
-      if (!(dragState.type === "friend" && dragState.value === "chocolate-milk")) {
+      if (!(dragState.type === "friend"
+        && (dragState.value === "chocolate-milk" || dragState.value === "baby-mr-chocolate-milk"))) {
         resetChocolateMilkFill("not-chocolate-milk");
         return;
       }
@@ -253,14 +254,16 @@
         chocolateMilkFillState.startedAtMs = nowMs;
         chocolateMilkFillState.completed = false;
         chocolateMilkFillState.completionTimerId = setTimeout(() => {
-          const isStillDraggingChocolateMilk = dragState.active && dragState.type === "friend" && dragState.value === "chocolate-milk";
+          const isStillDraggingChocolateMilk = dragState.active
+            && dragState.type === "friend"
+            && (dragState.value === "chocolate-milk" || dragState.value === "baby-mr-chocolate-milk");
           if (!isStillDraggingChocolateMilk || chocolateMilkFillState.cupId !== hoveredCupId || !isOpenCupTarget(hoveredCupId)) {
             return;
           }
           completeChocolateMilkFill(hoveredCupId);
         }, chocolateMilkFillDurationMs);
         if (typeof onChocolateMilkFillStart === "function") {
-          onChocolateMilkFillStart(hoveredCupId);
+          onChocolateMilkFillStart(hoveredCupId, dragState.value);
         }
       }
 
@@ -427,7 +430,7 @@
       }
       const dropPoint = isFriendDrop ? getWorldDropPoint(event.clientX, event.clientY) : null;
       const adjustedDropPoint = (isFriendDrop
-        && dragState.value === "chocolate-milk"
+        && (dragState.value === "chocolate-milk" || dragState.value === "baby-mr-chocolate-milk")
         && state.activeWorld === "olivia-room"
         && dropPoint)
         ? {

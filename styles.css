@@ -418,6 +418,13 @@ body {
   transition: transform 110ms ease-in, opacity 110ms ease-in;
 }
 
+.friend-character[data-friend-type="baby-mr-chocolate-milk"] .friend-character-art {
+  width: 132px;
+  height: 132px;
+  transform: scale(.65);
+  transform-origin: center bottom;
+}
+
 .tube-slide-entering,
 .tube-slide-exiting {
   filter: contrast(1.12) saturate(1.12);

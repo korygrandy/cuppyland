@@ -272,9 +272,9 @@ const chocolateMilkFillController = window.CuppyLandChocolateMilkFillController.
   getSequenceConfig: () => getChocolateMilkSequenceConfig(),
   playLoopingSfxClip: (clipName) => window.CuppyLandAudio?.playLoopingSfxClip?.(clipName),
   stopSfxClip: (clipName) => window.CuppyLandAudio?.stopSfxClip?.(clipName),
-  onComplete: (cupId) => {
+  onComplete: (cupId, characterType) => {
     triggerCupSparkle(cupId);
-    ensureChocolateMilkForCup(cupId);
+    ensureChocolateMilkForCup(cupId, characterType);
   },
 });
 const chocolateMilkSequenceController = window.CuppyLandChocolateMilkSequenceController.createController({
@@ -593,7 +593,7 @@ function findFriendById(friendId, worldId = state.activeWorld) {
   return getWorldFriendList(worldId).find((friend) => friend.id === friendId) || null;
 }
 
-function ensureChocolateMilkForCup(cupId) {
+function ensureChocolateMilkForCup(cupId, characterType = "chocolate-milk") {
   if (!cupId || !state.activeWorld) {
     return null;
   }
@@ -602,12 +602,15 @@ function ensureChocolateMilkForCup(cupId) {
     return null;
   }
   const worldFriends = getWorldFriendList(state.activeWorld);
+  const normalizedCharacterType = characterType === "baby-mr-chocolate-milk"
+    ? "baby-mr-chocolate-milk"
+    : "chocolate-milk";
   let chocolateState = worldFriends.find((friend) => (
-    friend.type === "chocolate-milk"
+    friend.type === normalizedCharacterType
     && friend.attachedCupId === cupId
   ));
   if (!chocolateState) {
-    chocolateState = worldFriends.find((friend) => friend.type === "chocolate-milk");
+    chocolateState = worldFriends.find((friend) => friend.type === normalizedCharacterType);
   }
   if (chocolateState) {
     chocolateState.attachedCupId = cupId;
@@ -622,7 +625,7 @@ function ensureChocolateMilkForCup(cupId) {
   ), 90);
   chocolateState = {
     id: `friend-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
-    type: "chocolate-milk",
+    type: normalizedCharacterType,
     hasFood: false,
     pizzaWobbleActive: false,
     worldX: Math.max(0, Math.min(worldCanvas.offsetWidth - 132, cupInstance.state.worldX + 132)),
@@ -661,8 +664,8 @@ function clearChocolateMilkDragFillPreview() {
   chocolateMilkFillController.clearPreview();
 }
 
-function onChocolateMilkFillStart(cupId) {
-  chocolateMilkFillController.onFillStart(cupId);
+function onChocolateMilkFillStart(cupId, characterType = "chocolate-milk") {
+  chocolateMilkFillController.onFillStart(cupId, characterType);
 }
 
 function onChocolateMilkFillTick(cupId) {
@@ -673,8 +676,8 @@ function onChocolateMilkFillCancel() {
   chocolateMilkFillController.onFillCancel();
 }
 
-function onChocolateMilkFillComplete(cupId) {
-  chocolateMilkFillController.onFillComplete(cupId);
+function onChocolateMilkFillComplete(cupId, characterType = "chocolate-milk") {
+  chocolateMilkFillController.onFillComplete(cupId, characterType);
 }
 
 function onChocolateMilkFillEnd() {

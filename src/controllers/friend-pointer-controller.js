@@ -239,7 +239,10 @@
     }
 
     function setFriendDragVisual(friendElement, friendState, isDragging) {
-      if (!friendElement || !friendState || friendState.type !== "chocolate-milk") {
+      if (!friendElement || !friendState || (
+        friendState.type !== "chocolate-milk"
+        && friendState.type !== "baby-mr-chocolate-milk"
+      )) {
         return;
       }
 
@@ -325,7 +328,7 @@
         friendState.sequenceCompleted = false;
       }
       if (typeof onChocolateMilkFillComplete === "function") {
-        onChocolateMilkFillComplete(cupId);
+        onChocolateMilkFillComplete(cupId, friendState.type);
       }
       setFriendDragVisual(friendElement, friendState, false);
       resetFriendDragState();
@@ -335,7 +338,7 @@
     }
 
     function updateChocolateMilkFill(friendElement, friendState, pointerX, pointerY) {
-      if (friendState?.type !== "chocolate-milk") {
+      if (friendState?.type !== "chocolate-milk" && friendState?.type !== "baby-mr-chocolate-milk") {
         resetChocolateMilkFill("not-chocolate-milk");
         return;
       }
@@ -402,7 +405,7 @@
           const isStillDraggingChocolateMilk = (
             friendDragState.active
             && friendDragState.friendId === friendState.id
-            && friendState.type === "chocolate-milk"
+            && (friendState.type === "chocolate-milk" || friendState.type === "baby-mr-chocolate-milk")
           );
           if (!isStillDraggingChocolateMilk || chocolateMilkFillState.cupId !== hoveredCupId || !isOpenCupTarget(hoveredCupId)) {
             return;
@@ -410,7 +413,7 @@
           completeChocolateMilkFill(hoveredCupId, friendState, friendElement);
         }, chocolateMilkFillDurationMs);
         if (typeof onChocolateMilkFillStart === "function") {
-          onChocolateMilkFillStart(hoveredCupId);
+          onChocolateMilkFillStart(hoveredCupId, friendState.type);
         }
       }
 
@@ -536,7 +539,7 @@
         friendState.lastTapAtMs = nowMs;
       }
 
-      if (friendState.type === "chocolate-milk") {
+      if (friendState.type === "chocolate-milk" || friendState.type === "baby-mr-chocolate-milk") {
         const nowMs = Date.now();
         const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
         if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
@@ -632,7 +635,7 @@
         friendState.pizzaAnchorWorldX = friendState.worldX;
         friendState.pizzaAnchorWorldY = friendState.worldY;
       }
-      if (friendState.type === "chocolate-milk") {
+      if (friendState.type === "chocolate-milk" || friendState.type === "baby-mr-chocolate-milk") {
         friendState.attachedCupId = null;
         friendState.sequenceCompleted = false;
         friendState.sequenceFrame = null;
@@ -1115,7 +1118,10 @@
       friendReleaseController?.handleToyRelease(friendElement, friendState);
       friendReleaseController?.handleMotionRelease(friendState);
 
-      if (friendElement && friendState?.type === "chocolate-milk") {
+      if (friendElement && (
+        friendState?.type === "chocolate-milk"
+        || friendState?.type === "baby-mr-chocolate-milk"
+      )) {
         const previousPointerEvents = friendElement.style.pointerEvents || "";
         friendElement.style.pointerEvents = "none";
         const hoveredCupForMilk = getCupElementAtPoint(event.clientX, event.clientY);

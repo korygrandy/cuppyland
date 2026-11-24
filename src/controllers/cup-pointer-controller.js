@@ -57,13 +57,19 @@
 
       let chocolateState = ensureChocolateMilkForCup?.(cupId) || null;
       if (!chocolateState) {
-        const chocolateElement = worldCanvas.querySelector('.friend-character[data-friend-type="chocolate-milk"]');
+        const chocolateElement = worldCanvas.querySelector(
+          '.friend-character[data-friend-type="chocolate-milk"],'
+          + '.friend-character[data-friend-type="baby-mr-chocolate-milk"]'
+        );
         if (chocolateElement) {
           chocolateState = findFriendById?.(chocolateElement.dataset.friendId);
         }
       }
       if (!chocolateState) {
-        const chocolateElements = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="chocolate-milk"]'));
+        const chocolateElements = Array.from(worldCanvas.querySelectorAll(
+          '.friend-character[data-friend-type="chocolate-milk"],'
+          + '.friend-character[data-friend-type="baby-mr-chocolate-milk"]'
+        ));
         for (const element of chocolateElements) {
           const candidate = findFriendById?.(element.dataset.friendId);
           if (candidate?.attachedCupId === cupId) {
@@ -211,7 +217,10 @@
       const cupId = cupElement?.dataset?.cupId;
       if (cupDragState.moved && cupDragState.movedOutsideWorld) {
         if (cupId) {
-          const chocolateElements = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="chocolate-milk"]'));
+          const chocolateElements = Array.from(worldCanvas.querySelectorAll(
+            '.friend-character[data-friend-type="chocolate-milk"],'
+            + '.friend-character[data-friend-type="baby-mr-chocolate-milk"]'
+          ));
           chocolateElements.forEach((element) => {
             const candidate = findFriendById?.(element.dataset.friendId);
             if (candidate?.attachedCupId === cupId) {

@@ -60,7 +60,7 @@ test("cup inventory tap instantiates at viewport center", () => {
   assert.equal(inventory.includes("applyInventorySelection(target.dataset.itemType"), true);
   assert.equal(inventory.includes('target.dataset.itemType === "cup-create"'), true);
   assert.equal(inventory.includes("getDefaultFriendDropPoint(target.dataset.value)"), true);
-  assert.equal(worldCoordinates.includes("state?.activeWorld === \"olivia-room\" && friendType === \"chocolate-milk\""), true);
+  assert.equal(worldCoordinates.includes("friendType === \"chocolate-milk\" || friendType === \"baby-mr-chocolate-milk\""), true);
   assert.equal(worldCoordinates.includes("basePoint.worldX - 500"), true);
   assert.equal(inventory.includes("dragState.value === \"chocolate-milk\""), true);
   assert.equal(inventory.includes("dropPoint.worldX - 500"), true);
@@ -135,9 +135,26 @@ test("third re-added cup also receives a unique ID", () => {
   assert.equal(new Set(store.getWorldCupList().map((cup) => cup.id)).size, 3);
 });
 
+test("baby Mr Chocolate Milk shares cup and milk behavior at baby scale", () => {
+  const config = fs.readFileSync("src/core/game-config.js", "utf8");
+  const inventory = fs.readFileSync("src/ui/inventory.js", "utf8");
+  const inventoryController = fs.readFileSync("src/controllers/inventory-interaction-controller.js", "utf8");
+  const friendController = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
+  const sequenceController = fs.readFileSync("src/controllers/chocolate-milk-sequence-controller.js", "utf8");
+  const styles = fs.readFileSync("styles.css", "utf8");
+
+  assert.equal(config.includes('"baby-mr-chocolate-milk"'), true);
+  assert.equal(config.includes('"baby-mr-chocolate-milk": "./assets/chocolate-milk.png"'), true);
+  assert.equal(inventory.includes('"baby-mr-chocolate-milk"'), true);
+  assert.equal(inventoryController.includes('dragState.value === "baby-mr-chocolate-milk"'), true);
+  assert.equal(friendController.includes('friendState?.type !== "baby-mr-chocolate-milk"'), true);
+  assert.equal(sequenceController.includes('friendState.type !== "baby-mr-chocolate-milk"'), true);
+  assert.equal(styles.includes('.friend-character[data-friend-type="baby-mr-chocolate-milk"]'), true);
+});
+
 test("water bottle is in accessories and remains a snap source", () => {
   const ui = fs.readFileSync("src/ui/inventory.js", "utf8");
-  assert.equal(ui.includes('"lavalamp", "chocolate-milk", "uke", "flower-bead-craft", "merry-go-round", "water-bottle"'), true);
+  assert.equal(ui.includes('"lavalamp", "chocolate-milk", "baby-mr-chocolate-milk", "uke"'), true);
   assert.equal(ui.includes('"water-bottle"'), true);
 });
 

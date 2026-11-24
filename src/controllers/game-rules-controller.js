@@ -63,6 +63,7 @@
           : fallbackWorldY;
 
       const friendSizes = {
+        "baby-mr-chocolate-milk": { width: 86, height: 86 },
         "golden-puppy": { width: 120, height: 120 },
         "dogtoy-ball": { width: 72, height: 72 },
         "dogbone": { width: 110, height: 56 },
