@@ -91,6 +91,41 @@ test("re-added cups receive unique IDs after a middle cup is removed", () => {
   assert.equal(readded.id, "cup-olivia-room-3");
 });
 
+test("third re-added cup also receives a unique ID", () => {
+  const { loadBrowserScript } = require("./test-helpers");
+  const context = { window: {} };
+  loadBrowserScript("src/state/cup-state-store.js", context);
+
+  const state = {
+    activeWorld: "olivia-room",
+    activeCupId: "cup-olivia-room-1",
+    cup: {},
+    worlds: {
+      "olivia-room": {
+        cups: [
+          { id: "cup-olivia-room-1", state: { worldX: 500, worldY: 430, zIndex: 1 } },
+          { id: "cup-olivia-room-2", state: { worldX: 900, worldY: 430, zIndex: 2 } },
+        ],
+      },
+    },
+  };
+  const store = context.window.CuppyLandCupState.createStore({
+    state,
+    gameConfig: {
+      defaultCupState: { worldX: 920, worldY: 430, zIndex: 1 },
+    },
+    worldCanvas: { offsetWidth: 2200, offsetHeight: 800 },
+    worldViewport: { scrollLeft: 0, clientWidth: 1280, clientHeight: 800 },
+  });
+
+  store.removeCupInstance("cup-olivia-room-1");
+  const second = store.addCupToWorld();
+  const third = store.addCupToWorld();
+  assert.equal(second.id, "cup-olivia-room-3");
+  assert.equal(third.id, "cup-olivia-room-4");
+  assert.equal(new Set(store.getWorldCupList().map((cup) => cup.id)).size, 3);
+});
+
 test("water bottle is in accessories and remains a snap source", () => {
   const ui = fs.readFileSync("src/ui/inventory.js", "utf8");
   assert.equal(ui.includes('"lavalamp", "chocolate-milk", "uke", "flower-bead-craft", "merry-go-round", "water-bottle"'), true);

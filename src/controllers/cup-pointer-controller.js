@@ -184,7 +184,7 @@
           cupDragState.attemptedWorldX,
           cupDragState.attemptedWorldY,
           cupElement,
-          24
+          0
         );
       if (cupState.lidVisible && !cupState.lidDetached && deltaY >= 100) {
         cupState.lidVisible = false;
