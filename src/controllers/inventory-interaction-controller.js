@@ -310,7 +310,9 @@
 
       event.preventDefault();
       const targetCupId = getActiveCupId() || getActiveCupInstance()?.id || null;
-      const dropPoint = target.dataset.itemType === "friend" ? getDefaultFriendDropPoint() : null;
+      const dropPoint = target.dataset.itemType === "friend"
+        ? getDefaultFriendDropPoint(target.dataset.value)
+        : null;
       applyInventorySelection(target.dataset.itemType, target.dataset.value, targetCupId, dropPoint);
     }
 
@@ -424,8 +426,17 @@
         }
       }
       const dropPoint = isFriendDrop ? getWorldDropPoint(event.clientX, event.clientY) : null;
+      const adjustedDropPoint = (isFriendDrop
+        && dragState.value === "chocolate-milk"
+        && state.activeWorld === "olivia-room"
+        && dropPoint)
+        ? {
+          worldX: Math.max(0, dropPoint.worldX - 500),
+          worldY: dropPoint.worldY,
+        }
+        : dropPoint;
       const result = isFriendDrop
-        ? applyDrop(dragState.type, dragState.value, zone || "friend", targetCupId, dropPoint)
+        ? applyDrop(dragState.type, dragState.value, zone || "friend", targetCupId, adjustedDropPoint)
         : (zone ? applyDrop(dragState.type, dragState.value, zone, targetCupId) : { valid: false, reason: "no-zone" });
 
       if (result.valid) {

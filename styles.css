@@ -383,8 +383,33 @@ body {
   transform-origin: center bottom;
 }
 
-.world-background-object[data-object-id="trampoline"].is-bouncing .world-background-object-art {
+.world-background-object[data-object-id="bed-bg"] .world-background-object-art {
+  transform-origin: center bottom;
+}
+
+.world-background-object[data-object-id="trampoline"].is-bouncing .world-background-object-art,
+.world-background-object[data-object-id="bed-bg"].is-bouncing .world-background-object-art {
   animation: trampoline-bounce 420ms ease-in-out infinite alternate;
+}
+
+.world-background-object.has-bounce .world-background-object-art {
+  transition: opacity 210ms ease, transform 210ms ease;
+}
+
+.world-background-object.has-bounce.trampoline-down .world-background-object-art-down {
+  opacity: 1;
+}
+
+.world-background-object.has-bounce.trampoline-down .world-background-object-art-up {
+  opacity: 0;
+}
+
+.world-background-object.has-bounce.trampoline-up .world-background-object-art-down {
+  opacity: 0;
+}
+
+.world-background-object.has-bounce.trampoline-up .world-background-object-art-up {
+  opacity: 1;
 }
 
 @keyframes trampoline-bounce {
@@ -475,6 +500,18 @@ body {
   transform: translateY(3px) !important;
   opacity: 1;
   transition: transform 110ms ease-in, opacity 110ms ease-in;
+}
+
+.world-background-object-hitbox-debug {
+  position: absolute;
+  z-index: 6;
+  border: 3px dashed rgba(255, 208, 72, 0.95);
+  box-shadow:
+    0 0 0 1px rgba(25, 25, 25, 0.75),
+    inset 0 0 0 1px rgba(25, 25, 25, 0.75);
+  border-radius: 14px;
+  pointer-events: none;
+  box-sizing: border-box;
 }
 
 

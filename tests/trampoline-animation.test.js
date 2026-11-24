@@ -27,6 +27,23 @@ test("trampoline anchor and assets are configured", () => {
   assert.equal(trampoline.hitboxHeight, 110);
 });
 
+test("bed bounce anchor is configured for Olivia room", () => {
+  const context = { window: {} };
+  loadBrowserScript("src/core/world-anchor-registry.js", context);
+  const anchors = context.window.CuppyLandWorldAnchors.backgroundObjectAnchors["olivia-room"];
+  const bedBounce = anchors.find((anchor) => anchor.id === "bed-bg");
+
+  assert.ok(bedBounce);
+  assert.equal(bedBounce.activatedAssets.down, "./assets/bed-bounce.down.png");
+  assert.equal(bedBounce.activatedAssets.up, "./assets/bed-bounce-up.png");
+  assert.equal(bedBounce.frameDurationMs, 420);
+  assert.equal(bedBounce.showHitbox, true);
+  assert.ok(Number.isFinite(bedBounce.hitboxOffsetX));
+  assert.ok(Number.isFinite(bedBounce.hitboxOffsetY));
+  assert.ok(Number.isFinite(bedBounce.hitboxWidth));
+  assert.ok(Number.isFinite(bedBounce.hitboxHeight));
+});
+
 test("trampoline assets exist and have matching 600px dimensions", () => {
   const down = fs.statSync("assets/trampoline-down.png");
   const up = fs.statSync("assets/trampoline-up.png");
@@ -49,6 +66,12 @@ test("trampoline CSS defines a down/up bounce and alignment hook", () => {
   assert.equal(controller.includes("restoreTrampolineFriend"), true);
   assert.equal(controller.includes("trampoline-bounce-up"), true);
   assert.equal(controller.includes("trampoline-bounce-down"), true);
+  assert.equal(styles.includes("[data-object-id=\"bed-bg\"]"), true);
+  assert.equal(styles.includes("world-background-object-art-down"), true);
+  assert.equal(styles.includes("world-background-object-art-up"), true);
+  assert.equal(styles.includes(".world-background-object-hitbox-debug"), true);
+  assert.equal(controller.includes("showHitbox"), true);
+  assert.equal(controller.includes("applyBounceArtFrame"), true);
 });
 
 test("trampoline has no Barbie-only activator filter", () => {

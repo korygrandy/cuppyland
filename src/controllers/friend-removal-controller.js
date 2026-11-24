@@ -85,6 +85,7 @@
       removeBackgroundObjectActivation(friendId);
       stopChocolateMilkSequence(friendId);
       worldFriends.splice(friendIndex, 1);
+      removeBackgroundObjectActivation(friendState?.id || friendId);
 
       if (isBarbieRemoval) {
         playSfxClip("blondeBarbieObjectRemoved");
