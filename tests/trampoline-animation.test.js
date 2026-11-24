@@ -86,6 +86,13 @@ test("Olivia room bed single frame is rendered without activatedAssets down/up",
   assert.equal(controller.includes('let frame = objectConfig.activatedAssets ? "down" : "up"'), true);
 });
 
+test("bed hitbox objects use inverted up/down bounce poses", () => {
+  const controller = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
+
+  assert.equal(controller.includes('const isBedBounce = objectId === "bed-bg"'), true);
+  assert.equal(controller.includes('const friendIsUp = isBedBounce ? frame === "down" : frame === "up"'), true);
+});
+
 test("trampoline CSS defines a down/up bounce and alignment hook", () => {
   const styles = fs.readFileSync("styles.css", "utf8");
   const controller = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");

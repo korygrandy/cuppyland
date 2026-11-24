@@ -147,7 +147,9 @@
           return;
         }
         const applyFrame = () => {
-          if (frame === "up") {
+          const isBedBounce = objectId === "bed-bg";
+          const friendIsUp = isBedBounce ? frame === "down" : frame === "up";
+          if (friendIsUp) {
             element.style.transition = "transform 90ms ease-out, opacity 90ms ease-out";
             element.style.transform = "translateY(-24px)";
             element.style.opacity = "0.92";
@@ -206,8 +208,8 @@
       let frame = objectConfig.activatedAssets ? "down" : "up";
       trampolineFrames.set(objectId, frame);
       anchor.classList.add("is-bouncing");
-      applyBounceArtFrame(anchor, objectConfig, "down");
-      applyTrampolineFriendFrame(objectId, "down");
+      applyBounceArtFrame(anchor, objectConfig, frame);
+      applyTrampolineFriendFrame(objectId, frame);
 
       const timerId = setInterval(() => {
         frame = frame === "down" ? "up" : "down";
