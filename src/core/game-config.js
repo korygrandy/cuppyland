@@ -46,7 +46,14 @@
           friends: [],
         },
         "olivia-room": {
-          cups: [{ id: "cup-bedroom-1", state: JSON.parse(JSON.stringify(defaultCupState)) }],
+          cups: [{
+            id: "cup-bedroom-1",
+            state: (() => {
+              const state = JSON.parse(JSON.stringify(defaultCupState));
+              state.worldX = 720;
+              return state;
+            })(),
+          }],
           friends: [],
         },
       },

@@ -44,6 +44,15 @@ test("cup removal requires movement outside the world bounds", () => {
   assert.equal(cupPointer.includes("removeCupInstance?.(cupId)"), true);
 });
 
+test("Olivia-room cup starts 200px left of the default bedroom position", () => {
+  const gameConfig = fs.readFileSync("src/core/game-config.js", "utf8");
+  const cupStore = fs.readFileSync("src/state/cup-state-store.js", "utf8");
+  assert.equal(gameConfig.includes("state.worldX = 720"), true);
+  assert.equal(cupStore.includes("worldId === \"olivia-room\""), true);
+  assert.equal(cupStore.includes("state.worldX = 720"), true);
+  assert.equal(cupStore.includes("state?.activeWorld === \"olivia-room\" ? 200 : 0"), true);
+});
+
 test("cup inventory tap instantiates at viewport center", () => {
   const inventory = fs.readFileSync("src/controllers/inventory-interaction-controller.js", "utf8");
   const store = fs.readFileSync("src/state/cup-state-store.js", "utf8");

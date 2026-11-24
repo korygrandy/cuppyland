@@ -35,13 +35,19 @@
     let cupLayerOrderCounter = 1;
 
     function getViewportSpawnPoint(instanceIndex = 0) {
-      const fallbackX = state?.activeWorld === "playground" ? 3300 : 920;
+      const fallbackX = state?.activeWorld === "playground"
+        ? 3300
+        : (state?.activeWorld === "olivia-room" ? 720 : 920);
       const fallbackY = state?.activeWorld === "playground" ? 420 : 430;
       if (!worldCanvas || !worldViewport) {
         return { worldX: fallbackX, worldY: fallbackY };
       }
 
-      const visibleCenterX = (worldViewport.scrollLeft ?? 0) + (worldViewport.clientWidth ?? 1280) * 0.52;
+      const visibleCenterX = (
+        (worldViewport.scrollLeft ?? 0)
+        + (worldViewport.clientWidth ?? 1280) * 0.52
+        - (state?.activeWorld === "olivia-room" ? 200 : 0)
+      );
       const visibleCenterY = (worldViewport.clientHeight ?? 800) * 0.58;
       const offsetX = (instanceIndex % 3) * 120 - 120;
       const offsetY = (instanceIndex % 2 === 0 ? 0 : 80) + Math.floor(instanceIndex / 2) * 14;
@@ -181,6 +187,9 @@
       if (worldId === "playground" && state.worlds[worldId].cups[0]) {
         state.worlds[worldId].cups[0].state.worldX = 3300;
         state.worlds[worldId].cups[0].state.worldY = 420;
+      }
+      if (worldId === "olivia-room" && state.worlds[worldId].cups[0]) {
+        state.worlds[worldId].cups[0].state.worldX = 720;
       }
 
       return state.worlds[worldId];
