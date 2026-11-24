@@ -118,6 +118,8 @@
         artOffsetX: -75,
         artOffsetY: 0,
         artScale: 1,
+        artWidth: 500,
+        artHeight: 484,
         hitboxOffsetX: 42,
         hitboxOffsetY: 336,
         hitboxWidth: 237,

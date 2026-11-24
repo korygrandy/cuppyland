@@ -259,11 +259,18 @@
             : `world-background-object-art-${assetConfig.frame}`}`.trim();
           activatedArt.style.backgroundImage = `url("${assetConfig.asset}")`;
           if (isBounceObject(objectConfig)) {
-            const artScale = objectConfig.artScale ?? 1;
-            activatedArt.style.left = `${(objectConfig.artOffsetX ?? 0) - (((artScale - 1) * objectConfig.width) / 2)}px`;
-            activatedArt.style.top = `${(objectConfig.artOffsetY ?? 0) - (((artScale - 1) * objectConfig.height) / 2)}px`;
-            activatedArt.style.width = `${100 * artScale}%`;
-            activatedArt.style.height = `${100 * artScale}%`;
+            if (Number.isFinite(objectConfig.artWidth) && Number.isFinite(objectConfig.artHeight)) {
+              activatedArt.style.left = `${objectConfig.artOffsetX ?? 0}px`;
+              activatedArt.style.top = `${objectConfig.artOffsetY ?? 0}px`;
+              activatedArt.style.width = `${objectConfig.artWidth}px`;
+              activatedArt.style.height = `${objectConfig.artHeight}px`;
+            } else {
+              const artScale = objectConfig.artScale ?? 1;
+              activatedArt.style.left = `${(objectConfig.artOffsetX ?? 0) - (((artScale - 1) * objectConfig.width) / 2)}px`;
+              activatedArt.style.top = `${(objectConfig.artOffsetY ?? 0) - (((artScale - 1) * objectConfig.height) / 2)}px`;
+              activatedArt.style.width = `${100 * artScale}%`;
+              activatedArt.style.height = `${100 * artScale}%`;
+            }
             if (assetConfig.frame === "up") {
               activatedArt.style.opacity = "0";
             } else if (assetConfig.frame === "down") {
