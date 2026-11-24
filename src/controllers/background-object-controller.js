@@ -36,7 +36,10 @@
     }
 
     function isBounceObject(objectConfig) {
-      return Boolean(objectConfig?.activatedAssets?.down && objectConfig?.activatedAssets?.up);
+      return Boolean(
+        (objectConfig?.activatedAssets?.down && objectConfig?.activatedAssets?.up)
+        || objectConfig?.activatedAsset === "./assets/bed-bounce-up.png"
+      );
     }
 
     function applyBounceArtFrame(anchor, objectConfig, frame) {
@@ -57,9 +60,15 @@
       if (!art) {
         return;
       }
-      art.style.backgroundImage = `url("${frame === "down"
-        ? objectConfig.activatedAssets.down
-        : objectConfig.activatedAssets.up}")`;
+      const isActive = typeof anchor.classList?.contains === "function"
+        ? anchor.classList.contains("is-bouncing")
+        : true;
+      if (objectConfig.activatedAssets) {
+        art.style.backgroundImage = `url("${frame === "down"
+          ? objectConfig.activatedAssets.down
+          : objectConfig.activatedAssets.up}")`;
+      }
+      art.style.opacity = isActive && frame === "up" ? "1" : "0";
     }
 
     function restoreTrampolineFriend(friendId, record) {
