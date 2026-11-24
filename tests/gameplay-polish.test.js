@@ -39,6 +39,18 @@ test("cup removal requires movement outside the world bounds", () => {
   assert.equal(cupPointer.includes("cupDragState.startWorldX + deltaX"), true);
   assert.equal(cupPointer.includes("cupDragState.startWorldY + deltaY"), true);
   assert.equal(cupPointer.includes("movedOutsideWorld"), true);
+  assert.equal(cupPointer.includes("cupDragState.movedOutsideWorld"), true);
+  assert.equal(cupPointer.includes("onCupPointerUp(event)"), true);
+  assert.equal(cupPointer.includes("removeCupInstance?.(cupId)"), true);
+});
+
+test("Olivia-room cup starts 200px left of the default bedroom position", () => {
+  const gameConfig = fs.readFileSync("src/core/game-config.js", "utf8");
+  const cupStore = fs.readFileSync("src/state/cup-state-store.js", "utf8");
+  assert.equal(gameConfig.includes("state.worldX = 720"), true);
+  assert.equal(cupStore.includes("worldId === \"olivia-room\""), true);
+  assert.equal(cupStore.includes("state.worldX = 720"), true);
+  assert.equal(cupStore.includes("state?.activeWorld === \"olivia-room\" ? 200 : 0"), true);
 });
 
 test("cup inventory tap instantiates at viewport center", () => {
@@ -54,6 +66,73 @@ test("cup inventory tap instantiates at viewport center", () => {
   assert.equal(inventory.includes("dropPoint.worldX - 500"), true);
   assert.equal(store.includes("addCupToWorld()"), true);
   assert.equal(store.includes("getViewportSpawnPoint(worldCups.length)"), true);
+});
+
+test("re-added cups receive unique IDs after a middle cup is removed", () => {
+  const { loadBrowserScript } = require("./test-helpers");
+  const context = { window: {} };
+  loadBrowserScript("src/state/cup-state-store.js", context);
+
+  const state = {
+    activeWorld: "olivia-room",
+    activeCupId: "cup-olivia-room-1",
+    cup: {},
+    worlds: {
+      "olivia-room": {
+        cups: [
+          { id: "cup-olivia-room-1", state: { worldX: 500, worldY: 430, zIndex: 1 } },
+          { id: "cup-olivia-room-2", state: { worldX: 900, worldY: 430, zIndex: 2 } },
+        ],
+      },
+    },
+  };
+  const store = context.window.CuppyLandCupState.createStore({
+    state,
+    gameConfig: {
+      defaultCupState: { worldX: 920, worldY: 430, zIndex: 1 },
+    },
+    worldCanvas: { offsetWidth: 2200, offsetHeight: 800 },
+    worldViewport: { scrollLeft: 0, clientWidth: 1280, clientHeight: 800 },
+  });
+
+  assert.equal(store.removeCupInstance("cup-olivia-room-1").removed, true);
+  const readded = store.addCupToWorld();
+  assert.equal(readded.id, "cup-olivia-room-3");
+});
+
+test("third re-added cup also receives a unique ID", () => {
+  const { loadBrowserScript } = require("./test-helpers");
+  const context = { window: {} };
+  loadBrowserScript("src/state/cup-state-store.js", context);
+
+  const state = {
+    activeWorld: "olivia-room",
+    activeCupId: "cup-olivia-room-1",
+    cup: {},
+    worlds: {
+      "olivia-room": {
+        cups: [
+          { id: "cup-olivia-room-1", state: { worldX: 500, worldY: 430, zIndex: 1 } },
+          { id: "cup-olivia-room-2", state: { worldX: 900, worldY: 430, zIndex: 2 } },
+        ],
+      },
+    },
+  };
+  const store = context.window.CuppyLandCupState.createStore({
+    state,
+    gameConfig: {
+      defaultCupState: { worldX: 920, worldY: 430, zIndex: 1 },
+    },
+    worldCanvas: { offsetWidth: 2200, offsetHeight: 800 },
+    worldViewport: { scrollLeft: 0, clientWidth: 1280, clientHeight: 800 },
+  });
+
+  store.removeCupInstance("cup-olivia-room-1");
+  const second = store.addCupToWorld();
+  const third = store.addCupToWorld();
+  assert.equal(second.id, "cup-olivia-room-3");
+  assert.equal(third.id, "cup-olivia-room-4");
+  assert.equal(new Set(store.getWorldCupList().map((cup) => cup.id)).size, 3);
 });
 
 test("water bottle is in accessories and remains a snap source", () => {

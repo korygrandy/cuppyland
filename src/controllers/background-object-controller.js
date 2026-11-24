@@ -36,7 +36,10 @@
     }
 
     function isBounceObject(objectConfig) {
-      return Boolean(objectConfig?.activatedAssets?.down && objectConfig?.activatedAssets?.up);
+      return Boolean(
+        (objectConfig?.activatedAssets?.down && objectConfig?.activatedAssets?.up)
+        || objectConfig?.activatedAsset === "./assets/bed-bounce-down.png"
+      );
     }
 
     function applyBounceArtFrame(anchor, objectConfig, frame) {
@@ -46,17 +49,29 @@
       const downArt = anchor.querySelector(".world-background-object-art-down");
       const upArt = anchor.querySelector(".world-background-object-art-up");
       if (downArt && upArt) {
-        downArt.style.opacity = frame === "down" ? "1" : "0";
-        upArt.style.opacity = frame === "up" ? "1" : "0";
+        const isActive = typeof anchor.classList?.contains === "function"
+          ? anchor.classList.contains("is-bouncing")
+          : true;
+        downArt.style.opacity = isActive && frame === "down" ? "1" : "0";
+        upArt.style.opacity = isActive && frame === "up" ? "1" : "0";
         return;
       }
       const art = anchor.querySelector(".world-background-object-art");
       if (!art) {
         return;
       }
-      art.style.backgroundImage = `url("${frame === "down"
-        ? objectConfig.activatedAssets.down
-        : objectConfig.activatedAssets.up}")`;
+      const isActive = typeof anchor.classList?.contains === "function"
+        ? anchor.classList.contains("is-bouncing")
+        : true;
+      if (objectConfig.activatedAssets) {
+        art.style.backgroundImage = `url("${frame === "down"
+          ? objectConfig.activatedAssets.down
+          : objectConfig.activatedAssets.up}")`;
+        art.style.opacity = isActive && frame === "up" ? "1" : "0";
+        return;
+      }
+      art.style.backgroundImage = `url("${objectConfig.activatedAsset || ""}")`;
+      art.style.opacity = isActive && frame === "up" ? "1" : "0";
     }
 
     function restoreTrampolineFriend(friendId, record) {
@@ -132,7 +147,9 @@
           return;
         }
         const applyFrame = () => {
-          if (frame === "up") {
+          const isBedBounce = objectId === "bed-bg";
+          const friendIsUp = isBedBounce ? frame === "down" : frame === "up";
+          if (friendIsUp) {
             element.style.transition = "transform 90ms ease-out, opacity 90ms ease-out";
             element.style.transform = "translateY(-24px)";
             element.style.opacity = "0.92";
@@ -166,12 +183,21 @@
       }
       anchor.classList.remove("is-bouncing", "trampoline-up", "trampoline-down");
       const objectConfig = getObjects(activeWorld).find((item) => item.id === objectId);
-      applyBounceArtFrame(anchor, objectConfig, "down");
+      const downArt = anchor.querySelector(".world-background-object-art-down");
+      const upArt = anchor.querySelector(".world-background-object-art-up");
+      if (downArt && upArt) {
+        downArt.style.opacity = "0";
+        upArt.style.opacity = "0";
+      } else {
+        applyBounceArtFrame(anchor, objectConfig, "down");
+      }
     }
 
     function startTrampolineAnimation(objectId, objectConfig) {
       if (!objectConfig?.activatedAssets) {
-        return;
+        if (objectConfig?.activatedAsset !== "./assets/bed-bounce-down.png") {
+          return;
+        }
       }
       const anchor = container.querySelector(`[data-object-id="${objectId}"]`);
       const art = anchor?.querySelector(".world-background-object-art");
@@ -179,11 +205,11 @@
         return;
       }
 
-      let frame = "down";
+      let frame = objectConfig.activatedAssets ? "down" : "up";
       trampolineFrames.set(objectId, frame);
       anchor.classList.add("is-bouncing");
-      applyBounceArtFrame(anchor, objectConfig, "down");
-      applyTrampolineFriendFrame(objectId, "down");
+      applyBounceArtFrame(anchor, objectConfig, frame);
+      applyTrampolineFriendFrame(objectId, frame);
 
       const timerId = setInterval(() => {
         frame = frame === "down" ? "up" : "down";
@@ -230,10 +256,10 @@
           anchor.style.setProperty("--trampoline-hitbox-top", `${objectConfig.hitboxOffsetY ?? 0}px`);
           anchor.style.setProperty("--trampoline-hitbox-width", `${objectConfig.hitboxWidth ?? objectConfig.width}px`);
           anchor.style.setProperty("--trampoline-hitbox-height", `${objectConfig.hitboxHeight ?? objectConfig.height}px`);
-          anchor.classList.add("has-bounce", "trampoline-down");
+          anchor.classList.add("has-bounce");
         }
 
-        const activatedAssets = isBounceObject(objectConfig)
+        const activatedAssets = objectConfig.activatedAssets
           ? [
             { frame: "down", asset: objectConfig.activatedAssets.down },
             { frame: "up", asset: objectConfig.activatedAssets.up },
@@ -249,12 +275,21 @@
             : `world-background-object-art-${assetConfig.frame}`}`.trim();
           activatedArt.style.backgroundImage = `url("${assetConfig.asset}")`;
           if (isBounceObject(objectConfig)) {
-            const artScale = objectConfig.artScale ?? 1;
-            activatedArt.style.left = `${(objectConfig.artOffsetX ?? 0) - (((artScale - 1) * objectConfig.width) / 2)}px`;
-            activatedArt.style.top = `${(objectConfig.artOffsetY ?? 0) - (((artScale - 1) * objectConfig.height) / 2)}px`;
-            activatedArt.style.width = `${100 * artScale}%`;
-            activatedArt.style.height = `${100 * artScale}%`;
+            if (Number.isFinite(objectConfig.artWidth) && Number.isFinite(objectConfig.artHeight)) {
+              activatedArt.style.left = `${objectConfig.artOffsetX ?? 0}px`;
+              activatedArt.style.top = `${objectConfig.artOffsetY ?? 0}px`;
+              activatedArt.style.width = `${objectConfig.artWidth}px`;
+              activatedArt.style.height = `${objectConfig.artHeight}px`;
+            } else {
+              const artScale = objectConfig.artScale ?? 1;
+              activatedArt.style.left = `${(objectConfig.artOffsetX ?? 0) - (((artScale - 1) * objectConfig.width) / 2)}px`;
+              activatedArt.style.top = `${(objectConfig.artOffsetY ?? 0) - (((artScale - 1) * objectConfig.height) / 2)}px`;
+              activatedArt.style.width = `${100 * artScale}%`;
+              activatedArt.style.height = `${100 * artScale}%`;
+            }
             if (assetConfig.frame === "up") {
+              activatedArt.style.opacity = "0";
+            } else if (assetConfig.frame === "down") {
               activatedArt.style.opacity = "0";
             }
           }
