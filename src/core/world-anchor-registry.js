@@ -118,7 +118,7 @@
         artOffsetX: 0,
         artOffsetY: 0,
         artScale: 1,
-        hitboxOffsetX: 52,
+        hitboxOffsetX: 42,
         hitboxOffsetY: 336,
         hitboxWidth: 237,
         hitboxHeight: 213,

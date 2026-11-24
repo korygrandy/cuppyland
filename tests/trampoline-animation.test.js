@@ -38,7 +38,7 @@ test("bed bounce anchor is configured for Olivia room", () => {
   assert.equal(bedBounce.activatedAssets.up, "./assets/bed-bounce-up.png");
   assert.equal(bedBounce.frameDurationMs, 420);
   assert.equal(bedBounce.showHitbox, true);
-  assert.equal(bedBounce.hitboxOffsetX, 52);
+  assert.equal(bedBounce.hitboxOffsetX, 42);
   assert.equal(bedBounce.hitboxOffsetY, 336);
   assert.equal(bedBounce.hitboxWidth, 237);
   assert.equal(bedBounce.hitboxHeight, 213);
