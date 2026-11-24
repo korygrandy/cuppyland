@@ -38,7 +38,7 @@
     function isBounceObject(objectConfig) {
       return Boolean(
         (objectConfig?.activatedAssets?.down && objectConfig?.activatedAssets?.up)
-        || objectConfig?.activatedAsset === "./assets/bed-bounce-up.png"
+        || objectConfig?.activatedAsset === "./assets/bed-bounce-down.png"
       );
     }
 
@@ -67,7 +67,10 @@
         art.style.backgroundImage = `url("${frame === "down"
           ? objectConfig.activatedAssets.down
           : objectConfig.activatedAssets.up}")`;
+        art.style.opacity = isActive && frame === "up" ? "1" : "0";
+        return;
       }
+      art.style.backgroundImage = `url("${objectConfig.activatedAsset || ""}")`;
       art.style.opacity = isActive && frame === "up" ? "1" : "0";
     }
 
@@ -190,7 +193,9 @@
 
     function startTrampolineAnimation(objectId, objectConfig) {
       if (!objectConfig?.activatedAssets) {
-        return;
+        if (objectConfig?.activatedAsset !== "./assets/bed-bounce-down.png") {
+          return;
+        }
       }
       const anchor = container.querySelector(`[data-object-id="${objectId}"]`);
       const art = anchor?.querySelector(".world-background-object-art");
@@ -198,7 +203,7 @@
         return;
       }
 
-      let frame = "down";
+      let frame = objectConfig.activatedAssets ? "down" : "up";
       trampolineFrames.set(objectId, frame);
       anchor.classList.add("is-bouncing");
       applyBounceArtFrame(anchor, objectConfig, "down");
@@ -252,7 +257,7 @@
           anchor.classList.add("has-bounce");
         }
 
-        const activatedAssets = isBounceObject(objectConfig)
+        const activatedAssets = objectConfig.activatedAssets
           ? [
             { frame: "down", asset: objectConfig.activatedAssets.down },
             { frame: "up", asset: objectConfig.activatedAssets.up },

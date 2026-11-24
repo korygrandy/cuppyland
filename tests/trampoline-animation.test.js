@@ -34,7 +34,7 @@ test("bed bounce anchor is configured for Olivia room", () => {
   const bedBounce = anchors.find((anchor) => anchor.id === "bed-bg");
 
   assert.ok(bedBounce);
-  assert.equal(bedBounce.activatedAsset, "./assets/bed-bounce-up.png");
+  assert.equal(bedBounce.activatedAsset, "./assets/bed-bounce-down.png");
   assert.equal(bedBounce.activatedAssets, undefined);
   assert.equal(bedBounce.frameDurationMs, 420);
   assert.equal(bedBounce.showHitbox, true);
@@ -61,9 +61,9 @@ test("trampoline assets exist and have matching 600px dimensions", () => {
   assert.ok(up.size > 0);
 });
 
-test("bed bounce uses only the up animation frame", () => {
-  const up = fs.statSync("assets/bed-bounce-up.png");
-  assert.ok(up.size > 0);
+test("bed bounce uses only the down animation frame", () => {
+  const down = fs.statSync("assets/bed-bounce-down.png");
+  assert.ok(down.size > 0);
 });
 
 test("bed bounce frames remain hidden until hitbox activation and fade on stop", () => {
@@ -75,6 +75,15 @@ test("bed bounce frames remain hidden until hitbox activation and fade on stop",
   assert.equal(controller.includes('downArt.style.opacity = "0"'), true);
   assert.equal(controller.includes('upArt.style.opacity = "0"'), true);
   assert.equal(controller.includes('anchor.classList.remove("is-bouncing"'), true);
+});
+
+test("Olivia room bed single frame is rendered without activatedAssets down/up", () => {
+  const controller = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
+
+  assert.equal(controller.includes("objectConfig.activatedAsset"), true);
+  assert.equal(controller.includes("objectConfig.activatedAssets"), true);
+  assert.equal(controller.includes("objectConfig.activatedAsset ||"), true);
+  assert.equal(controller.includes('let frame = objectConfig.activatedAssets ? "down" : "up"'), true);
 });
 
 test("trampoline CSS defines a down/up bounce and alignment hook", () => {
