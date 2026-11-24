@@ -1921,6 +1921,22 @@ body {
   background-size: contain;
 }
 
+.inventory-baby-mr-chocolate-milk-thumb {
+  background-size: 65%;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.18));
+}
+
+.inventory-baby-mr-chocolate-milk-label {
+  display: block;
+  margin-top: 2px;
+  max-width: 62px;
+  font-size: 0.58rem;
+  line-height: 1;
+  font-weight: 700;
+  text-align: center;
+  color: white;
+}
+
 .inventory-expression-label {
   font-size: 0.62rem;
   letter-spacing: 0.04em;
@@ -2006,6 +2022,13 @@ body {
 .drag-ghost-friend {
   width: 132px;
   height: 132px;
+}
+
+.drag-ghost-baby-mr-chocolate-milk {
+  width: 86px;
+  height: 86px;
+  transform: scale(.65);
+  transform-origin: center;
 }
 
 .drag-ghost-uke {

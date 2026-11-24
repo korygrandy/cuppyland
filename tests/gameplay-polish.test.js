@@ -146,6 +146,9 @@ test("baby Mr Chocolate Milk shares cup and milk behavior at baby scale", () => 
   assert.equal(config.includes('"baby-mr-chocolate-milk"'), true);
   assert.equal(config.includes('"baby-mr-chocolate-milk": "./assets/chocolate-milk.png"'), true);
   assert.equal(inventory.includes('"baby-mr-chocolate-milk"'), true);
+  assert.equal(inventory.includes("Baby Mr Chocolate Milk"), true);
+  assert.equal(inventory.includes("inventory-baby-mr-chocolate-milk-thumb"), true);
+  assert.equal(inventory.includes("Baby"), true);
   assert.equal(inventoryController.includes('dragState.value === "baby-mr-chocolate-milk"'), true);
   assert.equal(friendController.includes('friendState?.type !== "baby-mr-chocolate-milk"'), true);
   assert.equal(sequenceController.includes('friendState.type !== "baby-mr-chocolate-milk"'), true);
