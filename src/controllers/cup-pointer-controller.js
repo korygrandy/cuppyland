@@ -146,6 +146,9 @@
       cupDragState.startClientY = event.clientY;
       cupDragState.startWorldX = Number.isFinite(cupState.worldX) ? cupState.worldX : 920;
       cupDragState.startWorldY = Number.isFinite(cupState.worldY) ? cupState.worldY : 430;
+      cupDragState.attemptedWorldX = cupDragState.startWorldX;
+      cupDragState.attemptedWorldY = cupDragState.startWorldY;
+      cupDragState.movedOutsideWorld = false;
       cupDragState.pointerScale = getElementDragScale(cupElement);
       cupDragState.moved = false;
       if (cupElement) {
@@ -174,25 +177,15 @@
       const maxY = Math.max(0, worldCanvas.offsetHeight - cupElement.offsetHeight);
       const nextX = Math.min(maxX, Math.max(0, cupDragState.startWorldX + deltaX));
       const nextY = Math.min(maxY, Math.max(0, cupDragState.startWorldY + deltaY));
-      const movedOutsideWorld = cupDragState.moved
+      cupDragState.attemptedWorldX = cupDragState.startWorldX + deltaX;
+      cupDragState.attemptedWorldY = cupDragState.startWorldY + deltaY;
+      cupDragState.movedOutsideWorld = cupDragState.moved
         && isCupOutsideWorldBounds(
-          cupDragState.startWorldX + deltaX,
-          cupDragState.startWorldY + deltaY,
+          cupDragState.attemptedWorldX,
+          cupDragState.attemptedWorldY,
           cupElement,
           24
         );
-      if (movedOutsideWorld) {
-        const cupId = cupElement.dataset.cupId;
-        const chocolateElements = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="chocolate-milk"]'));
-        chocolateElements.forEach((element) => {
-          const candidate = findFriendById?.(element.dataset.friendId);
-          if (candidate?.attachedCupId === cupId) {
-            removeFriendInstance(candidate.id, { playRemovedSfx: false });
-          }
-        });
-        removeCupInstance?.(cupId);
-        return;
-      }
       if (cupState.lidVisible && !cupState.lidDetached && deltaY >= 100) {
         cupState.lidVisible = false;
         cupState.lidDetached = true;
@@ -216,6 +209,25 @@
       const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
       const cupState = resolveCupStateForElement(cupElement);
       const cupId = cupElement?.dataset?.cupId;
+      if (cupDragState.moved && cupDragState.movedOutsideWorld) {
+        if (cupId) {
+          const chocolateElements = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="chocolate-milk"]'));
+          chocolateElements.forEach((element) => {
+            const candidate = findFriendById?.(element.dataset.friendId);
+            if (candidate?.attachedCupId === cupId) {
+              removeFriendInstance(candidate.id, { playRemovedSfx: false });
+            }
+          });
+          removeCupInstance?.(cupId);
+        }
+        cupDragState.active = false;
+        cupDragState.pointerId = null;
+        cupDragState.pointerScale = 1;
+        cupDragState.attemptedWorldX = 0;
+        cupDragState.attemptedWorldY = 0;
+        cupDragState.movedOutsideWorld = false;
+        return;
+      }
       if (cupId && !cupDragState.moved) {
         const nowMs = Date.now();
         const lastTapAt = cupLastTapAt.get(cupId) || 0;
@@ -242,6 +254,9 @@
       cupDragState.active = false;
       cupDragState.pointerId = null;
       cupDragState.pointerScale = 1;
+      cupDragState.attemptedWorldX = 0;
+      cupDragState.attemptedWorldY = 0;
+      cupDragState.movedOutsideWorld = false;
     }
 
     function onLidPointerDown(event) {

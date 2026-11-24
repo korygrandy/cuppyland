@@ -39,6 +39,9 @@ test("cup removal requires movement outside the world bounds", () => {
   assert.equal(cupPointer.includes("cupDragState.startWorldX + deltaX"), true);
   assert.equal(cupPointer.includes("cupDragState.startWorldY + deltaY"), true);
   assert.equal(cupPointer.includes("movedOutsideWorld"), true);
+  assert.equal(cupPointer.includes("cupDragState.movedOutsideWorld"), true);
+  assert.equal(cupPointer.includes("onCupPointerUp(event)"), true);
+  assert.equal(cupPointer.includes("removeCupInstance?.(cupId)"), true);
 });
 
 test("cup inventory tap instantiates at viewport center", () => {
