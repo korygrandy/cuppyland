@@ -191,6 +191,33 @@ const inventoryInteractionController = window.CuppyLandInventoryInteraction.crea
   refreshChocolateMilkSequences: () => refreshChocolateMilkSequences(),
   onChocolateMilkFillEnd,
   worldCanvas,
+  onDirectBabyMilkPart: (babyId, itemType, value) => {
+    const babyState = findFriendById(babyId, state.activeWorld);
+    if (!babyState || babyState.type !== "baby-mr-chocolate-milk") {
+      return false;
+    }
+    if (itemType === "lid") {
+      babyState.lidColor = value;
+    } else if (itemType === "cup") {
+      babyState.cupColor = value;
+    } else if (itemType === "sleeve") {
+      babyState.sleeve = value;
+      babyState.sleeveVisible = true;
+    } else if (itemType === "expression") {
+      babyState.expression = value;
+      babyState.faceVisible = true;
+    } else if (itemType === "hairstyle") {
+      babyState.hairstyle = value;
+      babyState.hairstyleVisible = true;
+      babyState.hairstyleDetached = false;
+      babyState.hairstyleOffsetX = 17;
+      babyState.hairstyleOffsetY = -14;
+    } else {
+      return false;
+    }
+    updateFriendElementAsset(babyId);
+    return true;
+  },
   onDirectPuppyToy: (toyType, puppyId) => {
     if (toyType === "dogbone") {
       return puppySequenceController?.playWithBone(puppyId) || false;
@@ -636,6 +663,25 @@ function ensureChocolateMilkForCup(cupId, characterType = "chocolate-milk") {
     attachedOffsetY: 18,
     activated: false,
     sequenceCompleted: false,
+    ...(normalizedCharacterType === "baby-mr-chocolate-milk" ? {
+      lidColor: "yellow",
+      cupColor: "red",
+      sleeve: "child",
+      expression: "happy",
+      hairstyle: null,
+      lidDetached: false,
+      lidVisible: true,
+      lidOffsetX: 11,
+      lidOffsetY: 0,
+      sleeveDetached: false,
+      sleeveVisible: true,
+      sleeveOffsetX: 20,
+      sleeveOffsetY: 104,
+      hairstyleDetached: false,
+      hairstyleOffsetX: 17,
+      hairstyleOffsetY: -14,
+      hairstyleVisible: false,
+    } : {}),
   };
   worldFriends.push(chocolateState);
   renderWorldCups();

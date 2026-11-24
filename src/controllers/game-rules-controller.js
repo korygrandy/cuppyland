@@ -105,6 +105,25 @@
         flowerCelebrationPending: friendType === "flower-bead-craft",
         puppyAttachmentPending: friendType === "golden-puppy",
         ukeDancePending: friendType === "uke",
+        ...(friendType === "baby-mr-chocolate-milk" ? {
+          lidColor: "yellow",
+          cupColor: "red",
+          sleeve: "child",
+          expression: "happy",
+          hairstyle: null,
+          lidDetached: false,
+          lidVisible: true,
+          lidOffsetX: 11,
+          lidOffsetY: 0,
+          sleeveDetached: false,
+          sleeveVisible: true,
+          sleeveOffsetX: 20,
+          sleeveOffsetY: 104,
+          hairstyleDetached: false,
+          hairstyleOffsetX: 17,
+          hairstyleOffsetY: -14,
+          hairstyleVisible: false,
+        } : {}),
       });
       renderWorldCups();
       if (friendType === "rocketman-craft") {

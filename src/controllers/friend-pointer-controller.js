@@ -225,6 +225,41 @@
         if (!friendElement || !friendState) {
           return;
         }
+        if (friendState.type === "baby-mr-chocolate-milk") {
+          const babyPart = event.target?.closest?.(
+            ".baby-mr-chocolate-milk-cup-lid,"
+            + ".baby-mr-chocolate-milk-cup-sleeve,"
+            + ".baby-mr-chocolate-milk-hairstyle"
+          );
+          if (babyPart) {
+            event.preventDefault();
+            event.stopPropagation();
+            const partType = babyPart.classList.contains("baby-mr-chocolate-milk-cup-lid")
+              ? "lid"
+              : babyPart.classList.contains("baby-mr-chocolate-milk-cup-sleeve")
+                ? "sleeve"
+                : "hairstyle";
+            friendDragState.active = true;
+            friendDragState.pointerId = event.pointerId;
+            friendDragState.friendId = friendState.id;
+            friendDragState.partType = partType;
+            friendDragState.startClientX = event.clientX;
+            friendDragState.startClientY = event.clientY;
+            friendDragState.partStartWorldX = partType === "lid"
+              ? friendState.lidOffsetX
+              : partType === "sleeve"
+                ? friendState.sleeveOffsetX
+                : friendState.hairstyleOffsetX;
+            friendDragState.partStartWorldY = partType === "lid"
+              ? friendState.lidOffsetY
+              : partType === "sleeve"
+                ? friendState.sleeveOffsetY
+                : friendState.hairstyleOffsetY;
+            friendDragState.moved = false;
+            trySetPointerCapture(babyPart, event.pointerId);
+            return;
+          }
+        }
 
 
         if (friendState.type === "fishbowl") {
@@ -276,6 +311,9 @@
       friendDragState.startClientY = 0;
       friendDragState.moved = false;
       friendDragState.dragStartedAtMs = 0;
+      friendDragState.partType = null;
+      friendDragState.partStartWorldX = 0;
+      friendDragState.partStartWorldY = 0;
       clearHoverMonitor();
     }
 
@@ -657,6 +695,39 @@
         return;
       }
 
+      if (friendDragState.partType) {
+        const friendElement = event.currentTarget.closest(".friend-character");
+        const friendState = resolveFriendStateForElement(friendElement);
+        if (!friendElement || !friendState) {
+          return;
+        }
+        const pointerScale = getElementDragScale(friendElement);
+        const deltaX = (event.clientX - friendDragState.startClientX) / pointerScale;
+        const deltaY = (event.clientY - friendDragState.startClientY) / pointerScale;
+        if (Math.hypot(deltaX, deltaY) > 6) {
+          friendDragState.moved = true;
+        }
+        const nextOffsetX = (friendDragState.partStartWorldX || 0) + deltaX / .65;
+        const nextOffsetY = (friendDragState.partStartWorldY || 0) + deltaY / .65;
+        if (friendDragState.partType === "lid") {
+          friendState.lidDetached = true;
+          friendState.lidOffsetX = nextOffsetX;
+          friendState.lidOffsetY = nextOffsetY;
+        } else if (friendDragState.partType === "sleeve") {
+          friendState.sleeveDetached = true;
+          friendState.sleeveOffsetX = nextOffsetX;
+          friendState.sleeveOffsetY = nextOffsetY;
+        } else {
+          friendState.hairstyleDetached = true;
+          friendState.hairstyleOffsetX = nextOffsetX;
+          friendState.hairstyleOffsetY = nextOffsetY;
+        }
+        updateFriendElementAsset(friendState.id);
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+
       const friendElement = event.currentTarget.closest(".friend-character");
       const friendState = resolveFriendStateForElement(friendElement);
       if (!friendElement || !friendState) {
@@ -711,6 +782,37 @@
 
     function onPointerUp(event) {
       if (!friendDragState.active || event.pointerId !== friendDragState.pointerId) {
+        return;
+      }
+
+      if (friendDragState.partType) {
+        const friendElement = event.currentTarget.closest(".friend-character");
+        const friendState = resolveFriendStateForElement(friendElement);
+        if (friendState) {
+          if (friendDragState.partType === "lid") {
+            if (Math.abs(friendState.lidOffsetX) < 45 && Math.abs(friendState.lidOffsetY) < 45) {
+              friendState.lidDetached = false;
+              friendState.lidOffsetX = 11;
+              friendState.lidOffsetY = 0;
+            }
+          } else if (friendDragState.partType === "sleeve") {
+            if (Math.abs(friendState.sleeveOffsetX - 20) < 45 && Math.abs(friendState.sleeveOffsetY - 104) < 45) {
+              friendState.sleeveDetached = false;
+              friendState.sleeveOffsetX = 20;
+              friendState.sleeveOffsetY = 104;
+            }
+          } else if (friendState.hairstyle) {
+            if (Math.abs(friendState.hairstyleOffsetX - 17) < 55 && Math.abs(friendState.hairstyleOffsetY + 14) < 55) {
+              friendState.hairstyleDetached = false;
+              friendState.hairstyleOffsetX = 17;
+              friendState.hairstyleOffsetY = -14;
+            }
+          }
+          updateFriendElementAsset(friendState.id);
+        }
+        resetFriendDragState();
+        event.preventDefault();
+        event.stopPropagation();
         return;
       }
 

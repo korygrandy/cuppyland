@@ -159,6 +159,7 @@ test("baby Mr Chocolate Milk shares cup and milk behavior at baby scale", () => 
   assert.equal(styles.includes(".baby-mr-chocolate-milk-cup-base"), true);
   assert.equal(styles.includes(".baby-mr-chocolate-milk-cup-lid"), true);
   assert.equal(styles.includes(".baby-mr-chocolate-milk-cup-sleeve"), true);
+  assert.equal(styles.includes(".baby-mr-chocolate-milk-hairstyle"), true);
 });
 
 test("water bottle is in accessories and remains a snap source", () => {
