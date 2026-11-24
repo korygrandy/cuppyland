@@ -112,7 +112,7 @@
         activatedAsset: "./assets/bed-bounce-down.png",
         frameDurationMs: 420,
         artOffsetX: -75,
-        artOffsetY: 300,
+        artOffsetY: 280,
         artScale: 1,
         artWidth: 450,
         artHeight: 436,
