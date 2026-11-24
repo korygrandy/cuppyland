@@ -757,11 +757,29 @@
       const art = document.createElement("span");
       art.className = "friend-character-art";
       art.style.backgroundImage = `url("${resolveFriendAsset(friendState)}")`;
+      if (friendState.type === "baby-mr-chocolate-milk") {
+        art.style.backgroundImage = "none";
+      }
       if (friendState.type === "flower-bead-craft") {
         art.style.transform = `scaleX(${friendState.flipped ? -1 : 1}) scaleY(1)`;
         art.style.transformOrigin = "center bottom";
       }
       friendElement.appendChild(art);
+      if (friendState.type === "baby-mr-chocolate-milk") {
+        const lid = document.createElement("span");
+        lid.className = "baby-mr-chocolate-milk-cup-lid";
+        const sleeve = document.createElement("span");
+        sleeve.className = "baby-mr-chocolate-milk-cup-sleeve";
+        const base = document.createElement("span");
+        base.className = "baby-mr-chocolate-milk-cup-base";
+        const face = document.createElement("span");
+        face.className = "baby-mr-chocolate-milk-face";
+        face.style.backgroundImage = `url("${getFriendAssetMap()?.["chocolate-milk"] || "./assets/chocolate-milk.png"}")`;
+        friendElement.appendChild(base);
+        friendElement.appendChild(sleeve);
+        friendElement.appendChild(lid);
+        friendElement.appendChild(face);
+      }
       const shouldRenderCompanionOverlay = window.CuppyLandPuppySequenceGuardHelper?.shouldRenderCompanionOverlay
         ? window.CuppyLandPuppySequenceGuardHelper.shouldRenderCompanionOverlay(friendState)
         : !friendState.sequenceActive;

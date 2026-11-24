@@ -425,6 +425,65 @@ body {
   transform-origin: center bottom;
 }
 
+.friend-character[data-friend-type="baby-mr-chocolate-milk"] {
+  width: 86px;
+  height: 86px;
+  overflow: visible;
+  isolation: isolate;
+}
+
+.baby-mr-chocolate-milk-cup-base,
+.baby-mr-chocolate-milk-cup-lid,
+.baby-mr-chocolate-milk-cup-sleeve,
+.baby-mr-chocolate-milk-face {
+  position: absolute;
+  left: 50%;
+  display: block;
+  transform: translateX(-50%);
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.baby-mr-chocolate-milk-cup-base {
+  bottom: -22px;
+  width: 86px;
+  height: 86px;
+  border-radius: 10px;
+  background: #3e80ff;
+  z-index: 1;
+}
+
+.baby-mr-chocolate-milk-cup-sleeve {
+  bottom: 8px;
+  width: 82px;
+  height: 48px;
+  border-radius: 8px;
+  background: #ffd94d;
+  z-index: 2;
+}
+
+.baby-mr-chocolate-milk-cup-lid {
+  top: -24px;
+  width: 92px;
+  height: 48px;
+  border-radius: 28px 28px 12px 12px;
+  background: #ffd94d;
+  z-index: 3;
+}
+
+.baby-mr-chocolate-milk-face {
+  left: 50%;
+  bottom: 18px;
+  width: 86px;
+  height: 86px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  transform: translateX(-50%) scale(.65);
+  transform-origin: center bottom;
+  z-index: 4;
+}
+
 .tube-slide-entering,
 .tube-slide-exiting {
   filter: contrast(1.12) saturate(1.12);
