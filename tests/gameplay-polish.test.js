@@ -10,7 +10,7 @@ test("cup and lid polish sources contain drag, snap, and boundary behavior", () 
 
   assert.equal(styles.includes(".cup-character.lid-detached"), true);
   assert.equal(cupPointer.includes("nowMs - lastTapAt <= 300"), true);
-  assert.equal(cupPointer.includes("movedOutsideViewport"), true);
+  assert.equal(cupPointer.includes("movedOutsideWorld"), true);
   assert.equal(inventory.includes('if (target.dataset.itemType === "cup-create")'), true);
   assert.equal(inventory.includes('dragState.type === "cup-create"'), false);
   assert.equal(rules.includes("lid-already-snapped"), true);
@@ -32,18 +32,26 @@ test("water, puppy, and toy interactions are registered", () => {
   assert.equal(ui.includes('"water-bottle"'), true);
 });
 
-test("cup removal requires movement outside the visible viewport edge", () => {
+test("cup removal requires movement outside the world bounds", () => {
   const cupPointer = fs.readFileSync("src/controllers/cup-pointer-controller.js", "utf8");
   assert.equal(cupPointer.includes("cupDragState.moved"), true);
-  assert.equal(cupPointer.includes("isPointerOutsideWorldCanvas"), true);
-  assert.equal(cupPointer.includes("movedOutsideViewport"), true);
+  assert.equal(cupPointer.includes("isCupOutsideWorldBounds"), true);
+  assert.equal(cupPointer.includes("cupDragState.startWorldX + deltaX"), true);
+  assert.equal(cupPointer.includes("cupDragState.startWorldY + deltaY"), true);
+  assert.equal(cupPointer.includes("movedOutsideWorld"), true);
 });
 
 test("cup inventory tap instantiates at viewport center", () => {
   const inventory = fs.readFileSync("src/controllers/inventory-interaction-controller.js", "utf8");
   const store = fs.readFileSync("src/state/cup-state-store.js", "utf8");
+  const worldCoordinates = fs.readFileSync("src/controllers/world-coordinate-controller.js", "utf8");
   assert.equal(inventory.includes("applyInventorySelection(target.dataset.itemType"), true);
   assert.equal(inventory.includes('target.dataset.itemType === "cup-create"'), true);
+  assert.equal(inventory.includes("getDefaultFriendDropPoint(target.dataset.value)"), true);
+  assert.equal(worldCoordinates.includes("state?.activeWorld === \"olivia-room\" && friendType === \"chocolate-milk\""), true);
+  assert.equal(worldCoordinates.includes("basePoint.worldX - 500"), true);
+  assert.equal(inventory.includes("dragState.value === \"chocolate-milk\""), true);
+  assert.equal(inventory.includes("dropPoint.worldX - 500"), true);
   assert.equal(store.includes("addCupToWorld()"), true);
   assert.equal(store.includes("getViewportSpawnPoint(worldCups.length)"), true);
 });
@@ -57,10 +65,15 @@ test("water bottle is in accessories and remains a snap source", () => {
 test("trampoline stops when trampolineFriends map is empty", () => {
   const source = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
   const pointerSource = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
+  const removalSource = fs.readFileSync("src/controllers/friend-removal-controller.js", "utf8");
   assert.equal(source.includes("const hasRegisteredTrampolineFriend"), true);
   assert.equal(source.includes("Boolean(trampolineFriends.get(objectConfig.id)?.size)"), true);
   assert.equal(source.includes("stopTrampolineAnimation(objectConfig.id)"), true);
   assert.equal(pointerSource.includes("friendState.attachedCupId = null"), true);
   assert.equal(pointerSource.includes("friendState.sequenceFrame = null"), true);
   assert.equal(pointerSource.includes("friendState.attachedOffsetX = 0"), true);
+  assert.equal(pointerSource.includes("isPointerOutsideWorldBounds"), true);
+  assert.equal(pointerSource.includes("getWorldPointFromClient"), true);
+  assert.equal(pointerSource.includes("friendState?.id || friendDragState.friendId"), true);
+  assert.equal(removalSource.includes("removeBackgroundObjectActivation(friendState?.id || friendId)"), true);
 });

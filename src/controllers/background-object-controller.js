@@ -35,6 +35,30 @@
       return Boolean(friendState?.type && trampolineBouncerTypes.has(friendState.type));
     }
 
+    function isBounceObject(objectConfig) {
+      return Boolean(objectConfig?.activatedAssets?.down && objectConfig?.activatedAssets?.up);
+    }
+
+    function applyBounceArtFrame(anchor, objectConfig, frame) {
+      if (!anchor || !objectConfig?.activatedAssets) {
+        return;
+      }
+      const downArt = anchor.querySelector(".world-background-object-art-down");
+      const upArt = anchor.querySelector(".world-background-object-art-up");
+      if (downArt && upArt) {
+        downArt.style.opacity = frame === "down" ? "1" : "0";
+        upArt.style.opacity = frame === "up" ? "1" : "0";
+        return;
+      }
+      const art = anchor.querySelector(".world-background-object-art");
+      if (!art) {
+        return;
+      }
+      art.style.backgroundImage = `url("${frame === "down"
+        ? objectConfig.activatedAssets.down
+        : objectConfig.activatedAssets.up}")`;
+    }
+
     function restoreTrampolineFriend(friendId, record) {
       if (!record?.element) {
         return;
@@ -141,11 +165,8 @@
         return;
       }
       anchor.classList.remove("is-bouncing", "trampoline-up", "trampoline-down");
-      const art = anchor.querySelector(".world-background-object-art");
-      if (art) {
-        const objectConfig = getObjects(activeWorld).find((item) => item.id === objectId);
-        art.style.backgroundImage = `url("${objectConfig?.activatedAsset || objectConfig?.activatedAssets?.down || ""}")`;
-      }
+      const objectConfig = getObjects(activeWorld).find((item) => item.id === objectId);
+      applyBounceArtFrame(anchor, objectConfig, "down");
     }
 
     function startTrampolineAnimation(objectId, objectConfig) {
@@ -161,7 +182,7 @@
       let frame = "down";
       trampolineFrames.set(objectId, frame);
       anchor.classList.add("is-bouncing");
-      art.style.backgroundImage = `url("${objectConfig.activatedAssets.down}")`;
+      applyBounceArtFrame(anchor, objectConfig, "down");
       applyTrampolineFriendFrame(objectId, "down");
 
       const timerId = setInterval(() => {
@@ -169,9 +190,7 @@
         trampolineFrames.set(objectId, frame);
         anchor.classList.toggle("trampoline-up", frame === "up");
         anchor.classList.toggle("trampoline-down", frame === "down");
-        art.style.backgroundImage = `url("${frame === "down"
-          ? objectConfig.activatedAssets.down
-          : objectConfig.activatedAssets.up}")`;
+        applyBounceArtFrame(anchor, objectConfig, frame);
         applyTrampolineFriendFrame(objectId, frame);
       }, objectConfig.frameDurationMs || 420);
       trampolineTimers.set(objectId, timerId);
@@ -206,24 +225,51 @@
         anchor.style.top = `${objectConfig.y}px`;
         anchor.style.width = `${objectConfig.width}px`;
         anchor.style.height = `${objectConfig.height}px`;
-        if (objectConfig.id === "trampoline") {
+        if (isBounceObject(objectConfig)) {
           anchor.style.setProperty("--trampoline-hitbox-left", `${objectConfig.hitboxOffsetX ?? 0}px`);
           anchor.style.setProperty("--trampoline-hitbox-top", `${objectConfig.hitboxOffsetY ?? 0}px`);
           anchor.style.setProperty("--trampoline-hitbox-width", `${objectConfig.hitboxWidth ?? objectConfig.width}px`);
           anchor.style.setProperty("--trampoline-hitbox-height", `${objectConfig.hitboxHeight ?? objectConfig.height}px`);
+          anchor.classList.add("has-bounce", "trampoline-down");
         }
 
-        const activatedArt = document.createElement("div");
-        activatedArt.className = "world-background-object-art";
-        activatedArt.style.backgroundImage = `url("${objectConfig.activatedAsset}")`;
-        if (objectConfig.id === "trampoline") {
-          const artScale = objectConfig.artScale ?? 1.425;
-          activatedArt.style.left = `${(objectConfig.artOffsetX ?? -10) - (((artScale - 1) * objectConfig.width) / 2)}px`;
-          activatedArt.style.top = `${(objectConfig.artOffsetY ?? 100) - (((artScale - 1) * objectConfig.height) / 2)}px`;
-          activatedArt.style.width = `${100 * artScale}%`;
-          activatedArt.style.height = `${100 * artScale}%`;
+        const activatedAssets = isBounceObject(objectConfig)
+          ? [
+            { frame: "down", asset: objectConfig.activatedAssets.down },
+            { frame: "up", asset: objectConfig.activatedAssets.up },
+          ]
+          : [
+            { frame: "single", asset: objectConfig.activatedAsset },
+          ];
+
+        activatedAssets.forEach((assetConfig) => {
+          const activatedArt = document.createElement("div");
+          activatedArt.className = `world-background-object-art ${assetConfig.frame === "single"
+            ? ""
+            : `world-background-object-art-${assetConfig.frame}`}`.trim();
+          activatedArt.style.backgroundImage = `url("${assetConfig.asset}")`;
+          if (isBounceObject(objectConfig)) {
+            const artScale = objectConfig.artScale ?? 1;
+            activatedArt.style.left = `${(objectConfig.artOffsetX ?? 0) - (((artScale - 1) * objectConfig.width) / 2)}px`;
+            activatedArt.style.top = `${(objectConfig.artOffsetY ?? 0) - (((artScale - 1) * objectConfig.height) / 2)}px`;
+            activatedArt.style.width = `${100 * artScale}%`;
+            activatedArt.style.height = `${100 * artScale}%`;
+            if (assetConfig.frame === "up") {
+              activatedArt.style.opacity = "0";
+            }
+          }
+          anchor.appendChild(activatedArt);
+        });
+
+        if (objectConfig.showHitbox) {
+          const hitbox = document.createElement("div");
+          hitbox.className = "world-background-object-hitbox-debug";
+          hitbox.style.left = `${objectConfig.hitboxOffsetX ?? 0}px`;
+          hitbox.style.top = `${objectConfig.hitboxOffsetY ?? 0}px`;
+          hitbox.style.width = `${objectConfig.hitboxWidth ?? objectConfig.width}px`;
+          hitbox.style.height = `${objectConfig.hitboxHeight ?? objectConfig.height}px`;
+          anchor.appendChild(hitbox);
         }
-        anchor.appendChild(activatedArt);
         container.appendChild(anchor);
         activeFriendsByObject.set(objectConfig.id, new Set());
       });
@@ -294,7 +340,7 @@
         if (!objectConfig.activatedSfx) {
           anchor?.classList.toggle("active", isActive);
         }
-        if (objectConfig.id === "trampoline") {
+        if (isBounceObject(objectConfig)) {
           const currentFriendOverlaps = friendIntersectsObject(friendState, friendElement, objectConfig);
           let newlyRegistered = false;
           if (isAllowedBouncer && currentFriendOverlaps) {
@@ -344,7 +390,7 @@
       }
 
       getObjects().forEach((objectConfig) => {
-        if (objectConfig.id !== "trampoline") {
+        if (!isBounceObject(objectConfig)) {
           return;
         }
 
@@ -400,7 +446,7 @@
         if (!objectConfig?.activatedSfx) {
           anchor?.classList.toggle("active", activeFriends.size > 0);
         }
-        if (objectConfig?.id === "trampoline" && activeFriends.size === 0) {
+        if (isBounceObject(objectConfig) && activeFriends.size === 0) {
           stopTrampolineAnimation(objectId);
         }
       });

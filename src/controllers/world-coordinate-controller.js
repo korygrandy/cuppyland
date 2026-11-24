@@ -54,7 +54,7 @@
       };
     }
 
-    function getDefaultFriendDropPoint() {
+    function getDefaultFriendDropPoint(friendType = "") {
       const visibleAnchor = getWorldViewportAnchorPoint();
       const worldList = state?.worlds?.[state?.activeWorld]?.friends ?? [];
       const instanceIndex = worldList.length;
@@ -73,7 +73,14 @@
       const viewportRect = worldViewport?.getBoundingClientRect?.() || { left: 0, top: 0 };
       const centerClientX = viewportRect.left + (worldViewport?.clientWidth || 1280) / 2;
       const centerClientY = viewportRect.top + (worldViewport?.clientHeight || 800) / 2;
-      return getWorldDropPoint(centerClientX, centerClientY);
+      const basePoint = getWorldDropPoint(centerClientX, centerClientY);
+      if (state?.activeWorld === "olivia-room" && friendType === "chocolate-milk") {
+        return {
+          worldX: Math.max(0, basePoint.worldX - 500),
+          worldY: basePoint.worldY,
+        };
+      }
+      return basePoint;
     }
 
     return {

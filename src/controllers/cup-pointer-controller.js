@@ -11,6 +11,7 @@
       safeClosest,
       trySetPointerCapture,
       isPointerOutsideWorldCanvas,
+      getWorldPointFromClient,
       setActiveCupInstance,
       bringCupElementToFront,
       resolveCupStateForElement,
@@ -106,6 +107,20 @@
       window.CuppyLandAudio?.playSfxClip?.("defaultObjectRemoved");
     }
 
+    function isCupOutsideWorldBounds(worldX, worldY, cupElement, padding = 24) {
+      if (!cupElement) {
+        return false;
+      }
+      const maxX = Math.max(0, (worldCanvas?.offsetWidth || 0) - cupElement.offsetWidth);
+      const maxY = Math.max(0, (worldCanvas?.offsetHeight || 0) - cupElement.offsetHeight);
+      return (
+        worldX < -padding
+        || worldX > maxX + padding
+        || worldY < -padding
+        || worldY > maxY + padding
+      );
+    }
+
     function onCupPointerDown(event) {
       const cupElement = event.currentTarget.closest(".cup-character") || cupCharacter;
       const cupState = resolveCupStateForElement(cupElement);
@@ -159,9 +174,14 @@
       const maxY = Math.max(0, worldCanvas.offsetHeight - cupElement.offsetHeight);
       const nextX = Math.min(maxX, Math.max(0, cupDragState.startWorldX + deltaX));
       const nextY = Math.min(maxY, Math.max(0, cupDragState.startWorldY + deltaY));
-      const movedOutsideViewport = cupDragState.moved
-        && isPointerOutsideWorldCanvas(event.clientX, event.clientY, 24);
-      if (movedOutsideViewport) {
+      const movedOutsideWorld = cupDragState.moved
+        && isCupOutsideWorldBounds(
+          cupDragState.startWorldX + deltaX,
+          cupDragState.startWorldY + deltaY,
+          cupElement,
+          24
+        );
+      if (movedOutsideWorld) {
         const cupId = cupElement.dataset.cupId;
         const chocolateElements = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="chocolate-milk"]'));
         chocolateElements.forEach((element) => {

@@ -140,6 +140,7 @@ const cupPointerController = window.CuppyLandCupPointerController.createControll
   safeClosest,
   trySetPointerCapture,
   isPointerOutsideWorldCanvas,
+  getWorldPointFromClient,
   setActiveCupInstance,
   bringCupElementToFront,
   resolveCupStateForElement,
@@ -756,8 +757,8 @@ function getWorldDropPoint(clientX, clientY) {
   return worldCoordinateController.getWorldDropPoint(clientX, clientY);
 }
 
-function getDefaultFriendDropPoint() {
-  return worldCoordinateController.getDefaultFriendDropPoint();
+function getDefaultFriendDropPoint(friendType = "") {
+  return worldCoordinateController.getDefaultFriendDropPoint(friendType);
 }
 
 function resolveFriendStateForElement(friendElement) {

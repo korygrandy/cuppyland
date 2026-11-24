@@ -177,6 +177,25 @@
       };
     }
 
+    function isPointerOutsideWorldBounds(clientX, clientY, padding = 24) {
+      const worldPoint = getWorldPointFromClient?.(clientX, clientY);
+      if (
+        !worldPoint
+        || !Number.isFinite(worldPoint.worldX)
+        || !Number.isFinite(worldPoint.worldY)
+      ) {
+        return isPointerOutsideWorldCanvas(clientX, clientY, padding);
+      }
+      const worldWidth = worldCanvas?.offsetWidth || 0;
+      const worldHeight = worldCanvas?.offsetHeight || 0;
+      return (
+        worldPoint.worldX < -padding
+        || worldPoint.worldX > worldWidth + padding
+        || worldPoint.worldY < -padding
+        || worldPoint.worldY > worldHeight + padding
+      );
+    }
+
     window.CuppyLandSquirrelRunningSfx = {
       reset: resetSquirrelRunningSfx,
     };
@@ -1114,9 +1133,10 @@
 
       if (
         friendDragState.moved
-        && isPointerOutsideWorldCanvas(event.clientX, event.clientY, 24)
+        && isPointerOutsideWorldBounds(event.clientX, event.clientY, 24)
       ) {
-        removeFriendInstance(friendDragState.friendId);
+        const friendIdToRemove = friendState?.id || friendDragState.friendId;
+        removeFriendInstance(friendIdToRemove);
       }
 
       stopSquirrelLoopIfNoPuppies();
