@@ -1276,6 +1276,51 @@ body {
   transform-origin: center center;
 }
 
+.baby-chocolate-milk-fill-preview {
+  width: 122px;
+  height: 122px;
+  background-size: 58% 58%;
+  background-position: center 72%;
+}
+
+.baby-chocolate-milk-cup-base,
+.baby-chocolate-milk-cup-lid,
+.baby-chocolate-milk-cup-sleeve {
+  position: absolute;
+  left: 50%;
+  display: block;
+  transform: translateX(-50%);
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.baby-chocolate-milk-cup-base {
+  bottom: 2px;
+  width: 82px;
+  height: 86px;
+  border-radius: 10px;
+  background: #3e80ff;
+  z-index: 1;
+}
+
+.baby-chocolate-milk-cup-lid {
+  top: 2px;
+  width: 88px;
+  height: 46px;
+  border-radius: 28px 28px 12px 12px;
+  background: #ffd94d;
+  z-index: 3;
+}
+
+.baby-chocolate-milk-cup-sleeve {
+  bottom: 19px;
+  width: 78px;
+  height: 42px;
+  border-radius: 8px;
+  background: #ffd94d;
+  z-index: 2;
+}
+
 .chocolate-milk-spill {
   position: absolute;
   inset: 0;
@@ -2029,6 +2074,41 @@ body {
   height: 86px;
   transform: scale(.65);
   transform-origin: center;
+}
+
+.drag-ghost-baby-mr-chocolate-milk i {
+  position: absolute;
+  left: 50%;
+  display: block;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+}
+
+.drag-ghost-baby-cup-lid {
+  top: -24px;
+  width: 92px;
+  height: 48px;
+  border-radius: 28px 28px 12px 12px;
+  background: #ffd94d;
+  z-index: 3;
+}
+
+.drag-ghost-baby-cup-sleeve {
+  bottom: 8px;
+  width: 82px;
+  height: 48px;
+  border-radius: 8px;
+  background: #ffd94d;
+  z-index: 2;
+}
+
+.drag-ghost-baby-cup-base {
+  bottom: -22px;
+  width: 86px;
+  height: 86px;
+  border-radius: 10px;
+  background: #3e80ff;
+  z-index: 1;
 }
 
 .drag-ghost-uke {

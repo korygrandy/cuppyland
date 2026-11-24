@@ -45,11 +45,24 @@
       if (!fillState.overlay) {
         const overlay = document.createElement("div");
         overlay.className = "cup-fill-preview";
+        if (fillState.characterType === "baby-mr-chocolate-milk") {
+          overlay.classList.add("baby-chocolate-milk-fill-preview");
+          overlay.innerHTML = [
+            '<span class="baby-chocolate-milk-cup-base"></span>',
+            '<span class="baby-chocolate-milk-cup-lid"></span>',
+            '<span class="baby-chocolate-milk-cup-sleeve"></span>',
+          ].join("");
+        }
         worldCanvas.appendChild(overlay);
         fillState.overlay = overlay;
       }
 
       const overlay = fillState.overlay;
+      if (fillState.characterType === "baby-mr-chocolate-milk") {
+        overlay.classList.add("baby-chocolate-milk-fill-preview");
+      } else {
+        overlay.classList.remove("baby-chocolate-milk-fill-preview");
+      }
       overlay.style.left = `${cupState.worldX + previewConfig.offsetX}px`;
       overlay.style.top = `${cupState.worldY + previewConfig.offsetY}px`;
       overlay.style.width = `${previewConfig.width}px`;

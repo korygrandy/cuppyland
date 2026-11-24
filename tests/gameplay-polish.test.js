@@ -150,6 +150,9 @@ test("baby Mr Chocolate Milk shares cup and milk behavior at baby scale", () => 
   assert.equal(inventory.includes("inventory-baby-mr-chocolate-milk-thumb"), true);
   assert.equal(inventory.includes("Baby"), true);
   assert.equal(inventoryController.includes('dragState.value === "baby-mr-chocolate-milk"'), true);
+  assert.equal(inventoryController.includes("drag-ghost-baby-cup-lid"), true);
+  assert.equal(inventoryController.includes("drag-ghost-baby-cup-sleeve"), true);
+  assert.equal(inventoryController.includes("drag-ghost-baby-cup-base"), true);
   assert.equal(friendController.includes('friendState?.type !== "baby-mr-chocolate-milk"'), true);
   assert.equal(sequenceController.includes('friendState.type !== "baby-mr-chocolate-milk"'), true);
   assert.equal(styles.includes('.friend-character[data-friend-type="baby-mr-chocolate-milk"]'), true);
