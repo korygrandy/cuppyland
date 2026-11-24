@@ -34,10 +34,13 @@ test("bed bounce anchor is configured for Olivia room", () => {
   const bedBounce = anchors.find((anchor) => anchor.id === "bed-bg");
 
   assert.ok(bedBounce);
-  assert.equal(bedBounce.activatedAssets.down, "./assets/bed-bounce.down.png");
+  assert.equal(bedBounce.activatedAssets.down, "./assets/bed-bounce-down.png");
   assert.equal(bedBounce.activatedAssets.up, "./assets/bed-bounce-up.png");
   assert.equal(bedBounce.frameDurationMs, 420);
   assert.equal(bedBounce.showHitbox, true);
+  assert.equal(bedBounce.artOffsetX, -75);
+  assert.equal(bedBounce.artOffsetY, 0);
+  assert.equal(bedBounce.artScale, 1);
   assert.equal(bedBounce.hitboxOffsetX, 42);
   assert.equal(bedBounce.hitboxOffsetY, 336);
   assert.equal(bedBounce.hitboxWidth, 237);
@@ -51,6 +54,14 @@ test("bed bounce anchor is configured for Olivia room", () => {
 test("trampoline assets exist and have matching 600px dimensions", () => {
   const down = fs.statSync("assets/trampoline-down.png");
   const up = fs.statSync("assets/trampoline-up.png");
+
+  assert.ok(down.size > 0);
+  assert.ok(up.size > 0);
+});
+
+test("bed bounce assets use distinct down and up animation frames", () => {
+  const down = fs.statSync("assets/bed-bounce-down.png");
+  const up = fs.statSync("assets/bed-bounce-up.png");
 
   assert.ok(down.size > 0);
   assert.ok(up.size > 0);
