@@ -1141,7 +1141,9 @@
         );
         if (bowlElement) {
           onDirectWaterSource?.(bowlElement.dataset.friendId, friendState.type);
-          removeFriendInstance(friendState.id, { playRemovedSfx: false });
+          if (friendState.type === "water-bottle") {
+            removeFriendInstance(friendState.id, { playRemovedSfx: false });
+          }
         }
       }
 

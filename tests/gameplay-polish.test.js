@@ -56,6 +56,8 @@ test("water, puppy, and toy interactions are registered", () => {
   assert.equal(pointer.includes("onDirectPuppyToBed"), true);
   assert.equal(pointer.includes("onDirectWaterSource"), true);
   assert.equal(inventory.includes('dragState.value === "fishbowl" || dragState.value === "water-bottle"'), true);
+  assert.equal(pointer.includes('if (friendState.type === "water-bottle")'), true);
+  assert.equal(pointer.includes('removeFriendInstance(friendState.id, { playRemovedSfx: false })'), true);
   assert.equal(config.includes('"water-bottle"'), true);
   assert.equal(ui.includes('"water-bottle"'), true);
 });
@@ -271,7 +273,9 @@ test("baby Mr Chocolate Milk shares cup and milk behavior at baby scale", () => 
 
 test("water bottle is in accessories and remains a snap source", () => {
   const ui = fs.readFileSync("src/ui/inventory.js", "utf8");
-  assert.equal(ui.includes('"lavalamp", "chocolate-milk", "baby-mr-chocolate-milk", "parmesan-cheese", "uke"'), true);
+  assert.equal(ui.includes('"lavalamp", "chocolate-milk", "parmesan-cheese", "uke"'), true);
+  assert.equal(ui.includes('const accessoryTypes = new Set(["lavalamp", "chocolate-milk", "baby-mr-chocolate-milk"'), false);
+  assert.equal(ui.includes('const accessoryOrder = [\n      "baby-mr-chocolate-milk"'), false);
   assert.equal(ui.includes('"water-bottle"'), true);
 });
 
