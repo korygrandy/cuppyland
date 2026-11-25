@@ -63,6 +63,8 @@
           : fallbackWorldY;
 
       const friendSizes = {
+        "parmesan-cheese": { width: 132, height: 276 },
+        "baby-mr-chocolate-milk": { width: 86, height: 86 },
         "golden-puppy": { width: 120, height: 120 },
         "dogtoy-ball": { width: 72, height: 72 },
         "dogbone": { width: 110, height: 56 },
@@ -104,6 +106,25 @@
         flowerCelebrationPending: friendType === "flower-bead-craft",
         puppyAttachmentPending: friendType === "golden-puppy",
         ukeDancePending: friendType === "uke",
+        ...(friendType === "baby-mr-chocolate-milk" ? {
+          lidColor: "yellow",
+          cupColor: "red",
+          sleeve: "child",
+          expression: "happy",
+          hairstyle: null,
+          lidDetached: false,
+          lidVisible: true,
+          lidOffsetX: 11,
+          lidOffsetY: 0,
+          sleeveDetached: false,
+          sleeveVisible: true,
+          sleeveOffsetX: 20,
+          sleeveOffsetY: 104,
+          hairstyleDetached: false,
+          hairstyleOffsetX: 17,
+          hairstyleOffsetY: -14,
+          hairstyleVisible: false,
+        } : {}),
       });
       renderWorldCups();
       if (friendType === "rocketman-craft") {

@@ -225,6 +225,41 @@
         if (!friendElement || !friendState) {
           return;
         }
+        if (friendState.type === "baby-mr-chocolate-milk") {
+          const babyPart = event.target?.closest?.(
+            ".baby-mr-chocolate-milk-cup-lid,"
+            + ".baby-mr-chocolate-milk-cup-sleeve,"
+            + ".baby-mr-chocolate-milk-hairstyle"
+          );
+          if (babyPart) {
+            event.preventDefault();
+            event.stopPropagation();
+            const partType = babyPart.classList.contains("baby-mr-chocolate-milk-cup-lid")
+              ? "lid"
+              : babyPart.classList.contains("baby-mr-chocolate-milk-cup-sleeve")
+                ? "sleeve"
+                : "hairstyle";
+            friendDragState.active = true;
+            friendDragState.pointerId = event.pointerId;
+            friendDragState.friendId = friendState.id;
+            friendDragState.partType = partType;
+            friendDragState.startClientX = event.clientX;
+            friendDragState.startClientY = event.clientY;
+            friendDragState.partStartWorldX = partType === "lid"
+              ? friendState.lidOffsetX
+              : partType === "sleeve"
+                ? friendState.sleeveOffsetX
+                : friendState.hairstyleOffsetX;
+            friendDragState.partStartWorldY = partType === "lid"
+              ? friendState.lidOffsetY
+              : partType === "sleeve"
+                ? friendState.sleeveOffsetY
+                : friendState.hairstyleOffsetY;
+            friendDragState.moved = false;
+            trySetPointerCapture(babyPart, event.pointerId);
+            return;
+          }
+        }
 
 
         if (friendState.type === "fishbowl") {
@@ -239,7 +274,10 @@
     }
 
     function setFriendDragVisual(friendElement, friendState, isDragging) {
-      if (!friendElement || !friendState || friendState.type !== "chocolate-milk") {
+      if (!friendElement || !friendState || (
+        friendState.type !== "chocolate-milk"
+        && friendState.type !== "baby-mr-chocolate-milk"
+      )) {
         return;
       }
 
@@ -250,6 +288,94 @@
 
       friendArt.style.transform = isDragging ? "rotate(-45deg)" : "";
       friendArt.style.transformOrigin = isDragging ? "center center" : "";
+    }
+
+    function playParmesanCheeseAnimation(friendState, friendElement) {
+      if (!friendState || !friendElement || friendState.type !== "parmesan-cheese") {
+        return;
+      }
+      const art = friendElement.querySelector(".friend-character-art");
+      if (art) {
+        art.style.transition = "transform 520ms cubic-bezier(.2,.75,.2,1)";
+        art.style.transformOrigin = "center center";
+        art.style.transform = "rotate(-45deg)";
+        art.classList.add("parmesan-cheese-rotated");
+      }
+
+      window.setTimeout(() => {
+        if (art) {
+          art.classList.remove("parmesan-cheese-rotated");
+          art.style.transform = "rotate(0deg)";
+        }
+      }, 520);
+
+      friendElement.querySelector(".parmesan-cheese-particles")?.remove();
+      const particles = document.createElement("div");
+      particles.className = "parmesan-cheese-particles";
+
+      const elementRect = friendElement.getBoundingClientRect();
+      const artRect = art?.getBoundingClientRect() || elementRect;
+      const angleRad = (-45 * Math.PI) / 180;
+      const localCenterX = artRect.width * 0.5;
+      const localCenterY = artRect.height * 0.5;
+      const upperLeftLocalX = artRect.width * 0.18;
+      const upperLeftLocalY = artRect.height * 0.14;
+      const rotatedStartX = localCenterX
+        + ((upperLeftLocalX - localCenterX) * Math.cos(angleRad))
+        - ((upperLeftLocalY - localCenterY) * Math.sin(angleRad));
+      const rotatedStartY = localCenterY
+        + ((upperLeftLocalX - localCenterX) * Math.sin(angleRad))
+        + ((upperLeftLocalY - localCenterY) * Math.cos(angleRad));
+      const localStartX = rotatedStartX;
+      const localStartY = rotatedStartY;
+      const localPileX = (artRect.width * 0.18) - 35;
+      const localPileY = artRect.height - 8;
+      const fallDistance = Math.max(60, localPileY - localStartY);
+
+      const pile = document.createElement("span");
+      pile.className = "parmesan-cheese-pile";
+      pile.style.setProperty("--pile-x", `${localPileX}px`);
+      pile.style.setProperty("--pile-y", `${localPileY}px`);
+      pile.style.setProperty("--pile-width", `${Math.min(150, artRect.width * 0.62)}px`);
+      pile.style.setProperty("--pile-delay", "280ms");
+      particles.appendChild(pile);
+
+      const pileSpecks = 52;
+      for (let index = 0; index < pileSpecks; index += 1) {
+        const speck = document.createElement("span");
+        speck.className = "parmesan-cheese-pile-speck";
+        const row = Math.floor(index / 13);
+        const column = index % 13;
+        const spreadX = (column - 6) * 5.2 + ((Math.random() * 3) - 1.5);
+        const spreadY = (row * 3.2) + ((Math.random() * 2) - 1);
+        speck.style.setProperty("--pile-speck-x", `${spreadX}px`);
+        speck.style.setProperty("--pile-speck-y", `${spreadY}px`);
+        speck.style.setProperty("--pile-speck-size", `${2 + Math.floor(Math.random() * 3)}px`);
+        speck.style.setProperty("--pile-speck-delay", `${280 + (index * 10)}ms`);
+        pile.appendChild(speck);
+      }
+
+      const count = 22;
+      for (let index = 0; index < count; index += 1) {
+        const particle = document.createElement("span");
+        particle.className = "parmesan-cheese-particle";
+        const startDrift = (Math.random() * 18) - 9;
+        const endDrift = (Math.random() * 64) - 32;
+        particle.style.setProperty("--cheese-start-x", `${localStartX + startDrift}px`);
+        particle.style.setProperty("--cheese-start-y", `${localStartY}px`);
+        particle.style.setProperty("--cheese-fall-y", `${fallDistance + (Math.random() * 18)}px`);
+        particle.style.setProperty("--cheese-drift-x", `${endDrift}px`);
+        particle.style.setProperty("--cheese-size", `${3 + Math.floor(Math.random() * 5)}px`);
+        particle.style.setProperty("--cheese-rotation", `${-30 + Math.floor(Math.random() * 60)}deg`);
+        particle.style.setProperty("--cheese-delay", `${80 + (index * 18) + Math.floor(Math.random() * 90)}ms`);
+        particle.style.setProperty("--cheese-duration", `${780 + Math.floor(Math.random() * 430)}ms`);
+        particles.appendChild(particle);
+      }
+
+      friendElement.appendChild(particles);
+      window.setTimeout(() => {
+        particles.remove();
+      }, 3600);
     }
 
     function syncSquirrelAvoidance(dogElement, dogState) {
@@ -273,6 +399,9 @@
       friendDragState.startClientY = 0;
       friendDragState.moved = false;
       friendDragState.dragStartedAtMs = 0;
+      friendDragState.partType = null;
+      friendDragState.partStartWorldX = 0;
+      friendDragState.partStartWorldY = 0;
       clearHoverMonitor();
     }
 
@@ -325,7 +454,7 @@
         friendState.sequenceCompleted = false;
       }
       if (typeof onChocolateMilkFillComplete === "function") {
-        onChocolateMilkFillComplete(cupId);
+        onChocolateMilkFillComplete(cupId, friendState.type);
       }
       setFriendDragVisual(friendElement, friendState, false);
       resetFriendDragState();
@@ -335,7 +464,7 @@
     }
 
     function updateChocolateMilkFill(friendElement, friendState, pointerX, pointerY) {
-      if (friendState?.type !== "chocolate-milk") {
+      if (friendState?.type !== "chocolate-milk" && friendState?.type !== "baby-mr-chocolate-milk") {
         resetChocolateMilkFill("not-chocolate-milk");
         return;
       }
@@ -402,7 +531,7 @@
           const isStillDraggingChocolateMilk = (
             friendDragState.active
             && friendDragState.friendId === friendState.id
-            && friendState.type === "chocolate-milk"
+            && (friendState.type === "chocolate-milk" || friendState.type === "baby-mr-chocolate-milk")
           );
           if (!isStillDraggingChocolateMilk || chocolateMilkFillState.cupId !== hoveredCupId || !isOpenCupTarget(hoveredCupId)) {
             return;
@@ -410,7 +539,7 @@
           completeChocolateMilkFill(hoveredCupId, friendState, friendElement);
         }, chocolateMilkFillDurationMs);
         if (typeof onChocolateMilkFillStart === "function") {
-          onChocolateMilkFillStart(hoveredCupId);
+          onChocolateMilkFillStart(hoveredCupId, friendState.type);
         }
       }
 
@@ -503,6 +632,21 @@
         friendState.fishbowlSuppressPointerDrag = false;
       }
 
+      if (friendState.type === "parmesan-cheese") {
+        const nowMs = Date.now();
+        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
+        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
+          friendState.lastTapAtMs = nowMs;
+          resetFriendDragState();
+          event.preventDefault();
+          event.stopPropagation();
+          window.CuppyLandAudio?.playSfxClip?.("parmesanCheeseActivated");
+          playParmesanCheeseAnimation(friendState, friendElement);
+          return;
+        }
+        friendState.lastTapAtMs = nowMs;
+      }
+
       if (friendState.type === "water-bowl") {
         const nowMs = Date.now();
         const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
@@ -511,6 +655,7 @@
           friendState.full = true;
           friendState.type = "water-bowl";
           updateFriendElementAsset?.(friendState.id);
+          syncBackgroundObjectActivation(friendState, friendElement);
           window.CuppyLandAudio?.playSfxClip?.("drinkingFountainActivated");
           resetFriendDragState();
           event.preventDefault();
@@ -536,7 +681,7 @@
         friendState.lastTapAtMs = nowMs;
       }
 
-      if (friendState.type === "chocolate-milk") {
+      if (friendState.type === "chocolate-milk" || friendState.type === "baby-mr-chocolate-milk") {
         const nowMs = Date.now();
         const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
         if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
@@ -632,7 +777,7 @@
         friendState.pizzaAnchorWorldX = friendState.worldX;
         friendState.pizzaAnchorWorldY = friendState.worldY;
       }
-      if (friendState.type === "chocolate-milk") {
+      if (friendState.type === "chocolate-milk" || friendState.type === "baby-mr-chocolate-milk") {
         friendState.attachedCupId = null;
         friendState.sequenceCompleted = false;
         friendState.sequenceFrame = null;
@@ -651,6 +796,39 @@
 
     function onPointerMove(event) {
       if (!friendDragState.active || event.pointerId !== friendDragState.pointerId) {
+        return;
+      }
+
+      if (friendDragState.partType) {
+        const friendElement = event.currentTarget.closest(".friend-character");
+        const friendState = resolveFriendStateForElement(friendElement);
+        if (!friendElement || !friendState) {
+          return;
+        }
+        const pointerScale = getElementDragScale(friendElement);
+        const deltaX = (event.clientX - friendDragState.startClientX) / pointerScale;
+        const deltaY = (event.clientY - friendDragState.startClientY) / pointerScale;
+        if (Math.hypot(deltaX, deltaY) > 6) {
+          friendDragState.moved = true;
+        }
+        const nextOffsetX = (friendDragState.partStartWorldX || 0) + deltaX / .65;
+        const nextOffsetY = (friendDragState.partStartWorldY || 0) + deltaY / .65;
+        if (friendDragState.partType === "lid") {
+          friendState.lidDetached = true;
+          friendState.lidOffsetX = nextOffsetX;
+          friendState.lidOffsetY = nextOffsetY;
+        } else if (friendDragState.partType === "sleeve") {
+          friendState.sleeveDetached = true;
+          friendState.sleeveOffsetX = nextOffsetX;
+          friendState.sleeveOffsetY = nextOffsetY;
+        } else {
+          friendState.hairstyleDetached = true;
+          friendState.hairstyleOffsetX = nextOffsetX;
+          friendState.hairstyleOffsetY = nextOffsetY;
+        }
+        updateFriendElementAsset(friendState.id);
+        event.preventDefault();
+        event.stopPropagation();
         return;
       }
 
@@ -697,6 +875,29 @@
       if (typeof syncBackgroundObjectActivation === "function") {
         syncBackgroundObjectActivation(friendState, friendElement);
       }
+      if (friendState.type === "water-bowl" && !friendState.full) {
+        const fountainAnchor = window.CuppyLandWorldAnchors?.backgroundObjectAnchors?.playground?.find(
+          (anchor) => anchor.id === "drinking-fountain"
+        );
+        if (fountainAnchor) {
+          const canvasRect = worldCanvas.getBoundingClientRect();
+          const scaleX = worldCanvas.offsetWidth ? canvasRect.width / worldCanvas.offsetWidth : 1;
+          const scaleY = worldCanvas.offsetHeight ? canvasRect.height / worldCanvas.offsetHeight : 1;
+          const fountainRect = {
+            left: canvasRect.left + fountainAnchor.x * scaleX,
+            right: canvasRect.left + (fountainAnchor.x + fountainAnchor.width) * scaleX,
+            top: canvasRect.top + fountainAnchor.y * scaleY,
+            bottom: canvasRect.top + (fountainAnchor.y + fountainAnchor.height) * scaleY,
+          };
+          const friendRect = friendElement.getBoundingClientRect();
+          if (window.CuppyLandFriendOverlap?.rectsOverlap(friendRect, fountainRect)) {
+            friendState.full = true;
+            updateFriendElementAsset?.(friendState.id);
+            syncBackgroundObjectActivation(friendState, friendElement);
+            window.CuppyLandAudio?.playSfxClip?.("drinkingFountainActivated");
+          }
+        }
+      }
       if (typeof syncMerryGoRoundActivations === "function") {
         syncMerryGoRoundActivations();
       }
@@ -708,6 +909,37 @@
 
     function onPointerUp(event) {
       if (!friendDragState.active || event.pointerId !== friendDragState.pointerId) {
+        return;
+      }
+
+      if (friendDragState.partType) {
+        const friendElement = event.currentTarget.closest(".friend-character");
+        const friendState = resolveFriendStateForElement(friendElement);
+        if (friendState) {
+          if (friendDragState.partType === "lid") {
+            if (Math.abs(friendState.lidOffsetX) < 45 && Math.abs(friendState.lidOffsetY) < 45) {
+              friendState.lidDetached = false;
+              friendState.lidOffsetX = 11;
+              friendState.lidOffsetY = 0;
+            }
+          } else if (friendDragState.partType === "sleeve") {
+            if (Math.abs(friendState.sleeveOffsetX - 20) < 45 && Math.abs(friendState.sleeveOffsetY - 104) < 45) {
+              friendState.sleeveDetached = false;
+              friendState.sleeveOffsetX = 20;
+              friendState.sleeveOffsetY = 104;
+            }
+          } else if (friendState.hairstyle) {
+            if (Math.abs(friendState.hairstyleOffsetX - 17) < 55 && Math.abs(friendState.hairstyleOffsetY + 14) < 55) {
+              friendState.hairstyleDetached = false;
+              friendState.hairstyleOffsetX = 17;
+              friendState.hairstyleOffsetY = -14;
+            }
+          }
+          updateFriendElementAsset(friendState.id);
+        }
+        resetFriendDragState();
+        event.preventDefault();
+        event.stopPropagation();
         return;
       }
 
@@ -1115,7 +1347,10 @@
       friendReleaseController?.handleToyRelease(friendElement, friendState);
       friendReleaseController?.handleMotionRelease(friendState);
 
-      if (friendElement && friendState?.type === "chocolate-milk") {
+      if (friendElement && (
+        friendState?.type === "chocolate-milk"
+        || friendState?.type === "baby-mr-chocolate-milk"
+      )) {
         const previousPointerEvents = friendElement.style.pointerEvents || "";
         friendElement.style.pointerEvents = "none";
         const hoveredCupForMilk = getCupElementAtPoint(event.clientX, event.clientY);

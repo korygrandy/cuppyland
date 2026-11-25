@@ -11,6 +11,7 @@
 
     const fillState = {
       cupId: null,
+      characterType: "chocolate-milk",
       intervalId: null,
       completionLocked: false,
       frame: 2,
@@ -24,6 +25,7 @@
       fillState.intervalId = null;
       fillState.completionLocked = false;
       fillState.cupId = null;
+      fillState.characterType = "chocolate-milk";
       fillState.frame = 2;
       if (fillState.overlay) {
         fillState.overlay.remove();
@@ -43,11 +45,24 @@
       if (!fillState.overlay) {
         const overlay = document.createElement("div");
         overlay.className = "cup-fill-preview";
+        if (fillState.characterType === "baby-mr-chocolate-milk") {
+          overlay.classList.add("baby-chocolate-milk-fill-preview");
+          overlay.innerHTML = [
+            '<span class="baby-chocolate-milk-cup-base"></span>',
+            '<span class="baby-chocolate-milk-cup-lid"></span>',
+            '<span class="baby-chocolate-milk-cup-sleeve"></span>',
+          ].join("");
+        }
         worldCanvas.appendChild(overlay);
         fillState.overlay = overlay;
       }
 
       const overlay = fillState.overlay;
+      if (fillState.characterType === "baby-mr-chocolate-milk") {
+        overlay.classList.add("baby-chocolate-milk-fill-preview");
+      } else {
+        overlay.classList.remove("baby-chocolate-milk-fill-preview");
+      }
       overlay.style.left = `${cupState.worldX + previewConfig.offsetX}px`;
       overlay.style.top = `${cupState.worldY + previewConfig.offsetY}px`;
       overlay.style.width = `${previewConfig.width}px`;
@@ -68,7 +83,7 @@
       overlay.style.backgroundImage = `url("${frameAsset}")`;
     }
 
-    function onFillStart(cupId) {
+    function onFillStart(cupId, characterType = "chocolate-milk") {
       if (!cupId || fillState.completionLocked) {
         return;
       }
@@ -78,6 +93,7 @@
         clearPreview();
         fillState.cupId = cupId;
       }
+      fillState.characterType = characterType;
 
       paintFillFrame(cupId, 2);
       fillState.intervalId = setInterval(() => {
@@ -110,7 +126,7 @@
       fillState.completionLocked = true;
       stopSfxClip("milkPour");
       clearPreview();
-      onComplete(cupId);
+      onComplete(cupId, fillState.characterType);
     }
 
     function onFillEnd() {

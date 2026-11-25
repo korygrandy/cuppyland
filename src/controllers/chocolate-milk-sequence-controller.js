@@ -52,7 +52,10 @@
     }
 
     function isAttachedAndOpen(friendState) {
-      if (!friendState || friendState.type !== "chocolate-milk" || !friendState.attachedCupId) {
+      if (!friendState || (
+        friendState.type !== "chocolate-milk"
+        && friendState.type !== "baby-mr-chocolate-milk"
+      ) || !friendState.attachedCupId) {
         return false;
       }
 
@@ -137,7 +140,9 @@
 
         if (runtime.has(friendState.id)) {
           stop(friendState.id);
-        } else if (friendState.type === "chocolate-milk" && friendState.sequenceFrame) {
+        } else if ((friendState.type === "chocolate-milk"
+          || friendState.type === "baby-mr-chocolate-milk")
+          && friendState.sequenceFrame) {
           friendState.sequenceFrame = null;
         }
       });
@@ -149,7 +154,10 @@
 
     function startForCup(friendId, cupId) {
       const friendState = findFriendById(friendId);
-      if (!friendState || friendState.type !== "chocolate-milk" || !cupId) {
+      if (!friendState || (
+        friendState.type !== "chocolate-milk"
+        && friendState.type !== "baby-mr-chocolate-milk"
+      ) || !cupId) {
         return false;
       }
       const normalizedCupId = typeof cupId === "object" ? cupId.attachedCupId : cupId;

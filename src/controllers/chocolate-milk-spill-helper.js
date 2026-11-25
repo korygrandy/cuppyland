@@ -7,7 +7,10 @@
     if (!isCupOpen(cupState)) {
       return false;
     }
-    return Boolean(friendState && friendState.type === "chocolate-milk");
+    return Boolean(friendState && (
+      friendState.type === "chocolate-milk"
+      || friendState.type === "baby-mr-chocolate-milk"
+    ));
   }
 
   function getDoubleTapCupId(friendState, hoveredCupId) {

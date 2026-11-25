@@ -22,6 +22,7 @@
       "spongebob-stuffy",
       "pizza-man-craft",
       "chocolate-milk",
+      "baby-mr-chocolate-milk",
       "barbie-blonde",
       "barbie-blonde-baby",
       "golden-puppy",
@@ -364,8 +365,12 @@
         const wasActive = activeFriends.size > 0;
         activeFriends.delete(friendState.id);
         const isAllowedBouncer = isTrampolineBouncer(friendState);
+        const overlaps = friendIntersectsObject(friendState, friendElement, objectConfig);
+        const isAllowedActivator = Array.isArray(objectConfig.activatorTypes)
+          ? objectConfig.activatorTypes.includes(friendState.type)
+          : false;
 
-        if (isAllowedBouncer && friendIntersectsObject(friendState, friendElement, objectConfig)) {
+        if ((isAllowedBouncer || isAllowedActivator) && overlaps) {
           activeFriends.add(friendState.id);
         }
 
@@ -415,6 +420,19 @@
             }, objectConfig.fadeOutMs ?? 450);
             fadeTimers.set(objectConfig.id, fadeTimer);
           });
+        } else if (wasActive && !isActive && objectConfig.activatedSfx) {
+          anchor?.classList.remove("active");
+          anchor?.classList.remove("fading");
+          anchor?.classList.add("fading");
+          const previousTimer = fadeTimers.get(objectConfig.id);
+          if (previousTimer) {
+            clearTimeout(previousTimer);
+          }
+          const fadeTimer = setTimeout(() => {
+            anchor.classList.remove("fading");
+            fadeTimers.delete(objectConfig.id);
+          }, objectConfig.fadeOutMs ?? 450);
+          fadeTimers.set(objectConfig.id, fadeTimer);
         }
       });
     }

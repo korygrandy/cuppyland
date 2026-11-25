@@ -258,6 +258,53 @@ body {
   background: rgba(255, 94, 122, 0.85);
 }
 
+.backpack-icon {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 34px;
+  vertical-align: middle;
+  filter: drop-shadow(0 2px 2px rgba(9, 38, 82, 0.28));
+}
+
+.backpack-icon-body,
+.backpack-icon-flap,
+.backpack-icon-pocket {
+  position: absolute;
+  display: block;
+  box-sizing: border-box;
+}
+
+.backpack-icon-body {
+  left: 4px;
+  bottom: 1px;
+  width: 22px;
+  height: 28px;
+  border: 3px solid #153c70;
+  border-radius: 8px 8px 6px 6px;
+  background: #50a7ff;
+}
+
+.backpack-icon-flap {
+  left: 8px;
+  top: 3px;
+  width: 14px;
+  height: 9px;
+  border: 3px solid #153c70;
+  border-radius: 8px 8px 3px 3px;
+  background: #78baff;
+}
+
+.backpack-icon-pocket {
+  left: 8px;
+  bottom: 5px;
+  width: 14px;
+  height: 9px;
+  border: 2px solid #153c70;
+  border-radius: 3px 3px 5px 5px;
+  background: #8bc8ff;
+}
+
 .world-viewport {
   position: absolute;
   inset: 0;
@@ -416,6 +463,212 @@ body {
   transform: translateY(3px);
   opacity: 1;
   transition: transform 110ms ease-in, opacity 110ms ease-in;
+}
+
+.friend-character[data-friend-type="baby-mr-chocolate-milk"] .friend-character-art {
+  width: 132px;
+  height: 132px;
+  transform: scale(.65);
+  transform-origin: center bottom;
+}
+
+.friend-character[data-friend-type="baby-mr-chocolate-milk"] {
+  width: 86px;
+  height: 86px;
+  overflow: visible;
+  isolation: isolate;
+}
+
+.baby-mr-chocolate-milk-cup-base,
+.baby-mr-chocolate-milk-cup-lid,
+.baby-mr-chocolate-milk-cup-sleeve,
+.baby-mr-chocolate-milk-face {
+  position: absolute;
+  left: 50%;
+  display: block;
+  transform: translateX(-50%);
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.baby-mr-chocolate-milk-cup-base {
+  bottom: -22px;
+  width: 143px;
+  height: 179px;
+  border-radius: 10px;
+  background: #3e80ff;
+  z-index: 1;
+}
+
+.baby-mr-chocolate-milk-cup-sleeve {
+  bottom: 8px;
+  width: 130px;
+  height: 72px;
+  border-radius: 8px;
+  background: #ffd94d;
+  z-index: 2;
+}
+
+.baby-mr-chocolate-milk-cup-lid {
+  top: -24px;
+  width: 151px;
+  height: 97px;
+  border-radius: 28px 28px 12px 12px;
+  background: #ffd94d;
+  z-index: 3;
+}
+
+.baby-mr-chocolate-milk-face {
+  left: 50%;
+  bottom: 18px;
+  width: 86px;
+  height: 86px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  transform: translateX(-50%) scale(.65);
+  transform-origin: center bottom;
+  z-index: 4;
+}
+
+.baby-mr-chocolate-milk-hairstyle {
+  position: absolute;
+  left: 50%;
+  top: -14px;
+  width: 86px;
+  height: 86px;
+  transform: translateX(-50%);
+  transform-origin: center bottom;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+.friend-character[data-friend-type="parmesan-cheese"] {
+  width: 132px;
+  height: 276px;
+  overflow: visible;
+}
+
+.friend-character[data-friend-type="parmesan-cheese"] .friend-character-art {
+  width: 132px;
+  height: 276px;
+  background-position: center bottom;
+  background-size: contain;
+  transform-origin: center center;
+  transition: transform 520ms cubic-bezier(.2,.75,.2,1);
+}
+
+.friend-character[data-friend-type="parmesan-cheese"] .friend-character-art.parmesan-cheese-rotated {
+  transform: rotate(-45deg);
+}
+
+.parmesan-cheese-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1400;
+  overflow: visible;
+}
+
+.parmesan-cheese-particle {
+  position: absolute;
+  left: var(--cheese-start-x);
+  top: var(--cheese-start-y);
+  width: var(--cheese-size);
+  height: calc(var(--cheese-size) * 0.7);
+  border-radius: 2px;
+  background: #f4d77a;
+  box-shadow: 0 0 3px rgba(255, 231, 154, 0.7);
+  opacity: 0;
+  transform: translate(0, 0) rotate(var(--cheese-rotation));
+  animation: parmesanCheeseFall var(--cheese-duration) cubic-bezier(.2,.65,.35,1) forwards;
+  animation-delay: var(--cheese-delay);
+}
+
+.parmesan-cheese-pile {
+  position: absolute;
+  left: var(--pile-x);
+  top: var(--pile-y);
+  width: var(--pile-width);
+  height: 14px;
+  margin-left: calc(var(--pile-width) * -0.5);
+  border-radius: 0;
+  background: transparent;
+  opacity: 0;
+  transform: scale(.25);
+  animation: parmesanCheesePile 3000ms ease-out forwards;
+  animation-delay: var(--pile-delay);
+}
+
+.parmesan-cheese-pile-speck {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: var(--pile-speck-size);
+  height: var(--pile-speck-size);
+  margin-left: calc(var(--pile-speck-size) * -0.5);
+  margin-top: calc(var(--pile-speck-size) * -0.5);
+  border-radius: 50%;
+  background: #f4d77a;
+  box-shadow: 0 0 2px rgba(255, 231, 154, 0.55);
+  opacity: 0;
+  transform: translate(var(--pile-speck-x), var(--pile-speck-y));
+  animation: parmesanCheesePileSpeck 2200ms ease-out forwards;
+  animation-delay: var(--pile-speck-delay);
+}
+
+@keyframes parmesanCheesePileSpeck {
+  0%, 8% {
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  72% {
+    opacity: .95;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes parmesanCheeseFall {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(var(--cheese-rotation)) scale(.7);
+  }
+  12% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--cheese-drift-x), var(--cheese-fall-y)) rotate(var(--cheese-rotation)) scale(.45);
+  }
+}
+
+@keyframes parmesanCheesePile {
+  0%, 18% {
+    opacity: 0;
+    transform: scale(.25);
+  }
+  32% {
+    opacity: .95;
+    transform: scale(.65);
+  }
+  72% {
+    opacity: .9;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
 }
 
 .tube-slide-entering,
@@ -1269,6 +1522,51 @@ body {
   transform-origin: center center;
 }
 
+.baby-chocolate-milk-fill-preview {
+  width: 122px;
+  height: 122px;
+  background-size: 58% 58%;
+  background-position: center 72%;
+}
+
+.baby-chocolate-milk-cup-base,
+.baby-chocolate-milk-cup-lid,
+.baby-chocolate-milk-cup-sleeve {
+  position: absolute;
+  left: 50%;
+  display: block;
+  transform: translateX(-50%);
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.baby-chocolate-milk-cup-base {
+  bottom: 2px;
+  width: 82px;
+  height: 86px;
+  border-radius: 10px;
+  background: #3e80ff;
+  z-index: 1;
+}
+
+.baby-chocolate-milk-cup-lid {
+  top: 2px;
+  width: 88px;
+  height: 46px;
+  border-radius: 28px 28px 12px 12px;
+  background: #ffd94d;
+  z-index: 3;
+}
+
+.baby-chocolate-milk-cup-sleeve {
+  bottom: 19px;
+  width: 78px;
+  height: 42px;
+  border-radius: 8px;
+  background: #ffd94d;
+  z-index: 2;
+}
+
 .chocolate-milk-spill {
   position: absolute;
   inset: 0;
@@ -1914,6 +2212,22 @@ body {
   background-size: contain;
 }
 
+.inventory-baby-mr-chocolate-milk-thumb {
+  background-size: 65%;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.18));
+}
+
+.inventory-baby-mr-chocolate-milk-label {
+  display: block;
+  margin-top: 2px;
+  max-width: 62px;
+  font-size: 0.58rem;
+  line-height: 1;
+  font-weight: 700;
+  text-align: center;
+  color: white;
+}
+
 .inventory-expression-label {
   font-size: 0.62rem;
   letter-spacing: 0.04em;
@@ -1999,6 +2313,48 @@ body {
 .drag-ghost-friend {
   width: 132px;
   height: 132px;
+}
+
+.drag-ghost-baby-mr-chocolate-milk {
+  width: 86px;
+  height: 86px;
+  transform: scale(.65);
+  transform-origin: center;
+}
+
+.drag-ghost-baby-mr-chocolate-milk i {
+  position: absolute;
+  left: 50%;
+  display: block;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+}
+
+.drag-ghost-baby-cup-lid {
+  top: -24px;
+  width: 92px;
+  height: 48px;
+  border-radius: 28px 28px 12px 12px;
+  background: #ffd94d;
+  z-index: 3;
+}
+
+.drag-ghost-baby-cup-sleeve {
+  bottom: 8px;
+  width: 82px;
+  height: 48px;
+  border-radius: 8px;
+  background: #ffd94d;
+  z-index: 2;
+}
+
+.drag-ghost-baby-cup-base {
+  bottom: -22px;
+  width: 86px;
+  height: 86px;
+  border-radius: 10px;
+  background: #3e80ff;
+  z-index: 1;
 }
 
 .drag-ghost-uke {

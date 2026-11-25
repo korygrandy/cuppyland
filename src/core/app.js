@@ -191,6 +191,33 @@ const inventoryInteractionController = window.CuppyLandInventoryInteraction.crea
   refreshChocolateMilkSequences: () => refreshChocolateMilkSequences(),
   onChocolateMilkFillEnd,
   worldCanvas,
+  onDirectBabyMilkPart: (babyId, itemType, value) => {
+    const babyState = findFriendById(babyId, state.activeWorld);
+    if (!babyState || babyState.type !== "baby-mr-chocolate-milk") {
+      return false;
+    }
+    if (itemType === "lid") {
+      babyState.lidColor = value;
+    } else if (itemType === "cup") {
+      babyState.cupColor = value;
+    } else if (itemType === "sleeve") {
+      babyState.sleeve = value;
+      babyState.sleeveVisible = true;
+    } else if (itemType === "expression") {
+      babyState.expression = value;
+      babyState.faceVisible = true;
+    } else if (itemType === "hairstyle") {
+      babyState.hairstyle = value;
+      babyState.hairstyleVisible = true;
+      babyState.hairstyleDetached = false;
+      babyState.hairstyleOffsetX = 17;
+      babyState.hairstyleOffsetY = -14;
+    } else {
+      return false;
+    }
+    updateFriendElementAsset(babyId);
+    return true;
+  },
   onDirectPuppyToy: (toyType, puppyId) => {
     if (toyType === "dogbone") {
       return puppySequenceController?.playWithBone(puppyId) || false;
@@ -224,6 +251,7 @@ const inventoryInteractionController = window.CuppyLandInventoryInteraction.crea
     }
     bowlState.full = true;
     bowlState.type = "water-bowl";
+    syncBackgroundObjectActivation(bowlState, worldCanvas.querySelector(`.friend-character[data-friend-id="${bowlId}"]`));
     updateFriendElementAsset(bowlId);
     window.CuppyLandAudio?.playSfxClip?.("drinkingFountainActivated");
     if (sourceType === "fishbowl") {
@@ -272,9 +300,9 @@ const chocolateMilkFillController = window.CuppyLandChocolateMilkFillController.
   getSequenceConfig: () => getChocolateMilkSequenceConfig(),
   playLoopingSfxClip: (clipName) => window.CuppyLandAudio?.playLoopingSfxClip?.(clipName),
   stopSfxClip: (clipName) => window.CuppyLandAudio?.stopSfxClip?.(clipName),
-  onComplete: (cupId) => {
+  onComplete: (cupId, characterType) => {
     triggerCupSparkle(cupId);
-    ensureChocolateMilkForCup(cupId);
+    ensureChocolateMilkForCup(cupId, characterType);
   },
 });
 const chocolateMilkSequenceController = window.CuppyLandChocolateMilkSequenceController.createController({
@@ -456,6 +484,7 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
     }
     bowlState.full = true;
     updateFriendElementAsset(bowlId);
+    syncBackgroundObjectActivation(bowlState, worldCanvas.querySelector(`.friend-character[data-friend-id="${bowlId}"]`));
     window.CuppyLandAudio?.playSfxClip?.("drinkingFountainActivated");
     if (sourceType === "fishbowl") {
       window.CuppyLandAudio?.playSfxClip?.("fishbowlActivated");
@@ -490,6 +519,7 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
       return false;
     }
     bowlState.full = true;
+    syncBackgroundObjectActivation(bowlState, worldCanvas.querySelector(`.friend-character[data-friend-id="${bowlId}"]`));
     updateFriendElementAsset(bowlId);
     window.CuppyLandAudio?.playSfxClip?.("drinkingFountainActivated");
     if (sourceType === "fishbowl") {
@@ -593,7 +623,7 @@ function findFriendById(friendId, worldId = state.activeWorld) {
   return getWorldFriendList(worldId).find((friend) => friend.id === friendId) || null;
 }
 
-function ensureChocolateMilkForCup(cupId) {
+function ensureChocolateMilkForCup(cupId, characterType = "chocolate-milk") {
   if (!cupId || !state.activeWorld) {
     return null;
   }
@@ -602,12 +632,15 @@ function ensureChocolateMilkForCup(cupId) {
     return null;
   }
   const worldFriends = getWorldFriendList(state.activeWorld);
+  const normalizedCharacterType = characterType === "baby-mr-chocolate-milk"
+    ? "baby-mr-chocolate-milk"
+    : "chocolate-milk";
   let chocolateState = worldFriends.find((friend) => (
-    friend.type === "chocolate-milk"
+    friend.type === normalizedCharacterType
     && friend.attachedCupId === cupId
   ));
   if (!chocolateState) {
-    chocolateState = worldFriends.find((friend) => friend.type === "chocolate-milk");
+    chocolateState = worldFriends.find((friend) => friend.type === normalizedCharacterType);
   }
   if (chocolateState) {
     chocolateState.attachedCupId = cupId;
@@ -622,7 +655,7 @@ function ensureChocolateMilkForCup(cupId) {
   ), 90);
   chocolateState = {
     id: `friend-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
-    type: "chocolate-milk",
+    type: normalizedCharacterType,
     hasFood: false,
     pizzaWobbleActive: false,
     worldX: Math.max(0, Math.min(worldCanvas.offsetWidth - 132, cupInstance.state.worldX + 132)),
@@ -633,6 +666,25 @@ function ensureChocolateMilkForCup(cupId) {
     attachedOffsetY: 18,
     activated: false,
     sequenceCompleted: false,
+    ...(normalizedCharacterType === "baby-mr-chocolate-milk" ? {
+      lidColor: "yellow",
+      cupColor: "red",
+      sleeve: "child",
+      expression: "happy",
+      hairstyle: null,
+      lidDetached: false,
+      lidVisible: true,
+      lidOffsetX: 11,
+      lidOffsetY: 0,
+      sleeveDetached: false,
+      sleeveVisible: true,
+      sleeveOffsetX: 20,
+      sleeveOffsetY: 104,
+      hairstyleDetached: false,
+      hairstyleOffsetX: 17,
+      hairstyleOffsetY: -14,
+      hairstyleVisible: false,
+    } : {}),
   };
   worldFriends.push(chocolateState);
   renderWorldCups();
@@ -661,8 +713,8 @@ function clearChocolateMilkDragFillPreview() {
   chocolateMilkFillController.clearPreview();
 }
 
-function onChocolateMilkFillStart(cupId) {
-  chocolateMilkFillController.onFillStart(cupId);
+function onChocolateMilkFillStart(cupId, characterType = "chocolate-milk") {
+  chocolateMilkFillController.onFillStart(cupId, characterType);
 }
 
 function onChocolateMilkFillTick(cupId) {
@@ -673,8 +725,8 @@ function onChocolateMilkFillCancel() {
   chocolateMilkFillController.onFillCancel();
 }
 
-function onChocolateMilkFillComplete(cupId) {
-  chocolateMilkFillController.onFillComplete(cupId);
+function onChocolateMilkFillComplete(cupId, characterType = "chocolate-milk") {
+  chocolateMilkFillController.onFillComplete(cupId, characterType);
 }
 
 function onChocolateMilkFillEnd() {
@@ -817,6 +869,11 @@ function updateWorldBackground() {
 
 function resolveCupStateForElement(cupElement) {
   return cupPositionController.resolveCupStateForElement(cupElement);
+}
+
+function syncBackgroundObjectActivation(friendState, friendElement) {
+  backgroundObjectController?.syncFriend?.(friendState, friendElement);
+  tubeSlideController?.syncFriend?.(friendState, friendElement);
 }
 
 function syncCupWorldPosition(cupElement = cupCharacter) {

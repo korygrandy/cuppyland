@@ -154,10 +154,23 @@
     item.className = "inventory-item friend";
     item.dataset.itemType = "friend";
     item.dataset.value = friendName;
-    item.setAttribute("aria-label", `friend ${friendName}`);
+    const friendLabel = friendName === "baby-mr-chocolate-milk"
+      ? "Baby Mr Chocolate Milk"
+      : friendName;
+    item.setAttribute("aria-label", friendLabel);
+    item.title = friendLabel;
 
     const thumb = document.createElement("span");
     thumb.className = "inventory-friend-thumb";
+    if (friendName === "baby-mr-chocolate-milk") {
+      thumb.classList.add("inventory-baby-mr-chocolate-milk-thumb");
+      const babyLabel = document.createElement("span");
+      babyLabel.className = "inventory-baby-mr-chocolate-milk-label";
+      babyLabel.textContent = "Baby";
+      item.appendChild(thumb);
+      item.appendChild(babyLabel);
+      return item;
+    }
     thumb.style.backgroundImage = `url("${game.friendAssetMap?.[friendName] || ""}")`;
     item.appendChild(thumb);
     return item;
@@ -172,7 +185,7 @@
     const petsItems = document.getElementById("petsItems");
     const friendsItems = document.getElementById("friendsItems");
 
-    const accessoryTypes = new Set(["lavalamp", "chocolate-milk", "uke", "flower-bead-craft", "merry-go-round", "water-bottle"]);
+    const accessoryTypes = new Set(["lavalamp", "chocolate-milk", "baby-mr-chocolate-milk", "parmesan-cheese", "uke", "flower-bead-craft", "merry-go-round", "water-bottle"]);
     const petTypes = new Set(["golden-puppy", "doghouse", "dogbone", "rope-dogtoy", "dogtoy-ball", "dogleash", "dog-collar", "dogbed", "dogbowl", "dogfood", "water-bowl", "squirrel", "fishbowl", "rabbit-bead-craft", "triceratops-bead-craft", "turkey"]);
     const petOrder = [
       "golden-puppy",
@@ -225,7 +238,17 @@
       hairstyleItems.appendChild(createHairstyleItem(hairstyleName));
     });
 
-    friendTypes
+    const accessoryOrder = [
+      "baby-mr-chocolate-milk",
+      "parmesan-cheese",
+      "chocolate-milk",
+      "lavalamp",
+      "uke",
+      "flower-bead-craft",
+      "merry-go-round",
+      "water-bottle",
+    ];
+    accessoryOrder
       .filter((friendName) => accessoryTypes.has(friendName))
       .forEach((friendName) => {
         accessoriesItems.appendChild(createFriendItem(friendName));

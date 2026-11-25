@@ -27,6 +27,7 @@
     } = options;
 
     const imagePreloadCache = new Map();
+    const babyCanvasImageCache = new Map();
     const friendRemovalController = window.CuppyLandFriendRemovalController.createController({
       state,
       getWorldFriendList,
@@ -77,7 +78,8 @@
           getFriendAssetMap()?.["turkey-sequence-2"],
         );
       }
-      if (friendState.type === "chocolate-milk") {
+      if (friendState.type === "chocolate-milk"
+        || friendState.type === "baby-mr-chocolate-milk") {
         targets.push(
           getSequenceConfig?.().frame2Asset,
           getSequenceConfig?.().frame3Asset,
@@ -187,6 +189,95 @@
       }
 
       return getFriendAssetMap()?.[friendState.type] || "";
+    }
+
+    function loadBabyCanvasImage(src) {
+      if (!src) {
+        return Promise.resolve(null);
+      }
+      if (babyCanvasImageCache.has(src)) {
+        return babyCanvasImageCache.get(src);
+      }
+      const promise = new Promise((resolve) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => resolve(null);
+        image.src = src;
+      });
+      babyCanvasImageCache.set(src, promise);
+      return promise;
+    }
+
+    function paintBabyTintedCanvas(canvas, assetSrc, colorName) {
+      if (!canvas) {
+        return;
+      }
+      const context = canvas.getContext("2d");
+      if (!context) {
+        return;
+      }
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      loadBabyCanvasImage(assetSrc).then((image) => {
+        if (!image) {
+          context.fillStyle = window.CuppyLandGame?.colorMap?.[colorName] || "#ffffff";
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          return;
+        }
+        context.fillStyle = window.CuppyLandGame?.colorMap?.[colorName] || "#ffffff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.save();
+        context.globalCompositeOperation = "multiply";
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        context.restore();
+        context.save();
+        context.globalCompositeOperation = "destination-in";
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        context.restore();
+      });
+    }
+
+    function syncBabyChocolateMilkParts(friendState, friendElement = null) {
+      if (!friendState || friendState.type !== "baby-mr-chocolate-milk") {
+        return;
+      }
+      const element = friendElement || worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`);
+      if (!element) {
+        return;
+      }
+      const lid = element.querySelector(".baby-mr-chocolate-milk-cup-lid");
+      const base = element.querySelector(".baby-mr-chocolate-milk-cup-base");
+      const sleeve = element.querySelector(".baby-mr-chocolate-milk-cup-sleeve");
+      const hairstyle = element.querySelector(".baby-mr-chocolate-milk-hairstyle");
+      const face = element.querySelector(".baby-mr-chocolate-milk-face");
+      paintBabyTintedCanvas(lid, window.CuppyLandGame?.tintAssetConfig?.lid, friendState.lidColor || "yellow");
+      paintBabyTintedCanvas(base, window.CuppyLandGame?.tintAssetConfig?.cup, friendState.cupColor || "red");
+      if (sleeve) {
+        const sleeveAsset = window.CuppyLandGame?.sleeveAssetMap?.[friendState.sleeve]
+          || window.CuppyLandGame?.defaultSleeveAsset;
+        paintBabyTintedCanvas(sleeve, sleeveAsset, friendState.sleeve || "child");
+      }
+      if (lid) {
+        lid.style.display = friendState.lidVisible === false ? "none" : "block";
+        lid.style.left = `calc(50% + ${(friendState.lidDetached ? friendState.lidOffsetX * .65 : 11 * .65)}px)`;
+        lid.style.top = `${friendState.lidDetached ? friendState.lidOffsetY * .65 : 0}px`;
+      }
+      if (sleeve) {
+        sleeve.style.display = friendState.sleeveVisible === false ? "none" : "block";
+        sleeve.style.left = `calc(50% + ${(friendState.sleeveDetached ? friendState.sleeveOffsetX * .65 : 20 * .65)}px)`;
+        sleeve.style.top = `${friendState.sleeveDetached ? friendState.sleeveOffsetY * .65 : 104 * .65}px`;
+      }
+      if (hairstyle) {
+        hairstyle.style.display = friendState.hairstyleVisible === false ? "none" : "block";
+        hairstyle.style.left = `calc(50% + ${(friendState.hairstyleDetached ? friendState.hairstyleOffsetX * .65 : 17 * .65)}px)`;
+        hairstyle.style.top = `${friendState.hairstyleDetached ? friendState.hairstyleOffsetY * .65 : -14 * .65}px`;
+        const hairstyleAsset = window.CuppyLandGame?.hairstyleAssetMap?.[friendState.hairstyle || "child"]
+          || "./assets/hairstyle-child.svg";
+        hairstyle.style.backgroundImage = `url("${hairstyleAsset}")`;
+      }
+      if (face) {
+        const faceAsset = window.CuppyLandGame?.expressionAssetMap?.[friendState.expression || "happy"];
+        face.style.backgroundImage = `url("${faceAsset || "./assets/facial-expression-happy.png"}")`;
+      }
     }
 
     function syncDogbedExtractionZone(friendState) {
@@ -299,10 +390,13 @@
       const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"]`);
       const friendArt = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"] .friend-character-art`);
       if (friendArt) {
-        friendArt.style.backgroundImage = `url("${asset}")`;
+        friendArt.style.backgroundImage = friendState?.type === "baby-mr-chocolate-milk"
+          ? "none"
+          : `url("${asset}")`;
       }
       syncFriendAnimationClasses(friendState, friendElement);
       syncDogbedExtractionZone(friendState);
+      syncBabyChocolateMilkParts(friendState, friendElement);
     }
 
     function findFriendById(friendId, worldId = state.activeWorld) {
@@ -756,11 +850,38 @@
       const art = document.createElement("span");
       art.className = "friend-character-art";
       art.style.backgroundImage = `url("${resolveFriendAsset(friendState)}")`;
+      if (friendState.type === "baby-mr-chocolate-milk") {
+        art.style.backgroundImage = "none";
+      }
       if (friendState.type === "flower-bead-craft") {
         art.style.transform = `scaleX(${friendState.flipped ? -1 : 1}) scaleY(1)`;
         art.style.transformOrigin = "center bottom";
       }
       friendElement.appendChild(art);
+      if (friendState.type === "baby-mr-chocolate-milk") {
+        const lid = document.createElement("canvas");
+        lid.className = "baby-mr-chocolate-milk-cup-lid";
+        lid.width = 232;
+        lid.height = 149;
+        const sleeve = document.createElement("canvas");
+        sleeve.className = "baby-mr-chocolate-milk-cup-sleeve";
+        sleeve.width = 200;
+        sleeve.height = 110;
+        const base = document.createElement("canvas");
+        base.className = "baby-mr-chocolate-milk-cup-base";
+        base.width = 220;
+        base.height = 275;
+        const face = document.createElement("span");
+        face.className = "baby-mr-chocolate-milk-face";
+        const hairstyle = document.createElement("span");
+        hairstyle.className = "baby-mr-chocolate-milk-hairstyle";
+        friendElement.appendChild(base);
+        friendElement.appendChild(sleeve);
+        friendElement.appendChild(lid);
+        friendElement.appendChild(face);
+        friendElement.appendChild(hairstyle);
+        syncBabyChocolateMilkParts(friendState, friendElement);
+      }
       const shouldRenderCompanionOverlay = window.CuppyLandPuppySequenceGuardHelper?.shouldRenderCompanionOverlay
         ? window.CuppyLandPuppySequenceGuardHelper.shouldRenderCompanionOverlay(friendState)
         : !friendState.sequenceActive;
