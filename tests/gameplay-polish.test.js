@@ -15,6 +15,8 @@ test("inventory button uses the blue backpack icon", () => {
 test("cup and lid polish sources contain drag, snap, and boundary behavior", () => {
   const styles = fs.readFileSync("styles.css", "utf8");
   const cupPointer = fs.readFileSync("src/controllers/cup-pointer-controller.js", "utf8");
+  const cupPosition = fs.readFileSync("src/controllers/cup-position-controller.js", "utf8");
+  const render = fs.readFileSync("src/controllers/render-controller.js", "utf8");
   const inventory = fs.readFileSync("src/controllers/inventory-interaction-controller.js", "utf8");
   const rules = fs.readFileSync("src/controllers/game-rules-controller.js", "utf8");
 
@@ -25,6 +27,9 @@ test("cup and lid polish sources contain drag, snap, and boundary behavior", () 
   assert.equal(inventory.includes('dragState.type === "cup-create"'), false);
   assert.equal(rules.includes("lid-already-snapped"), true);
   assert.equal(rules.includes("lidDetached = false"), true);
+  assert.equal(cupPosition.includes("cupState.lidVisible === false && cupState.hairstyleDetached !== true"), true);
+  assert.equal(cupPosition.includes('hairstyleLayerElement.style.display = "none"'), true);
+  assert.equal(render.includes("cupState.hairstyleDetached === true"), true);
 });
 
 test("water bowl double-tap and fountain hitbox activate immediately", () => {
@@ -49,13 +54,16 @@ test("water, puppy, and toy interactions are registered", () => {
   const app = fs.readFileSync("src/core/app.js", "utf8");
   const pointer = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
   const inventory = fs.readFileSync("src/controllers/inventory-interaction-controller.js", "utf8");
+  const directDropResolver = fs.readFileSync("src/controllers/inventory-direct-drop-resolver.js", "utf8");
   const config = fs.readFileSync("src/core/game-config.js", "utf8");
   const ui = fs.readFileSync("src/ui/inventory.js", "utf8");
 
   assert.equal(app.includes("onDirectWaterSource"), true);
   assert.equal(pointer.includes("onDirectPuppyToBed"), true);
   assert.equal(pointer.includes("onDirectWaterSource"), true);
-  assert.equal(inventory.includes('dragState.value === "fishbowl" || dragState.value === "water-bottle"'), true);
+  assert.equal(directDropResolver.includes('dragState.value === "fishbowl" || dragState.value === "water-bottle"'), true);
+  assert.equal(pointer.includes('if (friendState.type === "water-bottle")'), true);
+  assert.equal(pointer.includes('removeFriendInstance(friendState.id, { playRemovedSfx: false })'), true);
   assert.equal(config.includes('"water-bottle"'), true);
   assert.equal(ui.includes('"water-bottle"'), true);
 });
@@ -189,11 +197,15 @@ test("pumpkin woman and shared object hairstyle snapping are configured", () => 
 
 test("pumpkin man and pumpkin woman double-tap roll animations are configured", () => {
   const pointer = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
+  const doubleTap = fs.readFileSync("src/controllers/friend-double-tap-controller.js", "utf8");
+  const index = fs.readFileSync("index.html", "utf8");
   const styles = fs.readFileSync("styles.css", "utf8");
   const config = fs.readFileSync("src/core/game-config.js", "utf8");
 
   assert.equal(config.includes('"punpkin-man"'), true);
   assert.equal(config.includes('"pumpkin-woman"'), true);
+  assert.equal(doubleTap.includes("tryActivate(friendState"), true);
+  assert.equal(index.includes("friend-double-tap-controller.js"), true);
   assert.equal(pointer.includes('friendState.type === "punpkin-man" || friendState.type === "pumpkin-woman"'), true);
   assert.equal(pointer.includes("pumpkin-man-roll-left"), true);
   assert.equal(pointer.includes("pumpkin-man-roll-right"), true);
@@ -232,11 +244,14 @@ test("Parmesan cheese double-tap rotates and drops a cheese pile", () => {
   assert.equal(pointer.includes('friendState.type === "parmesan-cheese"'), true);
   assert.equal(pointer.includes('transform = "rotate(-45deg)"'), true);
   assert.equal(pointer.includes("playParmesanCheeseAnimation"), true);
-  assert.equal(pointer.includes('playSfxClip?.("parmesanCheeseActivated")'), true);
+  assert.equal(pointer.includes('CuppyLandObjectSfxTriggerRegistry?.playDoubleTapSfx'), true);
   assert.equal(config.includes("parmesanCheeseActivated"), true);
   assert.equal(styles.includes(".parmesan-cheese-particle"), true);
   assert.equal(styles.includes(".parmesan-cheese-pile"), true);
   assert.equal(styles.includes(".parmesan-cheese-pile-speck"), true);
+  assert.equal(styles.includes("animation: parmesanCheesePile 30000ms"), true);
+  assert.equal(styles.includes("animation: parmesanCheesePileSpeck 30000ms"), true);
+  assert.equal(pointer.includes("}, 30000);"), true);
   assert.equal(pointer.includes("art.style.transform = \"rotate(0deg)\""), true);
   assert.equal(styles.includes("@keyframes parmesanCheeseFall"), true);
   assert.equal(styles.includes("@keyframes parmesanCheesePile"), true);
@@ -255,13 +270,13 @@ test("baby Mr Chocolate Milk shares cup and milk behavior at baby scale", () => 
   assert.equal(inventory.includes('"baby-mr-chocolate-milk"'), true);
   assert.equal(inventory.includes("Baby Mr Chocolate Milk"), true);
   assert.equal(inventory.includes("inventory-baby-mr-chocolate-milk-thumb"), true);
-  assert.equal(inventory.includes("Baby"), true);
+  assert.equal(inventory.includes('friendName !== "baby-mr-chocolate-milk"'), true);
   assert.equal(inventoryController.includes('dragState.value === "baby-mr-chocolate-milk"'), true);
   assert.equal(inventoryController.includes("drag-ghost-baby-cup-lid"), true);
   assert.equal(inventoryController.includes("drag-ghost-baby-cup-sleeve"), true);
   assert.equal(inventoryController.includes("drag-ghost-baby-cup-base"), true);
   assert.equal(friendController.includes('friendState?.type !== "baby-mr-chocolate-milk"'), true);
-  assert.equal(sequenceController.includes('friendState.type !== "baby-mr-chocolate-milk"'), true);
+  assert.equal(sequenceController.includes("CuppyLandChocolateMilkTypes?.isChocolateMilkType"), true);
   assert.equal(styles.includes('.friend-character[data-friend-type="baby-mr-chocolate-milk"]'), true);
   assert.equal(styles.includes(".baby-mr-chocolate-milk-cup-base"), true);
   assert.equal(styles.includes(".baby-mr-chocolate-milk-cup-lid"), true);
@@ -271,7 +286,12 @@ test("baby Mr Chocolate Milk shares cup and milk behavior at baby scale", () => 
 
 test("water bottle is in accessories and remains a snap source", () => {
   const ui = fs.readFileSync("src/ui/inventory.js", "utf8");
-  assert.equal(ui.includes('"lavalamp", "chocolate-milk", "baby-mr-chocolate-milk", "parmesan-cheese", "uke"'), true);
+  const config = fs.readFileSync("src/core/game-config.js", "utf8");
+  assert.equal(ui.includes('"lavalamp", "chocolate-milk", "parmesan-cheese", "uke"'), true);
+  assert.equal(ui.includes('const accessoryTypes = new Set(["lavalamp", "chocolate-milk", "baby-mr-chocolate-milk"'), false);
+  assert.equal(ui.includes('const accessoryOrder = [\n      "baby-mr-chocolate-milk"'), false);
+  assert.equal(ui.includes('friendName !== "baby-mr-chocolate-milk"'), true);
+  assert.equal(config.includes('      "baby-mr-chocolate-milk",'), false);
   assert.equal(ui.includes('"water-bottle"'), true);
 });
 

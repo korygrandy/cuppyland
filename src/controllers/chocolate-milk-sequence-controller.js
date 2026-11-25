@@ -52,10 +52,13 @@
     }
 
     function isAttachedAndOpen(friendState) {
-      if (!friendState || (
-        friendState.type !== "chocolate-milk"
-        && friendState.type !== "baby-mr-chocolate-milk"
-      ) || !friendState.attachedCupId) {
+      const isChocolateMilkType = window.CuppyLandChocolateMilkTypes?.isChocolateMilkType;
+      const isChocolate = typeof isChocolateMilkType === "function"
+        ? isChocolateMilkType(friendState?.type)
+        : friendState?.type === "chocolate-milk" || friendState?.type === "baby-mr-chocolate-milk";
+      if (!friendState
+        || !isChocolate
+        || !friendState.attachedCupId) {
         return false;
       }
 
@@ -83,7 +86,7 @@
       }
 
       const sequenceConfig = getSequenceConfig();
-      friendState.sequenceFrame = null;
+      friendState.sequenceFrame = 2;
       updateFriendElementAsset(friendState.id);
       const spillElement = ensureSpillEffect(friendState.attachedCupId);
       if (spillElement) {
@@ -105,6 +108,11 @@
         const currentSpill = ensureSpillEffect(activeFriend.attachedCupId);
         if (currentSpill) {
           currentSpill.classList.toggle("is-pulsing", Math.floor(elapsedMs / 450) % 2 === 0);
+        }
+        const nextFrame = Math.floor(elapsedMs / sequenceConfig.frameIntervalMs) % 2 === 0 ? 2 : 3;
+        if (activeFriend.sequenceFrame !== nextFrame) {
+          activeFriend.sequenceFrame = nextFrame;
+          updateFriendElementAsset(activeFriend.id);
         }
 
         if (elapsedMs >= sequenceConfig.durationMs) {
@@ -138,10 +146,13 @@
           return;
         }
 
+        const isChocolateMilkType = window.CuppyLandChocolateMilkTypes?.isChocolateMilkType;
+        const isChocolate = typeof isChocolateMilkType === "function"
+          ? isChocolateMilkType(friendState.type)
+          : friendState.type === "chocolate-milk" || friendState.type === "baby-mr-chocolate-milk";
         if (runtime.has(friendState.id)) {
           stop(friendState.id);
-        } else if ((friendState.type === "chocolate-milk"
-          || friendState.type === "baby-mr-chocolate-milk")
+        } else if (isChocolate
           && friendState.sequenceFrame) {
           friendState.sequenceFrame = null;
         }
@@ -154,10 +165,11 @@
 
     function startForCup(friendId, cupId) {
       const friendState = findFriendById(friendId);
-      if (!friendState || (
-        friendState.type !== "chocolate-milk"
-        && friendState.type !== "baby-mr-chocolate-milk"
-      ) || !cupId) {
+      const isChocolateMilkType = window.CuppyLandChocolateMilkTypes?.isChocolateMilkType;
+      const isChocolate = typeof isChocolateMilkType === "function"
+        ? isChocolateMilkType(friendState?.type)
+        : friendState?.type === "chocolate-milk" || friendState?.type === "baby-mr-chocolate-milk";
+      if (!friendState || !isChocolate || !cupId) {
         return false;
       }
       const normalizedCupId = typeof cupId === "object" ? cupId.attachedCupId : cupId;

@@ -30,10 +30,31 @@
       "rabbit-bead-craft",
       "squirrel",
       "turkey",
+      "punpkin-man",
+      "pumpkin-woman",
     ]);
 
     function isTrampolineBouncer(friendState) {
       return Boolean(friendState?.type && trampolineBouncerTypes.has(friendState.type));
+    }
+
+    function isGeneralHitboxType(friendType) {
+      if (!friendType) {
+        return false;
+      }
+      const excludedEquipmentTypes = new Set([
+        "dogbone",
+        "rope-dogtoy",
+        "dogtoy-ball",
+        "dogleash",
+        "dog-collar",
+        "dogbowl",
+        "dogbowl-with-food",
+        "dogfood",
+        "water-bottle",
+      ]);
+      return !excludedEquipmentTypes.has(friendType)
+        && Boolean(window.CuppyLandGame?.friendTypes?.includes(friendType));
     }
 
     function isBounceObject(objectConfig) {
@@ -44,7 +65,19 @@
     }
 
     function applyBounceArtFrame(anchor, objectConfig, frame) {
-      if (!anchor || !objectConfig?.activatedAssets) {
+      if (!anchor) {
+        return;
+      }
+      if (!objectConfig?.activatedAssets) {
+        const art = anchor.querySelector(".world-background-object-art");
+        if (!art) {
+          return;
+        }
+        const isActive = typeof anchor.classList?.contains === "function"
+          ? anchor.classList.contains("is-bouncing")
+          : true;
+        art.style.backgroundImage = `url("${objectConfig.activatedAsset || ""}")`;
+        art.style.opacity = isActive ? "1" : "0";
         return;
       }
       const downArt = anchor.querySelector(".world-background-object-art-down");
@@ -72,7 +105,7 @@
         return;
       }
       art.style.backgroundImage = `url("${objectConfig.activatedAsset || ""}")`;
-      art.style.opacity = isActive && frame === "up" ? "1" : "0";
+      art.style.opacity = isActive ? "1" : "0";
     }
 
     function restoreTrampolineFriend(friendId, record) {
@@ -149,7 +182,7 @@
         }
         const applyFrame = () => {
           const isBedBounce = objectId === "bed-bg";
-          const friendIsUp = isBedBounce ? frame === "down" : frame === "up";
+          const friendIsUp = isBedBounce ? frame === "up" : frame === "up";
           if (friendIsUp) {
             element.style.transition = "transform 90ms ease-out, opacity 90ms ease-out";
             element.style.transform = "translateY(-24px)";
@@ -206,7 +239,7 @@
         return;
       }
 
-      let frame = objectConfig.activatedAssets ? "down" : "up";
+      let frame = objectConfig.activatedAssets ? "down" : "down";
       trampolineFrames.set(objectId, frame);
       anchor.classList.add("is-bouncing");
       applyBounceArtFrame(anchor, objectConfig, frame);
@@ -369,8 +402,17 @@
         const isAllowedActivator = Array.isArray(objectConfig.activatorTypes)
           ? objectConfig.activatorTypes.includes(friendState.type)
           : false;
+        const isBedBouncer = objectConfig.id === "bed-bg";
+        const isGeneralHitboxActivator = [
+          "bed-bg",
+          "trampoline",
+          "tube-slide",
+          "drinking-fountain",
+          "merry-go-round",
+        ].includes(objectConfig.id)
+          && isGeneralHitboxType(friendState?.type);
 
-        if ((isAllowedBouncer || isAllowedActivator) && overlaps) {
+        if ((isAllowedBouncer || isAllowedActivator || isBedBouncer || isGeneralHitboxActivator) && overlaps) {
           activeFriends.add(friendState.id);
         }
 
@@ -383,8 +425,15 @@
         if (isBounceObject(objectConfig)) {
           const currentFriendOverlaps = friendIntersectsObject(friendState, friendElement, objectConfig);
           let newlyRegistered = false;
-          if (isAllowedBouncer && currentFriendOverlaps) {
+          if ((isAllowedBouncer || isBedBouncer || isGeneralHitboxActivator) && currentFriendOverlaps) {
             newlyRegistered = registerTrampolineFriend(objectConfig.id, friendState, friendElement);
+            if (newlyRegistered
+              && (objectConfig.id === "trampoline" || objectConfig.id === "bed-bg")) {
+              window.CuppyLandObjectSfxTriggerRegistry?.playBounceActivationSfx(
+                friendState.type,
+                (clipName) => playSfxClip(clipName)
+              );
+            }
           } else {
             unregisterTrampolineFriend(objectConfig.id, friendState.id);
           }

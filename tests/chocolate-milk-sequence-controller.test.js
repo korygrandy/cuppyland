@@ -29,6 +29,31 @@ function createSequenceController(cupStates) {
   return { controller, friends };
 }
 
+test("chocolate milk spill CSS is positioned 35px lower", () => {
+  const fs = require("node:fs");
+  const styles = fs.readFileSync("styles.css", "utf8");
+  assert.equal(styles.includes("inset: 35px 0 0;"), true);
+  assert.equal(styles.includes("top: 68px;"), true);
+  assert.equal(styles.includes("top: 252px;"), true);
+});
+
+test("chocolate milk spill swaps sequence 2 and 3 above the cup", () => {
+  const fs = require("node:fs");
+  const controller = fs.readFileSync("src/controllers/chocolate-milk-sequence-controller.js", "utf8");
+  const friendController = fs.readFileSync("src/controllers/world-friend-controller.js", "utf8");
+  const assetResolver = fs.readFileSync("src/controllers/friend-asset-resolver.js", "utf8");
+  const config = fs.readFileSync("src/core/game-config.js", "utf8");
+  const styles = fs.readFileSync("styles.css", "utf8");
+  assert.equal(controller.includes("friendState.sequenceFrame = 2"), true);
+  assert.equal(controller.includes("activeFriend.sequenceFrame !== nextFrame"), true);
+  assert.equal(assetResolver.includes('"chocolate-milk-sequence-2"'), true);
+  assert.equal(assetResolver.includes('"chocolate-milk-sequence-3"'), true);
+  assert.equal(friendController.includes("is-chocolate-milk-spilling"), true);
+  assert.equal(config.includes("chocolate-milk-sequence-2"), true);
+  assert.equal(config.includes("chocolate-milk-sequence-3"), true);
+  assert.equal(styles.includes("z-index: 1402 !important"), true);
+});
+
 test("CSS spill effect replaces frame asset swapping", () => {
   let spillElement = null;
   const cupClasses = new Set();
@@ -81,7 +106,7 @@ test("CSS spill effect replaces frame asset swapping", () => {
   });
 
   assert.equal(controller.startForCup("milk-1", "cup-1"), true);
-  assert.equal(friends[0].sequenceFrame, null);
+  assert.equal(friends[0].sequenceFrame, 2);
   assert.equal(Boolean(spillElement), true);
   assert.equal(spillElement.className, "chocolate-milk-spill");
   assert.equal(spillElement.innerHTML.includes("milk-flow"), true);

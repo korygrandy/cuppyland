@@ -127,20 +127,11 @@
         } : {}),
       });
       renderWorldCups();
-      if (friendType === "rocketman-craft") {
-        window.CuppyLandAudio?.playSfxClip?.("rocketship");
-      }
-      if (friendType === "spongebob-stuffy") {
-        window.CuppyLandAudio?.playSfxClip?.("spongebob");
-      }
-      if (friendType === "hairy-guy") {
-        window.CuppyLandAudio?.playSfxClip?.("hairyGuy");
-      }
-      if (friendType === "furball-guy") {
-        window.CuppyLandAudio?.playSfxClip?.("furballGuy");
-      }
+      window.CuppyLandObjectSfxTriggerRegistry?.playSnapSfx(
+        friendType,
+        (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName)
+      );
       if (friendType === "golden-puppy") {
-        window.CuppyLandAudio?.playSfxClip?.("goldenPuppyActivated");
         const newPuppy = worldFriends[worldFriends.length - 1];
         schedulePuppyRequest(newPuppy);
       }

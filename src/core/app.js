@@ -14,6 +14,23 @@ const {
   chocolateMilkSequence,
 } = window.CuppyLandGame;
 
+const triggerGuard = window.CuppyLandTriggerManifest.validate({
+  worldAnchors: window.CuppyLandGame.backgroundObjectAnchors,
+  friendTypes: window.CuppyLandGame.friendTypes,
+  assetMap: window.CuppyLandGame.friendAssetMap,
+  sfxMap: window.CuppyLandGame.audioConfig.sfxClips,
+  frameAssets: window.CuppyLandGame.chocolateMilkSequence?.frameAssets,
+});
+if (!triggerGuard.valid) {
+  throw new Error(`Trigger guard failed:\n- ${triggerGuard.errors.join("\n- ")}`);
+}
+const objectSfxGuard = window.CuppyLandObjectSfxTriggerRegistry.validate(
+  window.CuppyLandGame.audioConfig.sfxClips
+);
+if (!objectSfxGuard.valid) {
+  throw new Error(`Object SFX guard failed:\n- ${objectSfxGuard.errors.join("\n- ")}`);
+}
+
 const dom = window.CuppyLandDomElements.createDomElements(document);
 const {
   screenEls,
@@ -598,7 +615,6 @@ friendWorldController = window.CuppyLandWorldFriendController.createController({
     if (!puppyState) {
       return;
     }
-    window.CuppyLandAudio?.playSfxClip?.("goldenPuppyActivated");
     requestAnimationFrame(() => {
       const puppyElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${puppyState.id}"]`);
       if (puppyElement) {
@@ -611,7 +627,6 @@ friendWorldController = window.CuppyLandWorldFriendController.createController({
     if (!puppyState) {
       return;
     }
-    window.CuppyLandAudio?.playSfxClip?.("goldenPuppyActivated");
     requestAnimationFrame(() => {
       const puppyElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${puppyState.id}"]`);
       if (puppyElement) {
@@ -1005,8 +1020,11 @@ function openWorld(worldId) {
   tubeSlideController.render(worldId);
   screenWorldController.openWorld(worldId);
   showWorldHeadlineOverlay(worldId);
+  window.CuppyLandAudio?.unlockAudio?.();
   if (worldId === "playground") {
-    window.CuppyLandAudio?.playSfxClip?.("playgroundIntroFx");
+    window.setTimeout(() => {
+      window.CuppyLandAudio?.playSfxClip?.("playgroundIntroFx");
+    }, 80);
   } else if (worldId === "olivia-room") {
     window.CuppyLandAudio?.playSfxClip?.("myNameIsOlivia");
   }

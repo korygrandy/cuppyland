@@ -33,6 +33,16 @@
       onDirectBabyMilkPart = null,
       onDirectObjectHairstyle = null,
     } = options;
+    const directDropResolver = window.CuppyLandInventoryDirectDropResolver?.createController({
+      documentRef: document,
+      worldCanvas,
+      onDirectObjectHairstyle,
+      onDirectBabyMilkPart,
+      onDirectPuppyToBed,
+      onDirectDogFood,
+      onDirectWaterSource,
+      onDirectPuppyToy,
+    });
     const chocolateMilkFillDurationMs = game.chocolateMilkSequence?.durationMs || 5000;
     const chocolateMilkFillState = {
       cupId: null,
@@ -353,152 +363,20 @@
       const targetCupId = hoveredCup?.dataset.cupId || getActiveCupId();
       const zone = zoneForPoint(event.clientX, event.clientY);
       const isFriendDrop = dragState.type === "friend";
-      if (
-        (dragState.type === "hairstyle")
-        && !isFriendDrop
-      ) {
-        const targetedElement = document.elementFromPoint(event.clientX, event.clientY);
-        let friendElement = targetedElement?.closest?.(
-          '.friend-character[data-friend-id]'
-        );
-        if (!friendElement && worldCanvas) {
-          friendElement = Array.from(worldCanvas.querySelectorAll(".friend-character[data-friend-id]"))
-            .find((candidate) => {
-              const rect = candidate.getBoundingClientRect();
-              return event.clientX >= rect.left
-                && event.clientX <= rect.right
-                && event.clientY >= rect.top
-                && event.clientY <= rect.bottom;
-            }) || null;
+      const directDrop = directDropResolver?.resolve(event, dragState) || { handled: false };
+      if (directDrop.handled) {
+        dragState.suppressClick = true;
+        dragState.active = false;
+        dragState.type = "";
+        dragState.value = "";
+        dragState.pointerId = null;
+        dragState.moved = false;
+        if (directDrop.resetChocolateMilkFill) {
+          resetChocolateMilkFill("direct-puppy-toy");
         }
-        if (friendElement && typeof onDirectObjectHairstyle === "function") {
-          const applied = onDirectObjectHairstyle(
-            friendElement.dataset.friendId,
-            "hairstyle",
-            dragState.value
-          );
-          if (applied) {
-            dragState.suppressClick = true;
-            dragState.active = false;
-            dragState.type = "";
-            dragState.value = "";
-            dragState.pointerId = null;
-            dragState.moved = false;
-            hideDragGhost();
-            clearZoneHighlights();
-            return;
-          }
-        }
-      }
-      if (
-        !isFriendDrop
-        && ["lid", "cup", "sleeve", "expression", "hairstyle"].includes(dragState.type)
-      ) {
-        const targetedElement = document.elementFromPoint(event.clientX, event.clientY);
-        const babyElement = targetedElement?.closest?.('.friend-character[data-friend-type="baby-mr-chocolate-milk"]');
-        if (babyElement && typeof onDirectBabyMilkPart === "function") {
-          const applied = onDirectBabyMilkPart(
-            babyElement.dataset.friendId,
-            dragState.type,
-            dragState.value
-          );
-          if (applied) {
-            dragState.suppressClick = true;
-            dragState.active = false;
-            dragState.type = "";
-            dragState.value = "";
-            dragState.pointerId = null;
-            dragState.moved = false;
-            hideDragGhost();
-            clearZoneHighlights();
-            return;
-          }
-        }
-      }
-      if (isFriendDrop && dragState.value === "golden-puppy") {
-        const targetedElement = document.elementFromPoint(event.clientX, event.clientY);
-        const bedElement = targetedElement?.closest?.('.friend-character[data-friend-type="dogbed"]');
-        if (bedElement) {
-          const activated = onDirectPuppyToBed?.(bedElement.dataset.friendId);
-          if (activated) {
-            dragState.suppressClick = true;
-            dragState.active = false;
-            dragState.type = "";
-            dragState.value = "";
-            dragState.pointerId = null;
-            dragState.moved = false;
-            hideDragGhost();
-            clearZoneHighlights();
-            return;
-          }
-        }
-      }
-      if (isFriendDrop && dragState.value === "dogfood") {
-        const targetedElement = document.elementFromPoint(event.clientX, event.clientY);
-        const bowlElement = targetedElement?.closest?.('.friend-character[data-friend-type="dogbowl"]');
-        if (bowlElement) {
-          const activated = onDirectDogFood?.(bowlElement.dataset.friendId);
-          if (activated) {
-            dragState.suppressClick = true;
-            dragState.active = false;
-            dragState.type = "";
-            dragState.value = "";
-            dragState.pointerId = null;
-            dragState.moved = false;
-            hideDragGhost();
-            clearZoneHighlights();
-            return;
-          }
-        }
-        if (isFriendDrop && (dragState.value === "fishbowl" || dragState.value === "water-bottle")) {
-          const targetedElement = document.elementFromPoint(event.clientX, event.clientY);
-          const bowlElement = targetedElement?.closest?.('.friend-character[data-friend-type="water-bowl"]');
-          if (bowlElement) {
-            const activated = onDirectWaterSource?.(bowlElement.dataset.friendId, dragState.value);
-            if (activated) {
-              dragState.suppressClick = true;
-              dragState.active = false;
-              dragState.type = "";
-              dragState.value = "";
-              dragState.pointerId = null;
-              dragState.moved = false;
-              hideDragGhost();
-              clearZoneHighlights();
-              return;
-            }
-          }
-        }
-      }
-      if (isFriendDrop && (dragState.value === "dogbone" || dragState.value === "rope-dogtoy" || dragState.value === "dogtoy-ball" || dragState.value === "squirrel")) {
-        const targetedElement = document.elementFromPoint(event.clientX, event.clientY);
-        let puppyElement = targetedElement?.closest?.('.friend-character[data-friend-type="golden-puppy"]');
-        if (!puppyElement && worldCanvas) {
-          puppyElement = Array.from(worldCanvas.querySelectorAll('.friend-character[data-friend-type="golden-puppy"]')).find((candidate) => {
-            const rect = candidate.getBoundingClientRect();
-            return event.clientX >= rect.left
-              && event.clientX <= rect.right
-              && event.clientY >= rect.top
-              && event.clientY <= rect.bottom;
-          }) || null;
-        }
-        if (puppyElement) {
-          const activated = onDirectPuppyToy?.(
-            dragState.value,
-            puppyElement.dataset.friendId
-          );
-          if (activated) {
-            dragState.suppressClick = true;
-            dragState.active = false;
-            dragState.type = "";
-            dragState.value = "";
-            dragState.pointerId = null;
-            dragState.moved = false;
-            resetChocolateMilkFill("direct-puppy-toy");
-            hideDragGhost();
-            clearZoneHighlights();
-            return;
-          }
-        }
+        hideDragGhost();
+        clearZoneHighlights();
+        return;
       }
       const dropPoint = isFriendDrop ? getWorldDropPoint(event.clientX, event.clientY) : null;
       const adjustedDropPoint = (isFriendDrop

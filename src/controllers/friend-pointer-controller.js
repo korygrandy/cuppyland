@@ -56,6 +56,22 @@
       onDirectWaterSource = null,
       timerLifecycle = null,
     } = options;
+    const doubleTapController = window.CuppyLandFriendDoubleTapController?.createController()
+      || {
+        tryActivate: (friendState, windowMs, activate) => {
+          const nowMs = Date.now();
+          const lastTapAtMs = Number.isFinite(friendState?.lastTapAtMs) ? friendState.lastTapAtMs : 0;
+          if (lastTapAtMs && nowMs - lastTapAtMs <= windowMs) {
+            friendState.lastTapAtMs = 0;
+            activate?.();
+            return true;
+          }
+          if (friendState) {
+            friendState.lastTapAtMs = nowMs;
+          }
+          return false;
+        },
+      };
     const chocolateMilkFillDurationMs = getSequenceConfig?.().durationMs || 5000;
     const chocolateMilkFillState = {
       cupId: null,
@@ -397,7 +413,7 @@
       friendElement.appendChild(particles);
       window.setTimeout(() => {
         particles.remove();
-      }, 3600);
+      }, 30000);
     }
 
     function syncSquirrelAvoidance(dogElement, dogState) {
@@ -633,32 +649,39 @@
         return;
       }
 
+      if (friendState.type === "golden-puppy" && !friendState.pointerActivatedSfxPlayed) {
+        friendState.pointerActivatedSfxPlayed = true;
+        window.CuppyLandObjectSfxTriggerRegistry?.playSnapSfx(
+          friendState.type,
+          (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName)
+        );
+      }
+
       if (friendState.type === "punpkin-man" || friendState.type === "pumpkin-woman") {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-          friendState.lastTapAtMs = 0;
+        const activated = doubleTapController.tryActivate(friendState, 450, () => {
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
           playPumpkinAnimation(friendState, friendElement);
+        });
+        if (activated) {
           return;
         }
-        friendState.lastTapAtMs = nowMs;
       }
 
-      if (friendState.type === "golden-puppy" && friendState.activated !== true) {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-          friendState.lastTapAtMs = nowMs;
+      if (friendState.type === "golden-puppy") {
+        const activated = doubleTapController.tryActivate(friendState, 450, () => {
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
-          window.CuppyLandAudio?.playSfxClip?.("puppyBarking");
+          window.CuppyLandObjectSfxTriggerRegistry?.playDoubleTapSfx(
+            friendState.type,
+            (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName)
+          );
+        });
+        if (activated) {
           return;
         }
-        friendState.lastTapAtMs = nowMs;
         if (friendState.hasLeash) {
           friendState.walkingActive = true;
           friendState.walkingFacing = friendState.walkingFacing || "right";
@@ -678,96 +701,158 @@
       }
 
       if (friendState.type === "turkey") {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 320) {
-          friendState.lastTapAtMs = nowMs;
-          window.CuppyLandAudio?.playSfxClip?.("turkeyGobble");
+        const activated = doubleTapController.tryActivate(friendState, 320, () => {
+          window.CuppyLandObjectSfxTriggerRegistry?.playDoubleTapSfx(
+            friendState.type,
+            (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName)
+          );
           if (typeof triggerTurkeyAnimation === "function") {
             triggerTurkeyAnimation(friendState.id);
           }
+        });
+        if (activated) {
           return;
         }
-        friendState.lastTapAtMs = nowMs;
       }
 
       if (friendState.type === "fishbowl") {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-          friendState.lastTapAtMs = nowMs;
+        const activated = doubleTapController.tryActivate(friendState, 450, () => {
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
           if (typeof toggleFishbowlSequence === "function") {
             toggleFishbowlSequence(friendState.id);
           }
-          window.CuppyLandAudio?.playSfxClip?.("fishbowlActivated");
+          window.CuppyLandObjectSfxTriggerRegistry?.playDoubleTapSfx(
+            friendState.type,
+            (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName)
+          );
           friendState.fishbowlSuppressPointerDrag = true;
+        });
+        if (activated) {
           return;
         }
-        friendState.lastTapAtMs = nowMs;
         friendState.fishbowlSuppressPointerDrag = false;
       }
 
       if (friendState.type === "parmesan-cheese") {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-          friendState.lastTapAtMs = nowMs;
+        const activated = doubleTapController.tryActivate(friendState, 450, () => {
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
-          window.CuppyLandAudio?.playSfxClip?.("parmesanCheeseActivated");
+          window.CuppyLandObjectSfxTriggerRegistry?.playDoubleTapSfx(
+            friendState.type,
+            (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName)
+          );
           playParmesanCheeseAnimation(friendState, friendElement);
+        });
+        if (activated) {
           return;
         }
-        friendState.lastTapAtMs = nowMs;
       }
 
       if (friendState.type === "water-bowl") {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 300) {
-          friendState.lastTapAtMs = 0;
+        const activated = doubleTapController.tryActivate(friendState, 300, () => {
           friendState.full = true;
           friendState.type = "water-bowl";
           updateFriendElementAsset?.(friendState.id);
           syncBackgroundObjectActivation(friendState, friendElement);
-          window.CuppyLandAudio?.playSfxClip?.("drinkingFountainActivated");
+          window.CuppyLandObjectSfxTriggerRegistry?.playDoubleTapSfx(
+            friendState.type,
+            (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName)
+          );
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
+        });
+        if (activated) {
           return;
         }
-        friendState.lastTapAtMs = nowMs;
       }
 
       if (friendState.type === "rocketman-craft") {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-          friendState.lastTapAtMs = nowMs;
+        const activated = doubleTapController.tryActivate(friendState, 450, () => {
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
           if (typeof triggerRocketManAnimation === "function") {
             triggerRocketManAnimation(friendState.id);
           }
+        });
+        if (activated) {
           return;
         }
-        friendState.lastTapAtMs = nowMs;
       }
 
-      if (friendState.type === "chocolate-milk" || friendState.type === "baby-mr-chocolate-milk") {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-          friendState.lastTapAtMs = nowMs;
+      if (friendState.type === "uke") {
+        const activated = doubleTapController.tryActivate(friendState, 450, () => {
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
+          window.CuppyLandAudio?.stopSfxClip?.("uke");
+          friendState.ukeDancePending = false;
+          window.CuppyLandAudio?.playSfxClip?.("ukuleleActivated", () => {
+            if (friendElement) {
+              if (friendState.ukeDanceTimer) {
+                clearTimeout(friendState.ukeDanceTimer);
+                friendState.ukeDanceTimer = null;
+              }
+              friendState.ukeDancing = false;
+              friendState.ukeDanceTimer = null;
+              friendElement.classList.remove("is-dancing");
+              friendElement.classList.remove("is-dancing-fast");
+              stopUkeMusicNotes(friendElement);
+              updateFriendElementAsset?.(friendState.id);
+            }
+          });
+          friendState.ukeDancing = true;
+          friendElement.classList.add("is-dancing");
+          friendElement.classList.remove("is-dancing-fast");
+          startUkeMusicNotes(friendElement);
+          updateFriendElementAsset?.(friendState.id);
+        });
+        if (activated) {
+          return;
+        }
+      }
 
+      if (friendState.type === "pizza-man-craft") {
+        const activated = doubleTapController.tryActivate(friendState, 450, () => {
+          resetFriendDragState();
+          event.preventDefault();
+          event.stopPropagation();
+          const wobbleEnabled = window.CuppyLandFriendAnimationHelper?.togglePizzaWobble?.(friendState);
+          if (wobbleEnabled) {
+            friendState.pizzaAnchorWorldX = friendState.worldX;
+            friendState.pizzaAnchorWorldY = friendState.worldY;
+            startPizzaManAnimation?.(friendState.id);
+          } else {
+            stopPizzaManAnimation?.(friendState.id);
+          }
+          updateFriendElementAsset?.(friendState.id);
+        });
+        if (activated) {
+          return;
+        }
+      }
+
+      if (friendState.type === "barbie-blonde" || friendState.type === "barbie-blonde-baby") {
+        const activated = doubleTapController.tryActivate(friendState, 450, () => {
+          resetFriendDragState();
+          event.preventDefault();
+          event.stopPropagation();
+          triggerBarbieActivation?.(friendState.id);
+        });
+        if (activated) {
+          return;
+        }
+      }
+
+      if (friendState.type === "chocolate-milk" || friendState.type === "baby-mr-chocolate-milk") {
+        const activated = doubleTapController.tryActivate(friendState, 450, () => {
+          resetFriendDragState();
+          event.preventDefault();
+          event.stopPropagation();
           const hoveredCup = getCupElementAtPoint(event.clientX, event.clientY);
           const hoveredCupId = window.CuppyLandChocolateMilkSpillHelper?.getDoubleTapCupId
             ? window.CuppyLandChocolateMilkSpillHelper.getDoubleTapCupId(friendState, hoveredCup?.dataset?.cupId || null)
@@ -785,9 +870,10 @@
             refreshChocolateMilkSequences?.();
             startChocolateMilkSpill?.(friendState.id, cupId);
           }
+        });
+        if (activated) {
           return;
         }
-        friendState.lastTapAtMs = nowMs;
       }
 
       resetChocolateMilkFill("new-drag");
@@ -1032,86 +1118,10 @@
       const friendElement = event.currentTarget.closest(".friend-character");
       const friendState = resolveFriendStateForElement(friendElement);
       setFriendDragVisual(friendElement, friendState, false);
-
-      if (
-        friendState
-        && friendState.type === "uke"
-        && !friendDragState.moved
-      ) {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-          friendState.lastTapAtMs = 0;
-          resetFriendDragState();
-          event.preventDefault();
-          event.stopPropagation();
-          window.CuppyLandAudio?.stopSfxClip?.("uke");
-          friendState.ukeDancePending = false;
-          window.CuppyLandAudio?.playSfxClip?.("ukuleleActivated", () => {
-            if (friendElement) {
-              if (friendState.ukeDanceTimer) {
-                clearTimeout(friendState.ukeDanceTimer);
-                friendState.ukeDanceTimer = null;
-              }
-              friendState.ukeDancing = false;
-              friendState.ukeDanceTimer = null;
-              friendElement.classList.remove("is-dancing");
-              friendElement.classList.remove("is-dancing-fast");
-              stopUkeMusicNotes(friendElement);
-              updateFriendElementAsset?.(friendState.id);
-            }
-          });
-          friendState.ukeDancing = true;
-          friendElement?.classList.add("is-dancing");
-          friendElement?.classList.remove("is-dancing-fast");
-          if (friendElement) {
-            startUkeMusicNotes(friendElement);
-          }
-          updateFriendElementAsset?.(friendState.id);
-          return;
-        }
-        friendState.lastTapAtMs = nowMs;
+      if (friendState?.type === "golden-puppy") {
+        friendState.pointerActivatedSfxPlayed = false;
       }
 
-      if (friendState?.type === "pizza-man-craft" && !friendDragState.moved) {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-          friendState.lastTapAtMs = 0;
-          resetFriendDragState();
-          event.preventDefault();
-          event.stopPropagation();
-          const wobbleEnabled = window.CuppyLandFriendAnimationHelper?.togglePizzaWobble?.(friendState);
-          if (wobbleEnabled) {
-            friendState.pizzaAnchorWorldX = friendState.worldX;
-            friendState.pizzaAnchorWorldY = friendState.worldY;
-            startPizzaManAnimation?.(friendState.id);
-          } else {
-            stopPizzaManAnimation?.(friendState.id);
-          }
-          updateFriendElementAsset?.(friendState.id);
-          return;
-        }
-        friendState.lastTapAtMs = nowMs;
-      }
-
-      if (
-        friendState
-        && (friendState.type === "barbie-blonde" || friendState.type === "barbie-blonde-baby")
-        && !friendDragState.moved
-      ) {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-          friendState.lastTapAtMs = nowMs;
-          resetFriendDragState();
-          event.preventDefault();
-          event.stopPropagation();
-          triggerBarbieActivation?.(friendState.id);
-          return;
-        }
-        friendState.lastTapAtMs = nowMs;
-      }
 
       if (friendState?.type === "golden-puppy" && friendState.extractedFromDoghouseId && !friendDragState.moved) {
         if (typeof cancelPuppyExtraction === "function") {
@@ -1141,7 +1151,9 @@
         );
         if (bowlElement) {
           onDirectWaterSource?.(bowlElement.dataset.friendId, friendState.type);
-          removeFriendInstance(friendState.id, { playRemovedSfx: false });
+          if (friendState.type === "water-bottle") {
+            removeFriendInstance(friendState.id, { playRemovedSfx: false });
+          }
         }
       }
 

@@ -158,7 +158,8 @@
 
       const lidVisible = cupState.lidVisible !== false;
       const sleeveVisible = cupState.sleeveVisible !== false;
-      const hairstyleVisible = cupState.hairstyleVisible !== false;
+      const hairstyleVisible = cupState.hairstyleVisible !== false
+        && (lidVisible || cupState.hairstyleDetached === true);
       const faceVisible = cupState.faceVisible !== false;
 
       lidLayerElement.style.display = lidVisible ? "block" : "none";

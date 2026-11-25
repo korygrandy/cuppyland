@@ -27,11 +27,33 @@ test("trampoline anchor and assets are configured", () => {
   assert.equal(trampoline.hitboxHeight, 110);
 });
 
-test("Olivia room has no bed bounce hitbox", () => {
+test("Olivia room has the bed bounce hitbox", () => {
   const context = { window: {} };
   loadBrowserScript("src/core/world-anchor-registry.js", context);
   const anchors = context.window.CuppyLandWorldAnchors.backgroundObjectAnchors["olivia-room"];
-  assert.equal(anchors.some((anchor) => anchor.id === "bed-bg"), false);
+  const bed = anchors.find((anchor) => anchor.id === "bed-bg");
+  assert.ok(bed);
+  assert.equal(bed.activatedAsset, "./assets/bed-bounce-down.png");
+  assert.equal(bed.activatedAssets, undefined);
+  assert.equal(bed.x, 960);
+  assert.equal(bed.y, 80);
+  assert.equal(bed.width, 760);
+  assert.equal(bed.height, 620);
+  assert.equal(bed.artOffsetX, -93);
+  assert.equal(bed.artOffsetY, 235);
+  assert.equal(bed.artScale, 1);
+  assert.equal(bed.artWidth, 495);
+  assert.equal(bed.artHeight, 480);
+  assert.equal(bed.hitboxOffsetX, 42);
+  assert.equal(bed.hitboxOffsetY, 336);
+  assert.equal(bed.hitboxWidth, 237);
+  assert.equal(bed.hitboxHeight, 213);
+  assert.ok(Number.isFinite(bed.hitboxOffsetX));
+  assert.ok(Number.isFinite(bed.hitboxOffsetY));
+  assert.ok(Number.isFinite(bed.hitboxWidth));
+  assert.ok(Number.isFinite(bed.hitboxHeight));
+  assert.ok(fs.existsSync("assets/bed-bounce-down.png"));
+  assert.ok(fs.statSync("assets/bed-bounce-down.png").size > 0);
 });
 
 test("trampoline assets exist and have matching 600px dimensions", () => {
@@ -42,20 +64,23 @@ test("trampoline assets exist and have matching 600px dimensions", () => {
   assert.ok(up.size > 0);
 });
 
-test("Olivia room bed single frame is rendered without activatedAssets down/up", () => {
+test("Olivia room bed uses only the down frame", () => {
   const controller = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
 
   assert.equal(controller.includes("objectConfig.activatedAsset"), true);
-  assert.equal(controller.includes("objectConfig.activatedAssets"), true);
   assert.equal(controller.includes("objectConfig.activatedAsset ||"), true);
-  assert.equal(controller.includes('let frame = objectConfig.activatedAssets ? "down" : "up"'), true);
+  assert.equal(controller.includes('art.style.opacity = isActive ? "1" : "0"'), true);
+  assert.equal(controller.includes("bed-bounce-up.png"), false);
 });
 
 test("bed hitbox objects use inverted up/down bounce poses", () => {
   const controller = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
 
   assert.equal(controller.includes('const isBedBounce = objectId === "bed-bg"'), true);
-  assert.equal(controller.includes('const friendIsUp = isBedBounce ? frame === "down" : frame === "up"'), true);
+  assert.equal(controller.includes('const friendIsUp = isBedBounce ? frame === "up" : frame === "up"'), true);
+  assert.equal(controller.includes('const isBedBouncer = objectConfig.id === "bed-bg"'), true);
+  assert.equal(controller.includes("isGeneralHitboxActivator"), true);
+  assert.equal(controller.includes("isGeneralHitboxType"), true);
 });
 
 test("trampoline CSS defines a down/up bounce and alignment hook", () => {
@@ -251,14 +276,22 @@ test("cup and attached Mr Chocolate Milk use trampoline bouncing", () => {
   assert.equal(bouncerSource.includes('"chocolate-milk"'), true);
 });
 
-test("trampoline allows only friend and pet character types", () => {
+test("trampoline and general hitboxes include Pumpkin and pet character types", () => {
   const controllerSource = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
+  const tubeSource = fs.readFileSync("src/controllers/tube-slide-controller.js", "utf8");
   assert.equal(controllerSource.includes("const trampolineBouncerTypes = new Set"), true);
   assert.equal(controllerSource.includes('"golden-puppy"'), true);
   assert.equal(controllerSource.includes('"turtle-bead-craft"'), true);
   assert.equal(controllerSource.includes('"rabbit-bead-craft"'), true);
   assert.equal(controllerSource.includes('"squirrel"'), true);
   assert.equal(controllerSource.includes('"turkey"'), true);
+  assert.equal(controllerSource.includes('"punpkin-man"'), true);
+  assert.equal(controllerSource.includes('"pumpkin-woman"'), true);
+  assert.equal(controllerSource.includes("isGeneralHitboxActivator"), true);
+  assert.equal(tubeSource.includes("punpkin-man"), true);
+  assert.equal(tubeSource.includes("pumpkin-woman"), true);
   assert.equal(controllerSource.includes("isAllowedBouncer"), true);
   assert.equal(controllerSource.includes('"chocolate-milk"'), true);
+  assert.equal(controllerSource.includes('objectConfig.id === "trampoline" || objectConfig.id === "bed-bg"'), true);
+  assert.equal(controllerSource.includes("playBounceActivationSfx"), true);
 });
