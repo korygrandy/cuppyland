@@ -772,6 +772,29 @@
       if (typeof syncBackgroundObjectActivation === "function") {
         syncBackgroundObjectActivation(friendState, friendElement);
       }
+      if (friendState.type === "water-bowl" && !friendState.full) {
+        const fountainAnchor = window.CuppyLandWorldAnchors?.backgroundObjectAnchors?.playground?.find(
+          (anchor) => anchor.id === "drinking-fountain"
+        );
+        if (fountainAnchor) {
+          const canvasRect = worldCanvas.getBoundingClientRect();
+          const scaleX = worldCanvas.offsetWidth ? canvasRect.width / worldCanvas.offsetWidth : 1;
+          const scaleY = worldCanvas.offsetHeight ? canvasRect.height / worldCanvas.offsetHeight : 1;
+          const fountainRect = {
+            left: canvasRect.left + fountainAnchor.x * scaleX,
+            right: canvasRect.left + (fountainAnchor.x + fountainAnchor.width) * scaleX,
+            top: canvasRect.top + fountainAnchor.y * scaleY,
+            bottom: canvasRect.top + (fountainAnchor.y + fountainAnchor.height) * scaleY,
+          };
+          const friendRect = friendElement.getBoundingClientRect();
+          if (window.CuppyLandFriendOverlap?.rectsOverlap(friendRect, fountainRect)) {
+            friendState.full = true;
+            updateFriendElementAsset?.(friendState.id);
+            syncBackgroundObjectActivation(friendState, friendElement);
+            window.CuppyLandAudio?.playSfxClip?.("drinkingFountainActivated");
+          }
+        }
+      }
       if (typeof syncMerryGoRoundActivations === "function") {
         syncMerryGoRoundActivations();
       }

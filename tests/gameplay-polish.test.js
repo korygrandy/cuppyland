@@ -26,6 +26,9 @@ test("water bowl double-tap and fountain hitbox activate immediately", () => {
   assert.equal(pointer.includes('friendState.full = true'), true);
   assert.equal(pointer.includes('syncBackgroundObjectActivation(friendState, friendElement)'), true);
   assert.equal(pointer.includes('playSfxClip?.("drinkingFountainActivated")'), true);
+  assert.equal(pointer.includes('fountainAnchor?.find'), false);
+  assert.equal(background.includes('isAllowedActivator'), true);
+  assert.equal(background.includes('wasActive && !isActive && objectConfig.activatedSfx'), true);
   assert.equal(app.includes("syncBackgroundObjectActivation(bowlState"), true);
   assert.equal(background.includes('anchor?.classList.add("active")'), true);
   assert.equal(background.includes('playSfxClip(objectConfig.activatedSfx'), true);
