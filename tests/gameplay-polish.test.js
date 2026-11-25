@@ -176,6 +176,8 @@ test("pumpkin woman and shared object hairstyle snapping are configured", () => 
   assert.equal(friendController.includes(".object-hairstyle-overlay"), true);
   assert.equal(friendController.includes("snapDistance"), true);
   assert.equal(inventoryController.includes("onDirectObjectHairstyle"), true);
+  const app = fs.readFileSync("src/core/app.js", "utf8");
+  assert.equal(app.includes("onDirectObjectHairstyle:"), true);
 });
 
 test("Parmesan cheese double-tap rotates and drops a cheese pile", () => {

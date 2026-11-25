@@ -191,6 +191,23 @@ const inventoryInteractionController = window.CuppyLandInventoryInteraction.crea
   refreshChocolateMilkSequences: () => refreshChocolateMilkSequences(),
   onChocolateMilkFillEnd,
   worldCanvas,
+  onDirectObjectHairstyle: (friendId, itemType, value) => {
+    const friendState = findFriendById(friendId, state.activeWorld);
+    if (!friendState) {
+      return false;
+    }
+    const profile = window.CuppyLandObjectOverlayRegistry?.getProfile(friendState);
+    if (!profile) {
+      return false;
+    }
+    friendState.hairstyle = value;
+    friendState.hairstyleVisible = true;
+    friendState.hairstyleDetached = false;
+    friendState.hairstyleOffsetX = profile.offsetX;
+    friendState.hairstyleOffsetY = profile.offsetY;
+    updateFriendElementAsset(friendId);
+    return true;
+  },
   onDirectBabyMilkPart: (babyId, itemType, value) => {
     const babyState = findFriendById(babyId, state.activeWorld);
     if (!babyState || babyState.type !== "baby-mr-chocolate-milk") {

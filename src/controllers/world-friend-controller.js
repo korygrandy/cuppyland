@@ -270,7 +270,7 @@
       overlay.style.height = `${profile.overlayHeight * profile.scale}px`;
       overlay.style.left = `calc(50% + ${baseOffsetX}px - ${(profile.overlayWidth * profile.scale) / 2}px)`;
       overlay.style.top = `${baseOffsetY}px`;
-      overlay.style.backgroundImage = `url("${getFriendAssetMap()?.[friendState.hairstyle] || ""}")`;
+      overlay.style.backgroundImage = `url("${window.CuppyLandGame?.hairstyleAssetMap?.[friendState.hairstyle] || ""}")`;
       overlay.style.backgroundRepeat = "no-repeat";
       overlay.style.backgroundPosition = "center";
       overlay.style.backgroundSize = "contain";
