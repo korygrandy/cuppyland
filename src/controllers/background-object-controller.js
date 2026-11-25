@@ -369,8 +369,9 @@
         const isAllowedActivator = Array.isArray(objectConfig.activatorTypes)
           ? objectConfig.activatorTypes.includes(friendState.type)
           : false;
+        const isBedBouncer = objectConfig.id === "bed-bg";
 
-        if ((isAllowedBouncer || isAllowedActivator) && overlaps) {
+        if ((isAllowedBouncer || isAllowedActivator || isBedBouncer) && overlaps) {
           activeFriends.add(friendState.id);
         }
 
@@ -383,7 +384,7 @@
         if (isBounceObject(objectConfig)) {
           const currentFriendOverlaps = friendIntersectsObject(friendState, friendElement, objectConfig);
           let newlyRegistered = false;
-          if (isAllowedBouncer && currentFriendOverlaps) {
+          if ((isAllowedBouncer || isBedBouncer) && currentFriendOverlaps) {
             newlyRegistered = registerTrampolineFriend(objectConfig.id, friendState, friendElement);
           } else {
             unregisterTrampolineFriend(objectConfig.id, friendState.id);

@@ -27,11 +27,24 @@ test("trampoline anchor and assets are configured", () => {
   assert.equal(trampoline.hitboxHeight, 110);
 });
 
-test("Olivia room has no bed bounce hitbox", () => {
+test("Olivia room has the bed bounce hitbox", () => {
   const context = { window: {} };
   loadBrowserScript("src/core/world-anchor-registry.js", context);
   const anchors = context.window.CuppyLandWorldAnchors.backgroundObjectAnchors["olivia-room"];
-  assert.equal(anchors.some((anchor) => anchor.id === "bed-bg"), false);
+  const bed = anchors.find((anchor) => anchor.id === "bed-bg");
+  assert.ok(bed);
+  assert.equal(bed.activatedAssets.down, "./assets/bed-bounce-down.png");
+  assert.equal(bed.activatedAssets.up, "./assets/bed-bounce-up.png");
+  assert.equal(bed.hitboxWidth, 160);
+  assert.equal(bed.hitboxHeight, 120);
+  assert.ok(Number.isFinite(bed.hitboxOffsetX));
+  assert.ok(Number.isFinite(bed.hitboxOffsetY));
+  assert.ok(Number.isFinite(bed.hitboxWidth));
+  assert.ok(Number.isFinite(bed.hitboxHeight));
+  assert.ok(fs.existsSync("assets/bed-bounce-down.png"));
+  assert.ok(fs.existsSync("assets/bed-bounce-up.png"));
+  assert.ok(fs.statSync("assets/bed-bounce-down.png").size > 0);
+  assert.ok(fs.statSync("assets/bed-bounce-up.png").size > 0);
 });
 
 test("trampoline assets exist and have matching 600px dimensions", () => {
@@ -42,7 +55,7 @@ test("trampoline assets exist and have matching 600px dimensions", () => {
   assert.ok(up.size > 0);
 });
 
-test("Olivia room bed single frame is rendered without activatedAssets down/up", () => {
+test("Olivia room bed dual frame animation remains configured", () => {
   const controller = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
 
   assert.equal(controller.includes("objectConfig.activatedAsset"), true);
@@ -56,6 +69,8 @@ test("bed hitbox objects use inverted up/down bounce poses", () => {
 
   assert.equal(controller.includes('const isBedBounce = objectId === "bed-bg"'), true);
   assert.equal(controller.includes('const friendIsUp = isBedBounce ? frame === "down" : frame === "up"'), true);
+  assert.equal(controller.includes('const isBedBouncer = objectConfig.id === "bed-bg"'), true);
+  assert.equal(controller.includes('(isAllowedBouncer || isAllowedActivator || isBedBouncer)'), true);
 });
 
 test("trampoline CSS defines a down/up bounce and alignment hook", () => {
