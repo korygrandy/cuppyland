@@ -170,7 +170,7 @@
         }
         const applyFrame = () => {
           const isBedBounce = objectId === "bed-bg";
-          const friendIsUp = isBedBounce ? frame === "down" : frame === "up";
+          const friendIsUp = isBedBounce ? frame === "up" : frame === "up";
           if (friendIsUp) {
             element.style.transition = "transform 90ms ease-out, opacity 90ms ease-out";
             element.style.transform = "translateY(-24px)";

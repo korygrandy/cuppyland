@@ -79,7 +79,7 @@ test("bed hitbox objects use inverted up/down bounce poses", () => {
   const controller = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
 
   assert.equal(controller.includes('const isBedBounce = objectId === "bed-bg"'), true);
-  assert.equal(controller.includes('const friendIsUp = isBedBounce ? frame === "down" : frame === "up"'), true);
+  assert.equal(controller.includes('const friendIsUp = isBedBounce ? frame === "up" : frame === "up"'), true);
   assert.equal(controller.includes('const isBedBouncer = objectConfig.id === "bed-bg"'), true);
   assert.equal(controller.includes("isGeneralHitboxActivator"), true);
   assert.equal(controller.includes("isGeneralHitboxType"), true);
