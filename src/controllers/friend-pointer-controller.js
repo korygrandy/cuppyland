@@ -284,20 +284,6 @@
         }
 
 
-        if (friendState.type === "punpkin-man" || friendState.type === "pumpkin-woman") {
-          const nowMs = Date.now();
-          const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-          if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-            friendState.lastTapAtMs = nowMs;
-            resetFriendDragState();
-            event.preventDefault();
-            event.stopPropagation();
-            playPumpkinAnimation(friendState, friendElement);
-            return;
-          }
-          friendState.lastTapAtMs = nowMs;
-        }
-
         if (friendState.type === "fishbowl") {
           friendElement.dataset.dragging = "true";
           if (typeof pauseFishbowlSequence === "function") {
@@ -644,6 +630,20 @@
         event.preventDefault();
         event.stopPropagation();
         return;
+      }
+
+      if (friendState.type === "punpkin-man" || friendState.type === "pumpkin-woman") {
+        const nowMs = Date.now();
+        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
+        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
+          friendState.lastTapAtMs = 0;
+          resetFriendDragState();
+          event.preventDefault();
+          event.stopPropagation();
+          playPumpkinAnimation(friendState, friendElement);
+          return;
+        }
+        friendState.lastTapAtMs = nowMs;
       }
 
       if (friendState.type === "golden-puppy" && friendState.activated !== true) {

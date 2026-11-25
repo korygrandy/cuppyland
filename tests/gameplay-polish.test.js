@@ -197,6 +197,8 @@ test("pumpkin man and pumpkin woman double-tap roll animations are configured", 
   assert.equal(pointer.includes("pumpkin-man-roll-right"), true);
   assert.equal(pointer.includes("pumpkin-woman-roll-left"), true);
   assert.equal(pointer.includes("pumpkin-woman-roll-right"), true);
+  assert.equal(pointer.includes('friendState.type === "punpkin-man" || friendState.type === "pumpkin-woman"'), true);
+  assert.equal(pointer.includes("playPumpkinAnimation(friendState, friendElement)"), true);
   assert.equal(styles.includes("@keyframes pumpkinManRollLeft"), true);
   assert.equal(styles.includes("@keyframes pumpkinManRollRight"), true);
   assert.equal(styles.includes("@keyframes pumpkinWomanRollLeft"), true);
