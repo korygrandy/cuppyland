@@ -7,10 +7,13 @@
     if (!isCupOpen(cupState)) {
       return false;
     }
-    return Boolean(friendState && (
-      friendState.type === "chocolate-milk"
-      || friendState.type === "baby-mr-chocolate-milk"
-    ));
+    if (!friendState) {
+      return false;
+    }
+    const isChocolateMilkType = window.CuppyLandChocolateMilkTypes?.isChocolateMilkType;
+    return typeof isChocolateMilkType === "function"
+      ? isChocolateMilkType(friendState.type)
+      : friendState.type === "chocolate-milk" || friendState.type === "baby-mr-chocolate-milk";
   }
 
   function getDoubleTapCupId(friendState, hoveredCupId) {

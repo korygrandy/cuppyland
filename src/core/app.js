@@ -24,6 +24,12 @@ const triggerGuard = window.CuppyLandTriggerManifest.validate({
 if (!triggerGuard.valid) {
   throw new Error(`Trigger guard failed:\n- ${triggerGuard.errors.join("\n- ")}`);
 }
+const objectSfxGuard = window.CuppyLandObjectSfxTriggerRegistry.validate(
+  window.CuppyLandGame.audioConfig.sfxClips
+);
+if (!objectSfxGuard.valid) {
+  throw new Error(`Object SFX guard failed:\n- ${objectSfxGuard.errors.join("\n- ")}`);
+}
 
 const dom = window.CuppyLandDomElements.createDomElements(document);
 const {

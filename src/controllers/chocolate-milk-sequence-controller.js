@@ -52,10 +52,13 @@
     }
 
     function isAttachedAndOpen(friendState) {
-      if (!friendState || (
-        friendState.type !== "chocolate-milk"
-        && friendState.type !== "baby-mr-chocolate-milk"
-      ) || !friendState.attachedCupId) {
+      const isChocolateMilkType = window.CuppyLandChocolateMilkTypes?.isChocolateMilkType;
+      const isChocolate = typeof isChocolateMilkType === "function"
+        ? isChocolateMilkType(friendState?.type)
+        : friendState?.type === "chocolate-milk" || friendState?.type === "baby-mr-chocolate-milk";
+      if (!friendState
+        || !isChocolate
+        || !friendState.attachedCupId) {
         return false;
       }
 
@@ -143,10 +146,13 @@
           return;
         }
 
+        const isChocolateMilkType = window.CuppyLandChocolateMilkTypes?.isChocolateMilkType;
+        const isChocolate = typeof isChocolateMilkType === "function"
+          ? isChocolateMilkType(friendState.type)
+          : friendState.type === "chocolate-milk" || friendState.type === "baby-mr-chocolate-milk";
         if (runtime.has(friendState.id)) {
           stop(friendState.id);
-        } else if ((friendState.type === "chocolate-milk"
-          || friendState.type === "baby-mr-chocolate-milk")
+        } else if (isChocolate
           && friendState.sequenceFrame) {
           friendState.sequenceFrame = null;
         }
@@ -159,10 +165,11 @@
 
     function startForCup(friendId, cupId) {
       const friendState = findFriendById(friendId);
-      if (!friendState || (
-        friendState.type !== "chocolate-milk"
-        && friendState.type !== "baby-mr-chocolate-milk"
-      ) || !cupId) {
+      const isChocolateMilkType = window.CuppyLandChocolateMilkTypes?.isChocolateMilkType;
+      const isChocolate = typeof isChocolateMilkType === "function"
+        ? isChocolateMilkType(friendState?.type)
+        : friendState?.type === "chocolate-milk" || friendState?.type === "baby-mr-chocolate-milk";
+      if (!friendState || !isChocolate || !cupId) {
         return false;
       }
       const normalizedCupId = typeof cupId === "object" ? cupId.attachedCupId : cupId;

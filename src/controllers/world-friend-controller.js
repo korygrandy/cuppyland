@@ -301,11 +301,7 @@
       friendState.activated = true;
       updateFriendElementAsset(friendState.id);
 
-      if (friendState.type === "barbie-blonde") {
-        playSfxClip("barbieBlondeSnap");
-      } else if (friendState.type === "barbie-blonde-baby") {
-        playSfxClip("barbieBlondeBabySnap");
-      }
+      window.CuppyLandObjectSfxTriggerRegistry?.playSnapSfx(friendState.type, playSfxClip);
 
       const durationMs = window.CuppyLandGame?.barbieActivationAnchors?.durationMs ?? 2000;
       friendState.barbieActivationTimer = setTimeout(() => {
