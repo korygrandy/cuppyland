@@ -302,6 +302,13 @@
         art.classList.add("parmesan-cheese-rotated");
       }
 
+      window.setTimeout(() => {
+        if (art) {
+          art.classList.remove("parmesan-cheese-rotated");
+          art.style.transform = "rotate(0deg)";
+        }
+      }, 520);
+
       friendElement.querySelector(".parmesan-cheese-particles")?.remove();
       const particles = document.createElement("div");
       particles.className = "parmesan-cheese-particles";
@@ -368,10 +375,6 @@
       friendElement.appendChild(particles);
       window.setTimeout(() => {
         particles.remove();
-        if (art) {
-          art.classList.remove("parmesan-cheese-rotated");
-          art.style.transform = "rotate(0deg)";
-        }
       }, 3600);
     }
 
