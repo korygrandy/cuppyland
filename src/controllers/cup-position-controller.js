@@ -45,9 +45,15 @@
       const hairDefaultY = defaultCupState.hairstyleOffsetY ?? -22;
       const left = cupState.lidDetached ? cupState.lidOffsetX : lidDefaultX;
       const top = cupState.lidDetached ? cupState.lidOffsetY : lidDefaultY;
+      if (cupState.lidVisible === false && cupState.hairstyleDetached !== true) {
+        cupState.hairstyleVisible = false;
+      }
       lidLayerElement.style.left = `${left}px`;
       lidLayerElement.style.top = `${top}px`;
       if (hairstyleLayerElement) {
+        if (cupState.lidVisible === false && cupState.hairstyleDetached !== true) {
+          hairstyleLayerElement.style.display = "none";
+        }
         const hairLeft = cupState.hairstyleDetached ? cupState.hairstyleOffsetX : left + hairAttachOffsetX;
         const hairTop = cupState.hairstyleDetached ? cupState.hairstyleOffsetY : top + hairDefaultY;
         hairstyleLayerElement.style.left = `${hairLeft}px`;

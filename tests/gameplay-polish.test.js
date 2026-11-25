@@ -15,6 +15,8 @@ test("inventory button uses the blue backpack icon", () => {
 test("cup and lid polish sources contain drag, snap, and boundary behavior", () => {
   const styles = fs.readFileSync("styles.css", "utf8");
   const cupPointer = fs.readFileSync("src/controllers/cup-pointer-controller.js", "utf8");
+  const cupPosition = fs.readFileSync("src/controllers/cup-position-controller.js", "utf8");
+  const render = fs.readFileSync("src/controllers/render-controller.js", "utf8");
   const inventory = fs.readFileSync("src/controllers/inventory-interaction-controller.js", "utf8");
   const rules = fs.readFileSync("src/controllers/game-rules-controller.js", "utf8");
 
@@ -25,6 +27,9 @@ test("cup and lid polish sources contain drag, snap, and boundary behavior", () 
   assert.equal(inventory.includes('dragState.type === "cup-create"'), false);
   assert.equal(rules.includes("lid-already-snapped"), true);
   assert.equal(rules.includes("lidDetached = false"), true);
+  assert.equal(cupPosition.includes("cupState.lidVisible === false && cupState.hairstyleDetached !== true"), true);
+  assert.equal(cupPosition.includes('hairstyleLayerElement.style.display = "none"'), true);
+  assert.equal(render.includes("cupState.hairstyleDetached === true"), true);
 });
 
 test("water bowl double-tap and fountain hitbox activate immediately", () => {
