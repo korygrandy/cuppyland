@@ -251,6 +251,8 @@ test("Parmesan cheese double-tap rotates and drops a cheese pile", () => {
   assert.equal(styles.includes(".parmesan-cheese-pile-speck"), true);
   assert.equal(styles.includes("animation: parmesanCheesePile 30000ms"), true);
   assert.equal(styles.includes("animation: parmesanCheesePileSpeck 30000ms"), true);
+  assert.equal(styles.includes("0%, 2%"), true);
+  assert.equal(styles.includes("0%, 3%"), true);
   assert.equal(pointer.includes("}, 30000);"), true);
   assert.equal(pointer.includes("art.style.transform = \"rotate(0deg)\""), true);
   assert.equal(styles.includes("@keyframes parmesanCheeseFall"), true);

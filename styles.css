@@ -716,10 +716,10 @@ body {
 }
 
 @keyframes parmesanCheesePileSpeck {
-  0%, 8% {
+  0%, 2% {
     opacity: 0;
   }
-  18% {
+  5% {
     opacity: 1;
   }
   94% {
@@ -748,11 +748,11 @@ body {
 }
 
 @keyframes parmesanCheesePile {
-  0%, 18% {
+  0%, 3% {
     opacity: 0;
     transform: scale(.25);
   }
-  32% {
+  10% {
     opacity: .95;
     transform: scale(.65);
   }
