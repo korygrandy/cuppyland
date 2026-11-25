@@ -344,6 +344,7 @@
         dogfoodPour: "./sfx/dogfood-pour.ogg",
         turkeyGobble: "./sfx/turkey-gobble-doubleclick.ogg",
         goldenPuppyActivated: "./sfx/golden-puppy-activated.ogg",
+        pumpkinManActivated: "./sfx/pumpkin-man-activated.ogg",
         puppyBarking: "./sfx/puppy-barking.ogg",
         canIHaveDrink: "./sfx/can-i-have-drink-please.ogg",
         canIHaveFood: "./sfx/can-i-have-food-please.ogg",

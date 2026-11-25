@@ -558,6 +558,89 @@ body {
   touch-action: none;
 }
 
+.friend-character[data-friend-type="punpkin-man"] .friend-character-art,
+.friend-character[data-friend-type="pumpkin-woman"] .friend-character-art {
+  transform-origin: center bottom;
+  transition: transform 420ms cubic-bezier(.18,.72,.24,1);
+  will-change: transform;
+}
+
+.pumpkin-man-roll-left {
+  animation: pumpkinManRollLeft 1400ms cubic-bezier(.18,.72,.24,1) forwards;
+}
+
+.pumpkin-man-roll-right {
+  animation: pumpkinManRollRight 1400ms cubic-bezier(.18,.72,.24,1) forwards;
+}
+
+.pumpkin-woman-roll-left {
+  animation: pumpkinWomanRollLeft 900ms cubic-bezier(.18,.72,.24,1) forwards;
+}
+
+.pumpkin-woman-roll-right {
+  animation: pumpkinWomanRollRight 900ms cubic-bezier(.18,.72,.24,1) forwards;
+}
+
+@keyframes pumpkinManRollLeft {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(-200px, -36px) rotate(-180deg) scaleY(.96);
+  }
+  56% {
+    transform: translate(-224px, -44px) rotate(-202deg) scaleY(.94);
+  }
+  100% {
+    transform: translate(-400px, 0) rotate(-360deg);
+  }
+}
+
+@keyframes pumpkinManRollRight {
+  0% {
+    transform: translate(-400px, 0) rotate(-360deg);
+  }
+  50% {
+    transform: translate(-200px, -36px) rotate(-180deg) scaleY(.96);
+  }
+  56% {
+    transform: translate(-176px, -44px) rotate(-158deg) scaleY(.94);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes pumpkinWomanRollLeft {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(-78px, -84px) rotate(-180deg) scaleY(.96);
+  }
+  56% {
+    transform: translate(-87px, -96px) rotate(-202deg) scaleY(.94);
+  }
+  100% {
+    transform: translate(-156px, 0) rotate(-360deg);
+  }
+}
+
+@keyframes pumpkinWomanRollRight {
+  0% {
+    transform: translate(-156px, 0) rotate(-360deg);
+  }
+  50% {
+    transform: translate(-78px, -84px) rotate(-180deg) scaleY(.96);
+  }
+  56% {
+    transform: translate(-69px, -96px) rotate(-158deg) scaleY(.94);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
 .friend-character[data-friend-type="parmesan-cheese"] {
   width: 132px;
   height: 276px;

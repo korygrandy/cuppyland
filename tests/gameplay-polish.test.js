@@ -170,6 +170,8 @@ test("pumpkin woman and shared object hairstyle snapping are configured", () => 
   const inventoryController = fs.readFileSync("src/controllers/inventory-interaction-controller.js", "utf8");
 
   assert.equal(config.includes('"pumpkin-woman"'), true);
+  assert.equal(config.includes("pumpkinManActivated"), true);
+  assert.equal(config.includes("./sfx/pumpkin-man-activated.ogg"), true);
   assert.equal(config.includes('"pumpkin-woman": "./assets/pumpkin-woman.png"'), true);
   assert.equal(registry.includes("barbie-baby"), true);
   assert.equal(registry.includes("petTypes"), true);
@@ -183,6 +185,39 @@ test("pumpkin woman and shared object hairstyle snapping are configured", () => 
   assert.equal(inventoryController.includes("onDirectObjectHairstyle"), true);
   const app = fs.readFileSync("src/core/app.js", "utf8");
   assert.equal(app.includes("onDirectObjectHairstyle:"), true);
+});
+
+test("pumpkin man and pumpkin woman double-tap roll animations are configured", () => {
+  const pointer = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
+  const styles = fs.readFileSync("styles.css", "utf8");
+  const config = fs.readFileSync("src/core/game-config.js", "utf8");
+
+  assert.equal(config.includes('"punpkin-man"'), true);
+  assert.equal(config.includes('"pumpkin-woman"'), true);
+  assert.equal(pointer.includes('friendState.type === "punpkin-man" || friendState.type === "pumpkin-woman"'), true);
+  assert.equal(pointer.includes("pumpkin-man-roll-left"), true);
+  assert.equal(pointer.includes("pumpkin-man-roll-right"), true);
+  assert.equal(pointer.includes("pumpkin-woman-roll-left"), true);
+  assert.equal(pointer.includes("pumpkin-woman-roll-right"), true);
+  assert.equal(pointer.includes('playSfxClip?.("pumpkinManActivated")'), true);
+  assert.equal(pointer.includes('friendState.type === "punpkin-man" || friendState.type === "pumpkin-woman"'), true);
+  assert.equal(pointer.includes("playPumpkinAnimation(friendState, friendElement)"), true);
+  assert.equal(styles.includes("@keyframes pumpkinManRollLeft"), true);
+  assert.equal(styles.includes("@keyframes pumpkinManRollRight"), true);
+  assert.equal(styles.includes("@keyframes pumpkinWomanRollLeft"), true);
+  assert.equal(styles.includes("@keyframes pumpkinWomanRollRight"), true);
+  assert.equal(styles.includes("translate(-156px, 0)"), true);
+  assert.equal(styles.includes("translate(0, 0)"), true);
+  assert.equal(styles.includes("translate(-400px, 0)"), true);
+  assert.equal(styles.includes("rotate(-360deg)"), true);
+  assert.equal(styles.includes("pumpkinManRollRight") && styles.includes("translate(-400px, 0) rotate(-360deg)"), true);
+  assert.equal(styles.includes("rotate(-180deg)"), true);
+  assert.equal(styles.includes("pumpkinManRollRight") && styles.includes("translate(0, 0) rotate(0deg)"), true);
+  assert.equal(styles.includes("pumpkinWomanRollLeft") && styles.includes("translate(-156px, 0) rotate(-360deg)"), true);
+  assert.equal(styles.includes("translate(-200px, -36px)"), true);
+  assert.equal(styles.includes("pumpkinWomanRollLeft") && styles.includes("translate(-78px, -84px)"), true);
+  assert.equal(styles.includes("pumpkinWomanRollRight") && styles.includes("translate(-69px, -96px)"), true);
+  assert.equal(styles.includes("translate(-176px, -44px)"), true);
 });
 
 test("Parmesan cheese double-tap rotates and drops a cheese pile", () => {
