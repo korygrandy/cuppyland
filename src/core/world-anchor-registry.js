@@ -101,28 +101,7 @@
         ],
       },
     ],
-    "olivia-room": [
-      {
-        id: "bed-bg",
-        label: "Bed Bounce",
-        x: 960,
-        y: 80,
-        width: 760,
-        height: 620,
-        activatedAsset: "./assets/bed-bounce-down.png",
-        frameDurationMs: 420,
-        artOffsetX: -93,
-        artOffsetY: 235,
-        artScale: 1,
-        artWidth: 495,
-        artHeight: 480,
-        hitboxOffsetX: 42,
-        hitboxOffsetY: 336,
-        hitboxWidth: 237,
-        hitboxHeight: 213,
-        showHitbox: true,
-      },
-    ],
+    "olivia-room": [],
   };
 
   window.CuppyLandWorldAnchors = {

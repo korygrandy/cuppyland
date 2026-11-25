@@ -27,30 +27,11 @@ test("trampoline anchor and assets are configured", () => {
   assert.equal(trampoline.hitboxHeight, 110);
 });
 
-test("bed bounce anchor is configured for Olivia room", () => {
+test("Olivia room has no bed bounce hitbox", () => {
   const context = { window: {} };
   loadBrowserScript("src/core/world-anchor-registry.js", context);
   const anchors = context.window.CuppyLandWorldAnchors.backgroundObjectAnchors["olivia-room"];
-  const bedBounce = anchors.find((anchor) => anchor.id === "bed-bg");
-
-  assert.ok(bedBounce);
-  assert.equal(bedBounce.activatedAsset, "./assets/bed-bounce-down.png");
-  assert.equal(bedBounce.activatedAssets, undefined);
-  assert.equal(bedBounce.frameDurationMs, 420);
-  assert.equal(bedBounce.showHitbox, true);
-  assert.equal(bedBounce.artOffsetX, -93);
-  assert.equal(bedBounce.artOffsetY, 235);
-  assert.equal(bedBounce.artScale, 1);
-  assert.equal(bedBounce.artWidth, 495);
-  assert.equal(bedBounce.artHeight, 480);
-  assert.equal(bedBounce.hitboxOffsetX, 42);
-  assert.equal(bedBounce.hitboxOffsetY, 336);
-  assert.equal(bedBounce.hitboxWidth, 237);
-  assert.equal(bedBounce.hitboxHeight, 213);
-  assert.ok(Number.isFinite(bedBounce.hitboxOffsetX));
-  assert.ok(Number.isFinite(bedBounce.hitboxOffsetY));
-  assert.ok(Number.isFinite(bedBounce.hitboxWidth));
-  assert.ok(Number.isFinite(bedBounce.hitboxHeight));
+  assert.equal(anchors.some((anchor) => anchor.id === "bed-bg"), false);
 });
 
 test("trampoline assets exist and have matching 600px dimensions", () => {
@@ -59,22 +40,6 @@ test("trampoline assets exist and have matching 600px dimensions", () => {
 
   assert.ok(down.size > 0);
   assert.ok(up.size > 0);
-});
-
-test("bed bounce uses only the down animation frame", () => {
-  const down = fs.statSync("assets/bed-bounce-down.png");
-  assert.ok(down.size > 0);
-});
-
-test("bed bounce frames remain hidden until hitbox activation and fade on stop", () => {
-  const styles = fs.readFileSync("styles.css", "utf8");
-  const controller = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
-
-  assert.equal(styles.includes(".world-background-object[data-object-id=\"bed-bg\"]"), true);
-  assert.equal(controller.includes('assetConfig.frame === "down"'), true);
-  assert.equal(controller.includes('downArt.style.opacity = "0"'), true);
-  assert.equal(controller.includes('upArt.style.opacity = "0"'), true);
-  assert.equal(controller.includes('anchor.classList.remove("is-bouncing"'), true);
 });
 
 test("Olivia room bed single frame is rendered without activatedAssets down/up", () => {
