@@ -59,7 +59,9 @@
     if (friendState.type === "fishbowl") {
       return assetMap["fishbowl-sequence-1"] || "";
     }
-    if (friendState.type === "chocolate-milk" || friendState.type === "baby-mr-chocolate-milk") {
+    if (window.CuppyLandChocolateMilkTypes?.isChocolateMilkType(friendState.type)
+      || friendState.type === "chocolate-milk"
+      || friendState.type === "baby-mr-chocolate-milk") {
       if (friendState.sequenceFrame === 2) {
         return assetMap["chocolate-milk-sequence-2"] || assetMap[friendState.type] || "";
       }
