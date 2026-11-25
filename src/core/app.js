@@ -223,13 +223,13 @@ const inventoryInteractionController = window.CuppyLandInventoryInteraction.crea
     if (!friendState) {
       return false;
     }
-    if (window.CuppyLandObjectOverlayRegistry?.getProfile(friendState) === null) {
+    const profile = window.CuppyLandObjectOverlayRegistry?.getProfile(friendState);
+    if (!profile) {
       return false;
     }
     friendState.hairstyle = value;
     friendState.hairstyleVisible = true;
     friendState.hairstyleDetached = false;
-    const profile = window.CuppyLandObjectOverlayRegistry.getProfile(friendState);
     friendState.hairstyleOffsetX = profile?.offsetX ?? 0;
     friendState.hairstyleOffsetY = profile?.offsetY ?? -18;
     updateFriendElementAsset(friendId);

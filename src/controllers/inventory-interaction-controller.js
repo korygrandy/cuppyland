@@ -358,9 +358,19 @@
         && !isFriendDrop
       ) {
         const targetedElement = document.elementFromPoint(event.clientX, event.clientY);
-        const friendElement = targetedElement?.closest?.(
+        let friendElement = targetedElement?.closest?.(
           '.friend-character[data-friend-id]'
         );
+        if (!friendElement && worldCanvas) {
+          friendElement = Array.from(worldCanvas.querySelectorAll(".friend-character[data-friend-id]"))
+            .find((candidate) => {
+              const rect = candidate.getBoundingClientRect();
+              return event.clientX >= rect.left
+                && event.clientX <= rect.right
+                && event.clientY >= rect.top
+                && event.clientY <= rect.bottom;
+            }) || null;
+        }
         if (friendElement && typeof onDirectObjectHairstyle === "function") {
           const applied = onDirectObjectHairstyle(
             friendElement.dataset.friendId,
