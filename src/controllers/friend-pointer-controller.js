@@ -413,7 +413,7 @@
       friendElement.appendChild(particles);
       window.setTimeout(() => {
         particles.remove();
-      }, 3600);
+      }, 30000);
     }
 
     function syncSquirrelAvoidance(dogElement, dogState) {

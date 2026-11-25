@@ -694,7 +694,7 @@ body {
   background: transparent;
   opacity: 0;
   transform: scale(.25);
-  animation: parmesanCheesePile 3000ms ease-out forwards;
+  animation: parmesanCheesePile 30000ms ease-out forwards;
   animation-delay: var(--pile-delay);
 }
 
@@ -711,7 +711,7 @@ body {
   box-shadow: 0 0 2px rgba(255, 231, 154, 0.55);
   opacity: 0;
   transform: translate(var(--pile-speck-x), var(--pile-speck-y));
-  animation: parmesanCheesePileSpeck 2200ms ease-out forwards;
+  animation: parmesanCheesePileSpeck 30000ms ease-out forwards;
   animation-delay: var(--pile-speck-delay);
 }
 
@@ -722,7 +722,7 @@ body {
   18% {
     opacity: 1;
   }
-  72% {
+  94% {
     opacity: .95;
   }
   100% {
@@ -756,7 +756,7 @@ body {
     opacity: .95;
     transform: scale(.65);
   }
-  72% {
+  94% {
     opacity: .9;
     transform: scale(1);
   }
