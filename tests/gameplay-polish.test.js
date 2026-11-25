@@ -54,13 +54,14 @@ test("water, puppy, and toy interactions are registered", () => {
   const app = fs.readFileSync("src/core/app.js", "utf8");
   const pointer = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
   const inventory = fs.readFileSync("src/controllers/inventory-interaction-controller.js", "utf8");
+  const directDropResolver = fs.readFileSync("src/controllers/inventory-direct-drop-resolver.js", "utf8");
   const config = fs.readFileSync("src/core/game-config.js", "utf8");
   const ui = fs.readFileSync("src/ui/inventory.js", "utf8");
 
   assert.equal(app.includes("onDirectWaterSource"), true);
   assert.equal(pointer.includes("onDirectPuppyToBed"), true);
   assert.equal(pointer.includes("onDirectWaterSource"), true);
-  assert.equal(inventory.includes('dragState.value === "fishbowl" || dragState.value === "water-bottle"'), true);
+  assert.equal(directDropResolver.includes('dragState.value === "fishbowl" || dragState.value === "water-bottle"'), true);
   assert.equal(pointer.includes('if (friendState.type === "water-bottle")'), true);
   assert.equal(pointer.includes('removeFriendInstance(friendState.id, { playRemovedSfx: false })'), true);
   assert.equal(config.includes('"water-bottle"'), true);
