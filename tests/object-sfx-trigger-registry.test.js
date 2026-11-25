@@ -62,8 +62,11 @@ test("world intro explicitly unlocks and plays without focus gating", () => {
   const audio = fs.readFileSync("src/audio/audio.js", "utf8");
   assert.equal(app.includes("CuppyLandAudio?.unlockAudio?.()"), true);
   assert.equal(app.includes('playSfxClip?.("playgroundIntroFx")'), true);
+  assert.equal(app.includes("}, 80);"), true);
   assert.equal(audio.includes("document.hidden || !document.hasFocus()"), false);
   assert.equal(audio.includes("if (document.hidden)"), true);
+  assert.equal(audio.includes("sfxClipSources[clipName]"), true);
+  assert.equal(audio.includes("clip.load()"), true);
 });
 
 test("all object SFX registry clip files exist", () => {

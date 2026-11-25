@@ -20,6 +20,7 @@
   const audioStorageKey = "oliviaworld-audio-settings-v1";
   const playerToTrackName = new WeakMap();
   const sfxClipPlayers = {};
+  const sfxClipSources = {};
 
   const sfxProfiles = {
     standard: [
@@ -96,6 +97,7 @@
   };
   Object.entries(audioConfig.sfxClips || {}).forEach(([clipName, clipSrc]) => {
     if (typeof clipSrc === "string" && clipSrc.length > 0) {
+      sfxClipSources[clipName] = clipSrc;
       sfxClipPlayers[clipName] = createSfxClipPlayer(clipSrc);
     }
   });
@@ -256,6 +258,12 @@
       return;
     }
     let clip = sfxClipPlayers[clipName];
+    if (clip
+      && typeof HTMLMediaElement !== "undefined"
+      && (clip.error || clip.networkState === HTMLMediaElement.NETWORK_NO_SOURCE)) {
+      sfxClipPlayers[clipName] = createSfxClipPlayer(sfxClipSources[clipName] || clip.src);
+      clip = sfxClipPlayers[clipName];
+    }
     if (!clip && clipName === "goldenPuppyActivated") {
       clip = sfxClipPlayers.shimmer || null;
     }
@@ -282,6 +290,7 @@
     }
     clip.volume = audioState.sfxVolume;
     clip.currentTime = 0;
+    clip.load();
     const playPromise = clip.play();
     if (playPromise && typeof playPromise.catch === "function") {
       playPromise.catch((error) => {

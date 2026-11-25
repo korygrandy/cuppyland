@@ -1022,7 +1022,9 @@ function openWorld(worldId) {
   showWorldHeadlineOverlay(worldId);
   window.CuppyLandAudio?.unlockAudio?.();
   if (worldId === "playground") {
-    window.CuppyLandAudio?.playSfxClip?.("playgroundIntroFx");
+    window.setTimeout(() => {
+      window.CuppyLandAudio?.playSfxClip?.("playgroundIntroFx");
+    }, 80);
   } else if (worldId === "olivia-room") {
     window.CuppyLandAudio?.playSfxClip?.("myNameIsOlivia");
   }
