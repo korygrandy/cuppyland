@@ -31,6 +31,10 @@
     return doubleTapSfxByType[friendType] || null;
   }
 
+  function getHitboxSfx(friendType) {
+    return snapSfxByType[friendType] || null;
+  }
+
   function playSnapSfx(friendType, playSfxClip) {
     const clipName = getSnapSfx(friendType);
     if (clipName && typeof playSfxClip === "function") {
@@ -42,6 +46,15 @@
 
   function playDoubleTapSfx(friendType, playSfxClip) {
     const clipName = getDoubleTapSfx(friendType);
+    if (clipName && typeof playSfxClip === "function") {
+      playSfxClip(clipName);
+      return clipName;
+    }
+    return null;
+  }
+
+  function playHitboxSfx(friendType, playSfxClip) {
+    const clipName = getHitboxSfx(friendType);
     if (clipName && typeof playSfxClip === "function") {
       playSfxClip(clipName);
       return clipName;
@@ -68,8 +81,10 @@
     doubleTapSfxByType,
     getSnapSfx,
     getDoubleTapSfx,
+    getHitboxSfx,
     playSnapSfx,
     playDoubleTapSfx,
+    playHitboxSfx,
     validate,
   };
 })();

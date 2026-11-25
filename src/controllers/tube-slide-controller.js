@@ -91,6 +91,12 @@
       if (!element || activeSequences.has(id)) {
         return false;
       }
+      if (state.type === "barbie-blonde" || state.type === "barbie-blonde-baby") {
+        window.CuppyLandObjectSfxTriggerRegistry?.playHitboxSfx(
+          state.type,
+          (clipName) => playSfxClip(clipName)
+        );
+      }
       const sequence = {
         element,
         state,

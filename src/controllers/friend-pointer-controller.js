@@ -649,6 +649,14 @@
         return;
       }
 
+      if (friendState.type === "golden-puppy" && !friendState.pointerActivatedSfxPlayed) {
+        friendState.pointerActivatedSfxPlayed = true;
+        window.CuppyLandObjectSfxTriggerRegistry?.playSnapSfx(
+          friendState.type,
+          (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName)
+        );
+      }
+
       if (friendState.type === "punpkin-man" || friendState.type === "pumpkin-woman") {
         const activated = doubleTapController.tryActivate(friendState, 450, () => {
           resetFriendDragState();
@@ -661,7 +669,7 @@
         }
       }
 
-      if (friendState.type === "golden-puppy" && friendState.activated !== true) {
+      if (friendState.type === "golden-puppy") {
         const activated = doubleTapController.tryActivate(friendState, 450, () => {
           resetFriendDragState();
           event.preventDefault();
@@ -694,7 +702,10 @@
 
       if (friendState.type === "turkey") {
         const activated = doubleTapController.tryActivate(friendState, 320, () => {
-          window.CuppyLandAudio?.playSfxClip?.("turkeyGobble");
+          window.CuppyLandObjectSfxTriggerRegistry?.playDoubleTapSfx(
+            friendState.type,
+            (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName)
+          );
           if (typeof triggerTurkeyAnimation === "function") {
             triggerTurkeyAnimation(friendState.id);
           }
@@ -712,7 +723,10 @@
           if (typeof toggleFishbowlSequence === "function") {
             toggleFishbowlSequence(friendState.id);
           }
-          window.CuppyLandAudio?.playSfxClip?.("fishbowlActivated");
+          window.CuppyLandObjectSfxTriggerRegistry?.playDoubleTapSfx(
+            friendState.type,
+            (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName)
+          );
           friendState.fishbowlSuppressPointerDrag = true;
         });
         if (activated) {
@@ -726,7 +740,10 @@
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
-          window.CuppyLandAudio?.playSfxClip?.("parmesanCheeseActivated");
+          window.CuppyLandObjectSfxTriggerRegistry?.playDoubleTapSfx(
+            friendState.type,
+            (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName)
+          );
           playParmesanCheeseAnimation(friendState, friendElement);
         });
         if (activated) {
@@ -740,7 +757,10 @@
           friendState.type = "water-bowl";
           updateFriendElementAsset?.(friendState.id);
           syncBackgroundObjectActivation(friendState, friendElement);
-          window.CuppyLandAudio?.playSfxClip?.("drinkingFountainActivated");
+          window.CuppyLandObjectSfxTriggerRegistry?.playDoubleTapSfx(
+            friendState.type,
+            (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName)
+          );
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
@@ -1098,6 +1118,9 @@
       const friendElement = event.currentTarget.closest(".friend-character");
       const friendState = resolveFriendStateForElement(friendElement);
       setFriendDragVisual(friendElement, friendState, false);
+      if (friendState?.type === "golden-puppy") {
+        friendState.pointerActivatedSfxPlayed = false;
+      }
 
 
       if (friendState?.type === "golden-puppy" && friendState.extractedFromDoghouseId && !friendDragState.moved) {

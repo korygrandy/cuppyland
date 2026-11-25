@@ -244,7 +244,7 @@ test("Parmesan cheese double-tap rotates and drops a cheese pile", () => {
   assert.equal(pointer.includes('friendState.type === "parmesan-cheese"'), true);
   assert.equal(pointer.includes('transform = "rotate(-45deg)"'), true);
   assert.equal(pointer.includes("playParmesanCheeseAnimation"), true);
-  assert.equal(pointer.includes('playSfxClip?.("parmesanCheeseActivated")'), true);
+  assert.equal(pointer.includes('CuppyLandObjectSfxTriggerRegistry?.playDoubleTapSfx'), true);
   assert.equal(config.includes("parmesanCheeseActivated"), true);
   assert.equal(styles.includes(".parmesan-cheese-particle"), true);
   assert.equal(styles.includes(".parmesan-cheese-pile"), true);

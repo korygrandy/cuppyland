@@ -419,9 +419,10 @@
               overlappingFriendState.barbieMerryGoRoundAnchorId = merryState.id;
               overlappingFriendState.activated = true;
               updateFriendElementAsset(overlappingFriendState.id);
-              playSfxClip(overlappingFriendState.type === "barbie-blonde"
-                ? "barbieBlondeSnap"
-                : "barbieBlondeBabySnap");
+              window.CuppyLandObjectSfxTriggerRegistry?.playHitboxSfx(
+                overlappingFriendState.type,
+                playSfxClip
+              );
             } else if (!overlappingFriendState || (overlappingFriendState.type !== "barbie-blonde" && overlappingFriendState.type !== "barbie-blonde-baby")) {
               friendElements.forEach((friendElement) => {
                 const friendState = statesById.get(friendElement.dataset.friendId);

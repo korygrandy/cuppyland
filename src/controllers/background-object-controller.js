@@ -415,6 +415,13 @@
           let newlyRegistered = false;
           if ((isAllowedBouncer || isBedBouncer || isGeneralHitboxActivator) && currentFriendOverlaps) {
             newlyRegistered = registerTrampolineFriend(objectConfig.id, friendState, friendElement);
+            if (newlyRegistered
+              && (friendState.type === "barbie-blonde" || friendState.type === "barbie-blonde-baby")) {
+              window.CuppyLandObjectSfxTriggerRegistry?.playHitboxSfx(
+                friendState.type,
+                (clipName) => playSfxClip(clipName)
+              );
+            }
           } else {
             unregisterTrampolineFriend(objectConfig.id, friendState.id);
           }

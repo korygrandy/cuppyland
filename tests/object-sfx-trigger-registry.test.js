@@ -50,6 +50,9 @@ test("snap and double-tap dispatch is wired to gameplay controllers", () => {
   assert.equal(friendPointer.includes('friendState.type === "golden-puppy"'), true);
   assert.equal(friendPointer.includes("CuppyLandObjectSfxTriggerRegistry?.playDoubleTapSfx"), true);
   assert.equal(friendPointer.includes('friendState.type === "barbie-blonde"'), true);
+  assert.equal(friendPointer.includes('friendState.type === "fishbowl"'), true);
+  assert.equal(friendPointer.includes('toggleFishbowlSequence(friendState.id)'), true);
+  assert.equal(friendPointer.includes('friendState.pointerActivatedSfxPlayed'), true);
   assert.equal(worldFriend.includes("CuppyLandObjectSfxTriggerRegistry?.playSnapSfx"), true);
   assert.equal(index.includes("object-sfx-trigger-registry.js"), true);
 });
