@@ -337,7 +337,7 @@
       pile.style.setProperty("--pile-x", `${localPileX}px`);
       pile.style.setProperty("--pile-y", `${localPileY}px`);
       pile.style.setProperty("--pile-width", `${Math.min(150, artRect.width * 0.62)}px`);
-      pile.style.setProperty("--pile-delay", "780ms");
+      pile.style.setProperty("--pile-delay", "280ms");
       particles.appendChild(pile);
 
       const pileSpecks = 52;
@@ -351,7 +351,7 @@
         speck.style.setProperty("--pile-speck-x", `${spreadX}px`);
         speck.style.setProperty("--pile-speck-y", `${spreadY}px`);
         speck.style.setProperty("--pile-speck-size", `${2 + Math.floor(Math.random() * 3)}px`);
-        speck.style.setProperty("--pile-speck-delay", `${780 + (index * 10)}ms`);
+        speck.style.setProperty("--pile-speck-delay", `${280 + (index * 10)}ms`);
         pile.appendChild(speck);
       }
 
