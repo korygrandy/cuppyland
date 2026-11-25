@@ -919,6 +919,10 @@ body {
   z-index: 1400 !important;
 }
 
+.friend-character.is-chocolate-milk-spilling {
+  z-index: 1402 !important;
+}
+
 .cup-lid {
   position: absolute;
   z-index: 3;
@@ -1664,7 +1668,7 @@ body {
 
 .chocolate-milk-spill {
   position: absolute;
-  inset: 0;
+  inset: 35px 0 0;
   z-index: 1401;
   pointer-events: none;
   opacity: 0;
@@ -1678,7 +1682,7 @@ body {
 .chocolate-milk-spill .milk-flow {
   position: absolute;
   left: 198px;
-  top: 58px;
+  top: 68px;
   width: 26px;
   height: 210px;
   border-radius: 12px 12px 18px 18px;

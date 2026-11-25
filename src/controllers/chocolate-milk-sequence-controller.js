@@ -83,7 +83,7 @@
       }
 
       const sequenceConfig = getSequenceConfig();
-      friendState.sequenceFrame = null;
+      friendState.sequenceFrame = 2;
       updateFriendElementAsset(friendState.id);
       const spillElement = ensureSpillEffect(friendState.attachedCupId);
       if (spillElement) {
@@ -105,6 +105,11 @@
         const currentSpill = ensureSpillEffect(activeFriend.attachedCupId);
         if (currentSpill) {
           currentSpill.classList.toggle("is-pulsing", Math.floor(elapsedMs / 450) % 2 === 0);
+        }
+        const nextFrame = Math.floor(elapsedMs / sequenceConfig.frameIntervalMs) % 2 === 0 ? 2 : 3;
+        if (activeFriend.sequenceFrame !== nextFrame) {
+          activeFriend.sequenceFrame = nextFrame;
+          updateFriendElementAsset(activeFriend.id);
         }
 
         if (elapsedMs >= sequenceConfig.durationMs) {

@@ -157,6 +157,15 @@
         return getFriendAssetMap()?.["fishbowl-sequence-1"] || "";
       }
 
+      if (friendState.type === "chocolate-milk" || friendState.type === "baby-mr-chocolate-milk") {
+        if (friendState.sequenceFrame === 2) {
+          return getFriendAssetMap()?.["chocolate-milk-sequence-2"] || getFriendAssetMap()?.[friendState.type] || "";
+        }
+        if (friendState.sequenceFrame === 3) {
+          return getFriendAssetMap()?.["chocolate-milk-sequence-3"] || getFriendAssetMap()?.[friendState.type] || "";
+        }
+      }
+
       if (friendState.type === "dogbed") {
         if (friendState.sleeping) {
           return getFriendAssetMap()?.["dogbed-with-dog-sleeping"] || getFriendAssetMap()?.["dogbed-with-dog"] || getFriendAssetMap()?.[friendState.type] || "";
@@ -429,6 +438,13 @@
       const asset = resolveFriendAsset(friendState);
       const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"]`);
       const friendArt = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"] .friend-character-art`);
+      friendElement?.classList.toggle(
+        "is-chocolate-milk-spilling",
+        Boolean(friendState && (
+          friendState.type === "chocolate-milk"
+          || friendState.type === "baby-mr-chocolate-milk"
+        ) && friendState.sequenceFrame)
+      );
       if (friendArt) {
         friendArt.style.backgroundImage = friendState?.type === "baby-mr-chocolate-milk"
           ? "none"

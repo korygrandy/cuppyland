@@ -197,6 +197,8 @@
       "spongebob-stuffy": "./assets/spongebob-stuffy.png",
       "pizza-man-craft": "./assets/pizza-man-craft.png",
       "chocolate-milk": "./assets/chocolate-milk.png",
+      "chocolate-milk-sequence-2": "./assets/chocolate-milk-sequence2.png",
+      "chocolate-milk-sequence-3": "./assets/chocolate-milk-sequence3.png",
       "baby-mr-chocolate-milk": "./assets/chocolate-milk.png",
       "parmesan-cheese": "./assets/parmesan-cheese.png",
       "barbie-blonde": "./assets/barbie-blonde.png",
