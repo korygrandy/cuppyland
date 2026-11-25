@@ -109,10 +109,7 @@
         y: 80,
         width: 760,
         height: 620,
-        activatedAssets: {
-          down: "./assets/bed-bounce-down.png",
-          up: "./assets/bed-bounce-up.png",
-        },
+        activatedAsset: "./assets/bed-bounce-down.png",
         frameDurationMs: 420,
         artOffsetX: -93,
         artOffsetY: 235,

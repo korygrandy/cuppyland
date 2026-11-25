@@ -33,8 +33,8 @@ test("Olivia room has the bed bounce hitbox", () => {
   const anchors = context.window.CuppyLandWorldAnchors.backgroundObjectAnchors["olivia-room"];
   const bed = anchors.find((anchor) => anchor.id === "bed-bg");
   assert.ok(bed);
-  assert.equal(bed.activatedAssets.down, "./assets/bed-bounce-down.png");
-  assert.equal(bed.activatedAssets.up, "./assets/bed-bounce-up.png");
+  assert.equal(bed.activatedAsset, "./assets/bed-bounce-down.png");
+  assert.equal(bed.activatedAssets, undefined);
   assert.equal(bed.x, 960);
   assert.equal(bed.y, 80);
   assert.equal(bed.width, 760);
@@ -53,9 +53,7 @@ test("Olivia room has the bed bounce hitbox", () => {
   assert.ok(Number.isFinite(bed.hitboxWidth));
   assert.ok(Number.isFinite(bed.hitboxHeight));
   assert.ok(fs.existsSync("assets/bed-bounce-down.png"));
-  assert.ok(fs.existsSync("assets/bed-bounce-up.png"));
   assert.ok(fs.statSync("assets/bed-bounce-down.png").size > 0);
-  assert.ok(fs.statSync("assets/bed-bounce-up.png").size > 0);
 });
 
 test("trampoline assets exist and have matching 600px dimensions", () => {
@@ -66,13 +64,13 @@ test("trampoline assets exist and have matching 600px dimensions", () => {
   assert.ok(up.size > 0);
 });
 
-test("Olivia room bed dual frame animation remains configured", () => {
+test("Olivia room bed uses only the down frame", () => {
   const controller = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
 
   assert.equal(controller.includes("objectConfig.activatedAsset"), true);
-  assert.equal(controller.includes("objectConfig.activatedAssets"), true);
   assert.equal(controller.includes("objectConfig.activatedAsset ||"), true);
-  assert.equal(controller.includes('let frame = objectConfig.activatedAssets ? "down" : "up"'), true);
+  assert.equal(controller.includes('art.style.opacity = isActive ? "1" : "0"'), true);
+  assert.equal(controller.includes("bed-bounce-up.png"), false);
 });
 
 test("bed hitbox objects use inverted up/down bounce poses", () => {

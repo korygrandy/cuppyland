@@ -1,6 +1,6 @@
 (function () {
   const triggers = [
-    { id: "bed-bounce", world: "olivia-room", kind: "hitbox", anchorId: "bed-bg", allowedTypes: ["*"], assets: ["./assets/bed-bounce-down.png", "./assets/bed-bounce-up.png"] },
+    { id: "bed-bounce", world: "olivia-room", kind: "hitbox", anchorId: "bed-bg", allowedTypes: ["*"], assets: ["./assets/bed-bounce-down.png"] },
     { id: "trampoline-bounce", world: "playground", kind: "hitbox", anchorId: "trampoline", allowedTypes: ["*"], assets: ["./assets/trampoline-down.png", "./assets/trampoline-up.png"] },
     { id: "tube-slide", world: "playground", kind: "hitbox", anchorId: "tube-slide", allowedTypes: ["*"], assets: [] },
     { id: "drinking-fountain", world: "playground", kind: "hitbox", anchorId: "drinking-fountain", allowedTypes: ["*"], assets: ["./assets/drinking-fountain-activated.png"], sfx: "drinkingFountainActivated" },

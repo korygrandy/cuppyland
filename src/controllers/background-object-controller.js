@@ -65,7 +65,19 @@
     }
 
     function applyBounceArtFrame(anchor, objectConfig, frame) {
-      if (!anchor || !objectConfig?.activatedAssets) {
+      if (!anchor) {
+        return;
+      }
+      if (!objectConfig?.activatedAssets) {
+        const art = anchor.querySelector(".world-background-object-art");
+        if (!art) {
+          return;
+        }
+        const isActive = typeof anchor.classList?.contains === "function"
+          ? anchor.classList.contains("is-bouncing")
+          : true;
+        art.style.backgroundImage = `url("${objectConfig.activatedAsset || ""}")`;
+        art.style.opacity = isActive ? "1" : "0";
         return;
       }
       const downArt = anchor.querySelector(".world-background-object-art-down");
@@ -93,7 +105,7 @@
         return;
       }
       art.style.backgroundImage = `url("${objectConfig.activatedAsset || ""}")`;
-      art.style.opacity = isActive && frame === "up" ? "1" : "0";
+      art.style.opacity = isActive ? "1" : "0";
     }
 
     function restoreTrampolineFriend(friendId, record) {
@@ -227,7 +239,7 @@
         return;
       }
 
-      let frame = objectConfig.activatedAssets ? "down" : "up";
+      let frame = objectConfig.activatedAssets ? "down" : "down";
       trampolineFrames.set(objectId, frame);
       anchor.classList.add("is-bouncing");
       applyBounceArtFrame(anchor, objectConfig, frame);
