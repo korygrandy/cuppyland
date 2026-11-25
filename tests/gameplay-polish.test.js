@@ -207,8 +207,12 @@ test("pumpkin man and pumpkin woman double-tap roll animations are configured", 
   assert.equal(styles.includes("translate(0, 0)"), true);
   assert.equal(styles.includes("translate(-400px, 0)"), true);
   assert.equal(styles.includes("rotate(-360deg)"), true);
-  assert.equal(styles.includes("rotate(-720deg)"), true);
-  assert.equal(styles.includes("translate(-78px, -34px)"), true);
+  assert.equal(styles.includes("pumpkinWomanRollRight") && styles.includes("translate(-400px, 0) rotate(-360deg)"), true);
+  assert.equal(styles.includes("rotate(-180deg)"), true);
+  assert.equal(styles.includes("pumpkinWomanRollRight") && styles.includes("translate(0, 0) rotate(0deg)"), true);
+  assert.equal(styles.includes("translate(-78px, -42px)"), true);
+  assert.equal(styles.includes("translate(-200px, -36px)"), true);
+  assert.equal(styles.includes("translate(-176px, -44px)"), true);
 });
 
 test("Parmesan cheese double-tap rotates and drops a cheese pile", () => {

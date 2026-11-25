@@ -439,13 +439,13 @@
         window.setTimeout(() => {
           art.classList.remove("pumpkin-woman-roll-left");
           art.classList.add("pumpkin-woman-roll-right");
-        }, 700);
+        }, 1400);
         window.setTimeout(() => {
           art.classList.remove("pumpkin-woman-roll-right");
-        }, 1400);
+        }, 2800);
         friendState.pumpkinAnimationTimer = window.setTimeout(() => {
           friendState.pumpkinAnimationTimer = null;
-        }, 1400);
+        }, 2800);
       }
     }
 
