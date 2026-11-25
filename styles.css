@@ -558,6 +558,83 @@ body {
   touch-action: none;
 }
 
+.friend-character[data-friend-type="punpkin-man"] .friend-character-art,
+.friend-character[data-friend-type="pumpkin-woman"] .friend-character-art {
+  transform-origin: center bottom;
+  transition: transform 420ms cubic-bezier(.18,.72,.24,1);
+  will-change: transform;
+}
+
+.pumpkin-man-roll-left {
+  animation: pumpkinManRollLeft 900ms cubic-bezier(.18,.72,.24,1) forwards;
+}
+
+.pumpkin-man-roll-right {
+  animation: pumpkinManRollRight 900ms cubic-bezier(.18,.72,.24,1) forwards;
+}
+
+.pumpkin-woman-roll-left {
+  animation: pumpkinWomanRollLeft 700ms cubic-bezier(.18,.72,.24,1) forwards;
+}
+
+.pumpkin-woman-roll-right {
+  animation: pumpkinWomanRollRight 700ms cubic-bezier(.18,.72,.24,1) forwards;
+}
+
+@keyframes pumpkinManRollLeft {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-34px) rotate(-180deg);
+  }
+  100% {
+    transform: translateY(0) rotate(-360deg);
+  }
+}
+
+@keyframes pumpkinManRollRight {
+  0% {
+    transform: translateY(0) rotate(-360deg);
+  }
+  50% {
+    transform: translateY(-34px) rotate(-540deg);
+  }
+  100% {
+    transform: translateY(0) rotate(-720deg);
+  }
+}
+
+@keyframes pumpkinWomanRollLeft {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  52% {
+    transform: translateY(-22px) rotate(-180deg);
+  }
+  82% {
+    transform: translateY(4px) rotate(-180deg) scaleY(.96);
+  }
+  100% {
+    transform: translateY(0) rotate(-180deg);
+  }
+}
+
+@keyframes pumpkinWomanRollRight {
+  0% {
+    transform: translateY(0) rotate(-180deg);
+  }
+  52% {
+    transform: translateY(-22px) rotate(-360deg);
+  }
+  82% {
+    transform: translateY(4px) rotate(-360deg) scaleY(.96);
+  }
+  100% {
+    transform: translateY(0) rotate(-360deg);
+  }
+}
+
 .friend-character[data-friend-type="parmesan-cheese"] {
   width: 132px;
   height: 276px;

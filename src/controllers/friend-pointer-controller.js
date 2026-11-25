@@ -284,6 +284,20 @@
         }
 
 
+        if (friendState.type === "punpkin-man" || friendState.type === "pumpkin-woman") {
+          const nowMs = Date.now();
+          const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
+          if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
+            friendState.lastTapAtMs = nowMs;
+            resetFriendDragState();
+            event.preventDefault();
+            event.stopPropagation();
+            playPumpkinAnimation(friendState, friendElement);
+            return;
+          }
+          friendState.lastTapAtMs = nowMs;
+        }
+
         if (friendState.type === "fishbowl") {
           friendElement.dataset.dragging = "true";
           if (typeof pauseFishbowlSequence === "function") {
@@ -406,6 +420,47 @@
 
     function syncPuppyFacing(friendState, friendElement) {
       window.CuppyLandPuppyFacingHelper?.syncFacing(friendState, friendElement);
+    }
+
+    function playPumpkinAnimation(friendState, friendElement) {
+      if (!friendState || !friendElement) {
+        return;
+      }
+      const art = friendElement.querySelector(".friend-character-art");
+      if (!art) {
+        return;
+      }
+      if (friendState.type === "punpkin-man") {
+        art.classList.remove("pumpkin-man-roll-left", "pumpkin-man-roll-right");
+        void art.offsetWidth;
+        art.classList.add("pumpkin-man-roll-left");
+        window.setTimeout(() => {
+          art.classList.remove("pumpkin-man-roll-left");
+          art.classList.add("pumpkin-man-roll-right");
+        }, 900);
+        window.setTimeout(() => {
+          art.classList.remove("pumpkin-man-roll-right");
+        }, 1800);
+        friendState.pumpkinAnimationTimer = window.setTimeout(() => {
+          friendState.pumpkinAnimationTimer = null;
+        }, 1800);
+        return;
+      }
+      if (friendState.type === "pumpkin-woman") {
+        art.classList.remove("pumpkin-woman-roll-left", "pumpkin-woman-roll-right");
+        void art.offsetWidth;
+        art.classList.add("pumpkin-woman-roll-left");
+        window.setTimeout(() => {
+          art.classList.remove("pumpkin-woman-roll-left");
+          art.classList.add("pumpkin-woman-roll-right");
+        }, 700);
+        window.setTimeout(() => {
+          art.classList.remove("pumpkin-woman-roll-right");
+        }, 1400);
+        friendState.pumpkinAnimationTimer = window.setTimeout(() => {
+          friendState.pumpkinAnimationTimer = null;
+        }, 1400);
+      }
     }
 
 

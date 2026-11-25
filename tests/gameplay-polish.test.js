@@ -185,6 +185,24 @@ test("pumpkin woman and shared object hairstyle snapping are configured", () => 
   assert.equal(app.includes("onDirectObjectHairstyle:"), true);
 });
 
+test("pumpkin man and pumpkin woman double-tap roll animations are configured", () => {
+  const pointer = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
+  const styles = fs.readFileSync("styles.css", "utf8");
+  const config = fs.readFileSync("src/core/game-config.js", "utf8");
+
+  assert.equal(config.includes('"punpkin-man"'), true);
+  assert.equal(config.includes('"pumpkin-woman"'), true);
+  assert.equal(pointer.includes('friendState.type === "punpkin-man" || friendState.type === "pumpkin-woman"'), true);
+  assert.equal(pointer.includes("pumpkin-man-roll-left"), true);
+  assert.equal(pointer.includes("pumpkin-man-roll-right"), true);
+  assert.equal(pointer.includes("pumpkin-woman-roll-left"), true);
+  assert.equal(pointer.includes("pumpkin-woman-roll-right"), true);
+  assert.equal(styles.includes("@keyframes pumpkinManRollLeft"), true);
+  assert.equal(styles.includes("@keyframes pumpkinManRollRight"), true);
+  assert.equal(styles.includes("@keyframes pumpkinWomanRollLeft"), true);
+  assert.equal(styles.includes("@keyframes pumpkinWomanRollRight"), true);
+});
+
 test("Parmesan cheese double-tap rotates and drops a cheese pile", () => {
   const config = fs.readFileSync("src/core/game-config.js", "utf8");
   const inventory = fs.readFileSync("src/ui/inventory.js", "utf8");
