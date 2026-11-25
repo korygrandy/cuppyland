@@ -14,6 +14,17 @@ const {
   chocolateMilkSequence,
 } = window.CuppyLandGame;
 
+const triggerGuard = window.CuppyLandTriggerManifest.validate({
+  worldAnchors: window.CuppyLandGame.backgroundObjectAnchors,
+  friendTypes: window.CuppyLandGame.friendTypes,
+  assetMap: window.CuppyLandGame.friendAssetMap,
+  sfxMap: window.CuppyLandGame.audioConfig.sfxClips,
+  frameAssets: window.CuppyLandGame.chocolateMilkSequence?.frameAssets,
+});
+if (!triggerGuard.valid) {
+  throw new Error(`Trigger guard failed:\n- ${triggerGuard.errors.join("\n- ")}`);
+}
+
 const dom = window.CuppyLandDomElements.createDomElements(document);
 const {
   screenEls,
