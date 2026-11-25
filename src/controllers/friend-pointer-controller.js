@@ -956,7 +956,7 @@
           } else if (friendState.hairstyle) {
              const profile = window.CuppyLandObjectOverlayRegistry?.getProfile(friendState);
              const snapX = profile?.offsetX ?? 17;
-             const snapY = profile?.offsetY ?? -43;
+             const snapY = profile?.offsetY ?? -57;
              const snapDistance = profile?.snapDistance ?? 55;
              if (Math.abs(friendState.hairstyleOffsetX - snapX) < snapDistance
                && Math.abs(friendState.hairstyleOffsetY - snapY) < snapDistance) {

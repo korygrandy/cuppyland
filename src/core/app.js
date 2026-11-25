@@ -248,7 +248,7 @@ const inventoryInteractionController = window.CuppyLandInventoryInteraction.crea
     friendState.hairstyleVisible = true;
     friendState.hairstyleDetached = false;
     friendState.hairstyleOffsetX = profile?.offsetX ?? 0;
-    friendState.hairstyleOffsetY = profile?.offsetY ?? -43;
+    friendState.hairstyleOffsetY = profile?.offsetY ?? -57;
     updateFriendElementAsset(friendId);
     return true;
   },
