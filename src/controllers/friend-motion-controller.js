@@ -138,15 +138,15 @@
       friendState.rabbitAnimationTimer = setTimeout(tick, 300);
     }
 
-    function stopTriceratopsAnimation(friendId) {
+    function stopTurtleAnimation(friendId) {
       const friendState = findFriendById(friendId);
-      if (!friendState || friendState.type !== "triceratops-bead-craft") {
+      if (!friendState || friendState.type !== "turtle-bead-craft") {
         return;
       }
 
-      if (friendState.triceratopsAnimationTimer) {
-        clearTimeout(friendState.triceratopsAnimationTimer);
-        friendState.triceratopsAnimationTimer = null;
+      if (friendState.turtleAnimationTimer) {
+        clearTimeout(friendState.turtleAnimationTimer);
+        friendState.turtleAnimationTimer = null;
       }
 
       const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`);
@@ -156,104 +156,104 @@
       }
     }
 
-    function startTriceratopsAnimation(friendId) {
+    function startTurtleAnimation(friendId) {
       const friendState = findFriendById(friendId);
-      if (!friendState || friendState.type !== "triceratops-bead-craft") {
+      if (!friendState || friendState.type !== "turtle-bead-craft") {
         return;
       }
 
-      if (!Number.isFinite(friendState.triceratopsAnchorWorldX)) {
-        friendState.triceratopsAnchorWorldX = friendState.worldX;
+      if (!Number.isFinite(friendState.turtleAnchorWorldX)) {
+        friendState.turtleAnchorWorldX = friendState.worldX;
       }
-      if (!friendState.triceratopsDirection) {
-        friendState.triceratopsDirection = 1;
+      if (!friendState.turtleDirection) {
+        friendState.turtleDirection = 1;
       }
-      if (!Number.isFinite(friendState.triceratopsDistanceSinceEat)) {
-        friendState.triceratopsDistanceSinceEat = 0;
+      if (!Number.isFinite(friendState.turtleDistanceSinceEat)) {
+        friendState.turtleDistanceSinceEat = 0;
       }
-      if (friendState.triceratopsAnimationTimer) {
-        clearTimeout(friendState.triceratopsAnimationTimer);
-        friendState.triceratopsAnimationTimer = null;
+      if (friendState.turtleAnimationTimer) {
+        clearTimeout(friendState.turtleAnimationTimer);
+        friendState.turtleAnimationTimer = null;
       }
 
       const crawl = () => {
         const activeFriend = findFriendById(friendId);
-        if (!activeFriend || activeFriend.type !== "triceratops-bead-craft") {
+        if (!activeFriend || activeFriend.type !== "turtle-bead-craft") {
           if (activeFriend) {
-            activeFriend.triceratopsAnimationTimer = null;
+            activeFriend.turtleAnimationTimer = null;
           }
           return;
         }
 
         const friendElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"]`);
         if (!friendElement) {
-          activeFriend.triceratopsAnimationTimer = null;
+          activeFriend.turtleAnimationTimer = null;
           return;
         }
 
-        const anchorX = Number.isFinite(activeFriend.triceratopsAnchorWorldX)
-          ? activeFriend.triceratopsAnchorWorldX
+        const anchorX = Number.isFinite(activeFriend.turtleAnchorWorldX)
+          ? activeFriend.turtleAnchorWorldX
           : activeFriend.worldX;
         const minWorldX = Math.max(0, Math.min(worldCanvas.offsetWidth - friendElement.offsetWidth, anchorX - 100));
         const maxWorldX = Math.max(0, Math.min(worldCanvas.offsetWidth - friendElement.offsetWidth, anchorX + 100));
-        let nextX = activeFriend.worldX + activeFriend.triceratopsDirection;
+        let nextX = activeFriend.worldX + activeFriend.turtleDirection;
 
         if (nextX >= maxWorldX) {
           nextX = maxWorldX;
-          activeFriend.triceratopsDirection = -1;
+          activeFriend.turtleDirection = -1;
         } else if (nextX <= minWorldX) {
           nextX = minWorldX;
-          activeFriend.triceratopsDirection = 1;
+          activeFriend.turtleDirection = 1;
         }
 
         activeFriend.worldX = nextX;
         friendElement.style.left = `${nextX}px`;
         const art = friendElement.querySelector(".friend-character-art");
-        activeFriend.triceratopsDistanceSinceEat += activeFriend.triceratopsDirection;
-        const distanceSinceEat = Math.abs(activeFriend.triceratopsDistanceSinceEat);
+        activeFriend.turtleDistanceSinceEat += activeFriend.turtleDirection;
+        const distanceSinceEat = Math.abs(activeFriend.turtleDistanceSinceEat);
 
         if (art) {
-          art.style.transform = `scaleX(${activeFriend.triceratopsDirection < 0 ? -1 : 1})`;
+          art.style.transform = `scaleX(${activeFriend.turtleDirection < 0 ? -1 : 1})`;
           art.style.transformOrigin = "center bottom";
         }
 
         if (distanceSinceEat >= 20) {
-          activeFriend.triceratopsDistanceSinceEat = 0;
-          activeFriend.triceratopsAnimationTimer = setTimeout(() => {
+          activeFriend.turtleDistanceSinceEat = 0;
+          activeFriend.turtleAnimationTimer = setTimeout(() => {
             const eatingFriend = findFriendById(friendId);
             const eatingElement = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"]`);
-            if (!eatingFriend || eatingFriend.type !== "triceratops-bead-craft" || !eatingElement) {
+            if (!eatingFriend || eatingFriend.type !== "turtle-bead-craft" || !eatingElement) {
               return;
             }
 
             const eatingArt = eatingElement.querySelector(".friend-character-art");
-            const facingScale = eatingFriend.triceratopsDirection < 0 ? -1 : 1;
-            const eatingRotation = eatingFriend.triceratopsDirection >= 0 ? 14 : -14;
+            const facingScale = eatingFriend.turtleDirection < 0 ? -1 : 1;
+            const eatingRotation = eatingFriend.turtleDirection >= 0 ? 14 : -14;
             if (eatingArt) {
               eatingArt.style.transition = "transform 2s ease-in-out";
               eatingArt.style.transform = `scaleX(${facingScale}) rotate(${eatingRotation}deg)`;
             }
 
-            eatingFriend.triceratopsAnimationTimer = setTimeout(() => {
+            eatingFriend.turtleAnimationTimer = setTimeout(() => {
               const standingFriend = findFriendById(friendId);
               const standingArt = worldCanvas.querySelector(`.friend-character[data-friend-id="${friendId}"] .friend-character-art`);
-              if (!standingFriend || standingFriend.type !== "triceratops-bead-craft") {
+              if (!standingFriend || standingFriend.type !== "turtle-bead-craft") {
                 return;
               }
               if (standingArt) {
                 standingArt.style.transition = "transform 400ms ease-in-out";
-                standingArt.style.transform = `scaleX(${standingFriend.triceratopsDirection < 0 ? -1 : 1})`;
+                standingArt.style.transform = `scaleX(${standingFriend.turtleDirection < 0 ? -1 : 1})`;
               }
-              standingFriend.triceratopsAnimationTimer = setTimeout(crawl, 100);
+              standingFriend.turtleAnimationTimer = setTimeout(crawl, 100);
             }, 2000);
           }, 2000);
           return;
         }
 
-        activeFriend.triceratopsAnimationTimer = setTimeout(crawl, 100);
+        activeFriend.turtleAnimationTimer = setTimeout(crawl, 100);
       };
 
-      friendState.triceratopsAnimationTimer = setTimeout(crawl, 100);
+      friendState.turtleAnimationTimer = setTimeout(crawl, 100);
     }
 
     function stopPizzaManAnimation(friendId) {
@@ -569,7 +569,7 @@
         friendState.puppyPlayTimer = null;
       }
       stopRabbitAnimation(friendId);
-      stopTriceratopsAnimation(friendId);
+      stopTurtleAnimation(friendId);
       stopRocketManAnimation(friendId);
       stopPizzaManAnimation(friendId);
     }
@@ -577,8 +577,8 @@
     return {
       startRabbitAnimation,
       stopRabbitAnimation,
-      startTriceratopsAnimation,
-      stopTriceratopsAnimation,
+      startTurtleAnimation,
+      stopTurtleAnimation,
       startPizzaManAnimation,
       stopPizzaManAnimation,
       startRocketManAnimation,

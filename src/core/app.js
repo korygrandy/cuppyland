@@ -191,6 +191,23 @@ const inventoryInteractionController = window.CuppyLandInventoryInteraction.crea
   refreshChocolateMilkSequences: () => refreshChocolateMilkSequences(),
   onChocolateMilkFillEnd,
   worldCanvas,
+  onDirectObjectHairstyle: (friendId, itemType, value) => {
+    const friendState = findFriendById(friendId, state.activeWorld);
+    if (!friendState) {
+      return false;
+    }
+    const profile = window.CuppyLandObjectOverlayRegistry?.getProfile(friendState);
+    if (!profile) {
+      return false;
+    }
+    friendState.hairstyle = value;
+    friendState.hairstyleVisible = true;
+    friendState.hairstyleDetached = false;
+    friendState.hairstyleOffsetX = profile.offsetX;
+    friendState.hairstyleOffsetY = profile.offsetY;
+    updateFriendElementAsset(friendId);
+    return true;
+  },
   onDirectBabyMilkPart: (babyId, itemType, value) => {
     const babyState = findFriendById(babyId, state.activeWorld);
     if (!babyState || babyState.type !== "baby-mr-chocolate-milk") {
@@ -216,6 +233,23 @@ const inventoryInteractionController = window.CuppyLandInventoryInteraction.crea
       return false;
     }
     updateFriendElementAsset(babyId);
+    return true;
+  },
+  onDirectObjectHairstyle: (friendId, itemType, value) => {
+    const friendState = findFriendById(friendId, state.activeWorld);
+    if (!friendState) {
+      return false;
+    }
+    const profile = window.CuppyLandObjectOverlayRegistry?.getProfile(friendState);
+    if (!profile) {
+      return false;
+    }
+    friendState.hairstyle = value;
+    friendState.hairstyleVisible = true;
+    friendState.hairstyleDetached = false;
+    friendState.hairstyleOffsetX = profile?.offsetX ?? 0;
+    friendState.hairstyleOffsetY = profile?.offsetY ?? -57;
+    updateFriendElementAsset(friendId);
     return true;
   },
   onDirectPuppyToy: (toyType, puppyId) => {
@@ -380,7 +414,7 @@ const friendReleaseController = window.CuppyLandFriendReleaseController.createCo
   playGoldenPuppyWithBall: (friendId, options) => puppySequenceController.playWithBall(friendId, options),
   playGoldenPuppyWithSquirrel: (friendId) => puppySequenceController.playWithSquirrel(friendId),
   startRabbitAnimation: (friendId) => friendMotionController.startRabbitAnimation(friendId),
-  startTriceratopsAnimation: (friendId) => friendMotionController.startTriceratopsAnimation(friendId),
+  startTurtleAnimation: (friendId) => friendMotionController.startTurtleAnimation(friendId),
   startRocketManAnimation: (friendId) => friendMotionController.startRocketManAnimation(friendId),
   startPizzaManAnimation: (friendId) => friendMotionController.startPizzaManAnimation(friendId),
 });
@@ -419,8 +453,8 @@ const friendPointerController = window.CuppyLandFriendPointerController.createCo
   triggerTurkeyAnimation: (friendId) => friendWorldController?.triggerTurkeyAnimation?.(friendId),
   startRabbitAnimation: (friendId) => friendMotionController.startRabbitAnimation(friendId),
   stopRabbitAnimation: (friendId) => friendMotionController.stopRabbitAnimation(friendId),
-  startTriceratopsAnimation: (friendId) => friendMotionController.startTriceratopsAnimation(friendId),
-  stopTriceratopsAnimation: (friendId) => friendMotionController.stopTriceratopsAnimation(friendId),
+  startTurtleAnimation: (friendId) => friendMotionController.startTurtleAnimation(friendId),
+  stopTurtleAnimation: (friendId) => friendMotionController.stopTurtleAnimation(friendId),
   startPizzaManAnimation: (friendId) => friendMotionController.startPizzaManAnimation(friendId),
   stopPizzaManAnimation: (friendId) => friendMotionController.stopPizzaManAnimation(friendId),
   startRocketManAnimation: (friendId) => friendMotionController.startRocketManAnimation(friendId),

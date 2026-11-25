@@ -94,7 +94,7 @@
     friendTypes: [
       "heart-women",
       "heart-man",
-      "triceratops-bead-craft",
+      "turtle-bead-craft",
       "rocketman-craft",
       "furball-guy",
       "hairy-guy",
@@ -126,6 +126,7 @@
       "water-bottle",
       "squirrel",
       "punpkin-man",
+      "pumpkin-woman",
     ],
     expressionAssetMap: {
       happy: "./assets/facial-expression-happy.png",
@@ -184,7 +185,7 @@
     friendAssetMap: {
       "heart-women": "./assets/heart-woman.png",
       "heart-man": "./assets/heart-man.png",
-      "triceratops-bead-craft": "./assets/triceratops-bead-craft.png",
+      "turtle-bead-craft": "./assets/turtle-bead-craft.png",
       "rocketman-craft": "./assets/rocketman-craft.png",
       "furball-guy": "./assets/furball-guy-drawing.png",
       "hairy-guy": "./assets/hairy-guy-drawing.png",
@@ -238,6 +239,7 @@
       "squirrel": "./assets/squirrel.png",
       "squirrel-running": "./assets/squirrel-running.png",
       "punpkin-man": "./assets/punpkin-man.png",
+      "pumpkin-woman": "./assets/pumpkin-woman.png",
       "golden-puppy-playing-rope": "./assets/golden-puppy-playing-rope.png",
       "golden-puppy-with-rope-sitting": "./assets/golden-puppy-with-rope-sitting.png",
       "dogtoy-ball": "./assets/dogtoy-ball.png",

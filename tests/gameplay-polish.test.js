@@ -163,6 +163,28 @@ test("third re-added cup also receives a unique ID", () => {
   assert.equal(new Set(store.getWorldCupList().map((cup) => cup.id)).size, 3);
 });
 
+test("pumpkin woman and shared object hairstyle snapping are configured", () => {
+  const config = fs.readFileSync("src/core/game-config.js", "utf8");
+  const registry = fs.readFileSync("src/core/object-overlay-registry.js", "utf8");
+  const friendController = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
+  const inventoryController = fs.readFileSync("src/controllers/inventory-interaction-controller.js", "utf8");
+
+  assert.equal(config.includes('"pumpkin-woman"'), true);
+  assert.equal(config.includes('"pumpkin-woman": "./assets/pumpkin-woman.png"'), true);
+  assert.equal(registry.includes("barbie-baby"), true);
+  assert.equal(registry.includes("petTypes"), true);
+  assert.equal(registry.includes("offsetY: -57"), true);
+  assert.equal(registry.includes("offsetY: -22"), true);
+  assert.equal(registry.includes("offsetY: -4"), true);
+  assert.equal(registry.includes("scale: 0.29"), true);
+  assert.equal(registry.includes("offsetY: -8"), true);
+  assert.equal(friendController.includes(".object-hairstyle-overlay"), true);
+  assert.equal(friendController.includes("snapDistance"), true);
+  assert.equal(inventoryController.includes("onDirectObjectHairstyle"), true);
+  const app = fs.readFileSync("src/core/app.js", "utf8");
+  assert.equal(app.includes("onDirectObjectHairstyle:"), true);
+});
+
 test("Parmesan cheese double-tap rotates and drops a cheese pile", () => {
   const config = fs.readFileSync("src/core/game-config.js", "utf8");
   const inventory = fs.readFileSync("src/ui/inventory.js", "utf8");

@@ -31,6 +31,7 @@
       onDirectPuppyToBed = null,
       onDirectWaterSource = null,
       onDirectBabyMilkPart = null,
+      onDirectObjectHairstyle = null,
     } = options;
     const chocolateMilkFillDurationMs = game.chocolateMilkSequence?.durationMs || 5000;
     const chocolateMilkFillState = {
@@ -352,6 +353,43 @@
       const targetCupId = hoveredCup?.dataset.cupId || getActiveCupId();
       const zone = zoneForPoint(event.clientX, event.clientY);
       const isFriendDrop = dragState.type === "friend";
+      if (
+        (dragState.type === "hairstyle")
+        && !isFriendDrop
+      ) {
+        const targetedElement = document.elementFromPoint(event.clientX, event.clientY);
+        let friendElement = targetedElement?.closest?.(
+          '.friend-character[data-friend-id]'
+        );
+        if (!friendElement && worldCanvas) {
+          friendElement = Array.from(worldCanvas.querySelectorAll(".friend-character[data-friend-id]"))
+            .find((candidate) => {
+              const rect = candidate.getBoundingClientRect();
+              return event.clientX >= rect.left
+                && event.clientX <= rect.right
+                && event.clientY >= rect.top
+                && event.clientY <= rect.bottom;
+            }) || null;
+        }
+        if (friendElement && typeof onDirectObjectHairstyle === "function") {
+          const applied = onDirectObjectHairstyle(
+            friendElement.dataset.friendId,
+            "hairstyle",
+            dragState.value
+          );
+          if (applied) {
+            dragState.suppressClick = true;
+            dragState.active = false;
+            dragState.type = "";
+            dragState.value = "";
+            dragState.pointerId = null;
+            dragState.moved = false;
+            hideDragGhost();
+            clearZoneHighlights();
+            return;
+          }
+        }
+      }
       if (
         !isFriendDrop
         && ["lid", "cup", "sleeve", "expression", "hairstyle"].includes(dragState.type)
