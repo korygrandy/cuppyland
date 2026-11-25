@@ -173,6 +173,10 @@ test("pumpkin woman and shared object hairstyle snapping are configured", () => 
   assert.equal(config.includes('"pumpkin-woman": "./assets/pumpkin-woman.png"'), true);
   assert.equal(registry.includes("barbie-baby"), true);
   assert.equal(registry.includes("petTypes"), true);
+  assert.equal(registry.includes("offsetY: -43"), true);
+  assert.equal(registry.includes("offsetY: -12"), true);
+  assert.equal(registry.includes("scale: 0.58"), true);
+  assert.equal(registry.includes("offsetY: -8"), true);
   assert.equal(friendController.includes(".object-hairstyle-overlay"), true);
   assert.equal(friendController.includes("snapDistance"), true);
   assert.equal(inventoryController.includes("onDirectObjectHairstyle"), true);
