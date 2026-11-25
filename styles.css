@@ -546,6 +546,100 @@ body {
   pointer-events: auto;
 }
 
+.friend-character[data-friend-type="parmesan-cheese"] {
+  width: 132px;
+  height: 276px;
+  overflow: visible;
+}
+
+.friend-character[data-friend-type="parmesan-cheese"] .friend-character-art {
+  width: 132px;
+  height: 276px;
+  background-position: center bottom;
+  background-size: contain;
+  transform-origin: center center;
+  transition: transform 520ms cubic-bezier(.2,.75,.2,1);
+}
+
+.friend-character[data-friend-type="parmesan-cheese"] .friend-character-art.parmesan-cheese-rotated {
+  transform: rotate(-45deg);
+}
+
+.parmesan-cheese-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1400;
+  overflow: visible;
+}
+
+.parmesan-cheese-particle {
+  position: absolute;
+  left: var(--cheese-start-x);
+  top: var(--cheese-start-y);
+  width: var(--cheese-size);
+  height: calc(var(--cheese-size) * 0.7);
+  border-radius: 2px;
+  background: #f4d77a;
+  box-shadow: 0 0 3px rgba(255, 231, 154, 0.7);
+  opacity: 0;
+  transform: translate(0, 0) rotate(var(--cheese-rotation));
+  animation: parmesanCheeseFall var(--cheese-duration) cubic-bezier(.2,.65,.35,1) forwards;
+  animation-delay: var(--cheese-delay);
+}
+
+.parmesan-cheese-pile {
+  position: absolute;
+  left: var(--pile-x);
+  top: var(--pile-y);
+  width: var(--pile-width);
+  height: 18px;
+  margin-left: calc(var(--pile-width) * -0.5);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 50% 55%, #f7df98 0 35%, rgba(224, 188, 98, 0.95) 36% 58%, rgba(224, 188, 98, 0) 70%);
+  opacity: 0;
+  transform: scale(.25);
+  animation: parmesanCheesePile 3000ms ease-out forwards;
+  animation-delay: var(--pile-delay);
+}
+
+@keyframes parmesanCheeseFall {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(var(--cheese-rotation)) scale(.7);
+  }
+  12% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--cheese-drift-x), var(--cheese-fall-y)) rotate(var(--cheese-rotation)) scale(.45);
+  }
+}
+
+@keyframes parmesanCheesePile {
+  0%, 18% {
+    opacity: 0;
+    transform: scale(.25);
+  }
+  32% {
+    opacity: .95;
+    transform: scale(.65);
+  }
+  72% {
+    opacity: .9;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+}
+
 .tube-slide-entering,
 .tube-slide-exiting {
   filter: contrast(1.12) saturate(1.12);

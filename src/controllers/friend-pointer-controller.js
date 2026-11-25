@@ -290,6 +290,59 @@
       friendArt.style.transformOrigin = isDragging ? "center center" : "";
     }
 
+    function playParmesanCheeseAnimation(friendState, friendElement) {
+      if (!friendState || !friendElement || friendState.type !== "parmesan-cheese") {
+        return;
+      }
+      const art = friendElement.querySelector(".friend-character-art");
+      if (art) {
+        art.style.transition = "transform 520ms cubic-bezier(.2,.75,.2,1)";
+        art.style.transformOrigin = "center center";
+        art.style.transform = "rotate(-45deg)";
+        art.classList.add("parmesan-cheese-rotated");
+      }
+
+      friendElement.querySelector(".parmesan-cheese-particles")?.remove();
+      const particles = document.createElement("div");
+      particles.className = "parmesan-cheese-particles";
+
+      const elementRect = friendElement.getBoundingClientRect();
+      const artRect = art?.getBoundingClientRect() || elementRect;
+      const localStartX = (artRect.left - elementRect.left) + (artRect.width * 0.18);
+      const localStartY = (artRect.top - elementRect.top) + (artRect.height * 0.14);
+      const localPileX = (artRect.left - elementRect.left) + (artRect.width * 0.5);
+      const localPileY = (artRect.bottom - elementRect.top) - 12;
+      const fallDistance = Math.max(60, localPileY - localStartY);
+
+      const pile = document.createElement("span");
+      pile.className = "parmesan-cheese-pile";
+      pile.style.setProperty("--pile-x", `${localPileX}px`);
+      pile.style.setProperty("--pile-y", `${localPileY}px`);
+      pile.style.setProperty("--pile-width", `${Math.min(150, artRect.width * 0.62)}px`);
+      pile.style.setProperty("--pile-delay", "780ms");
+      particles.appendChild(pile);
+
+      const count = 22;
+      for (let index = 0; index < count; index += 1) {
+        const particle = document.createElement("span");
+        particle.className = "parmesan-cheese-particle";
+        const startDrift = (Math.random() * 18) - 9;
+        const endDrift = (Math.random() * 64) - 32;
+        particle.style.setProperty("--cheese-start-x", `${localStartX + startDrift}px`);
+        particle.style.setProperty("--cheese-start-y", `${localStartY}px`);
+        particle.style.setProperty("--cheese-fall-y", `${fallDistance + (Math.random() * 18)}px`);
+        particle.style.setProperty("--cheese-drift-x", `${endDrift}px`);
+        particle.style.setProperty("--cheese-size", `${3 + Math.floor(Math.random() * 5)}px`);
+        particle.style.setProperty("--cheese-rotation", `${-30 + Math.floor(Math.random() * 60)}deg`);
+        particle.style.setProperty("--cheese-delay", `${80 + (index * 18) + Math.floor(Math.random() * 90)}ms`);
+        particle.style.setProperty("--cheese-duration", `${780 + Math.floor(Math.random() * 430)}ms`);
+        particles.appendChild(particle);
+      }
+
+      friendElement.appendChild(particles);
+      window.setTimeout(() => particles.remove(), 3600);
+    }
+
     function syncSquirrelAvoidance(dogElement, dogState) {
       syncSquirrelProximity(dogElement, dogState);
     }
@@ -542,6 +595,20 @@
         }
         friendState.lastTapAtMs = nowMs;
         friendState.fishbowlSuppressPointerDrag = false;
+      }
+
+      if (friendState.type === "parmesan-cheese") {
+        const nowMs = Date.now();
+        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
+        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
+          friendState.lastTapAtMs = nowMs;
+          resetFriendDragState();
+          event.preventDefault();
+          event.stopPropagation();
+          playParmesanCheeseAnimation(friendState, friendElement);
+          return;
+        }
+        friendState.lastTapAtMs = nowMs;
       }
 
       if (friendState.type === "water-bowl") {

@@ -163,6 +163,24 @@ test("third re-added cup also receives a unique ID", () => {
   assert.equal(new Set(store.getWorldCupList().map((cup) => cup.id)).size, 3);
 });
 
+test("Parmesan cheese double-tap rotates and drops a cheese pile", () => {
+  const config = fs.readFileSync("src/core/game-config.js", "utf8");
+  const inventory = fs.readFileSync("src/ui/inventory.js", "utf8");
+  const pointer = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
+  const styles = fs.readFileSync("styles.css", "utf8");
+
+  assert.equal(config.includes('"parmesan-cheese"'), true);
+  assert.equal(config.includes('"parmesan-cheese": "./assets/parmesan-cheese.png"'), true);
+  assert.equal(inventory.includes('"parmesan-cheese"'), true);
+  assert.equal(pointer.includes('friendState.type === "parmesan-cheese"'), true);
+  assert.equal(pointer.includes('transform = "rotate(-45deg)"'), true);
+  assert.equal(pointer.includes("playParmesanCheeseAnimation"), true);
+  assert.equal(styles.includes(".parmesan-cheese-particle"), true);
+  assert.equal(styles.includes(".parmesan-cheese-pile"), true);
+  assert.equal(styles.includes("@keyframes parmesanCheeseFall"), true);
+  assert.equal(styles.includes("@keyframes parmesanCheesePile"), true);
+});
+
 test("baby Mr Chocolate Milk shares cup and milk behavior at baby scale", () => {
   const config = fs.readFileSync("src/core/game-config.js", "utf8");
   const inventory = fs.readFileSync("src/ui/inventory.js", "utf8");
@@ -192,7 +210,7 @@ test("baby Mr Chocolate Milk shares cup and milk behavior at baby scale", () => 
 
 test("water bottle is in accessories and remains a snap source", () => {
   const ui = fs.readFileSync("src/ui/inventory.js", "utf8");
-  assert.equal(ui.includes('"lavalamp", "chocolate-milk", "baby-mr-chocolate-milk", "uke"'), true);
+  assert.equal(ui.includes('"lavalamp", "chocolate-milk", "baby-mr-chocolate-milk", "parmesan-cheese", "uke"'), true);
   assert.equal(ui.includes('"water-bottle"'), true);
 });
 
