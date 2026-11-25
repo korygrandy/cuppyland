@@ -206,6 +206,8 @@ test("pumpkin man and pumpkin woman double-tap roll animations are configured", 
   assert.equal(styles.includes("translate(-156px, 0)"), true);
   assert.equal(styles.includes("translate(0, 0)"), true);
   assert.equal(styles.includes("translate(-400px, 0)"), true);
+  assert.equal(styles.includes("rotate(-360deg)"), true);
+  assert.equal(styles.includes("rotate(-720deg)"), true);
   assert.equal(styles.includes("translate(-78px, -34px)"), true);
 });
 
