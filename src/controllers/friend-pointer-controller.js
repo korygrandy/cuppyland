@@ -417,19 +417,20 @@
         return;
       }
       if (friendState.type === "punpkin-man") {
+        window.CuppyLandAudio?.playSfxClip?.("pumpkinManActivated");
         art.classList.remove("pumpkin-man-roll-left", "pumpkin-man-roll-right");
         void art.offsetWidth;
         art.classList.add("pumpkin-man-roll-left");
         window.setTimeout(() => {
           art.classList.remove("pumpkin-man-roll-left");
           art.classList.add("pumpkin-man-roll-right");
-        }, 900);
+        }, 1400);
         window.setTimeout(() => {
           art.classList.remove("pumpkin-man-roll-right");
-        }, 1800);
+        }, 2800);
         friendState.pumpkinAnimationTimer = window.setTimeout(() => {
           friendState.pumpkinAnimationTimer = null;
-        }, 1800);
+        }, 2800);
         return;
       }
       if (friendState.type === "pumpkin-woman") {
@@ -439,13 +440,13 @@
         window.setTimeout(() => {
           art.classList.remove("pumpkin-woman-roll-left");
           art.classList.add("pumpkin-woman-roll-right");
-        }, 1400);
+        }, 900);
         window.setTimeout(() => {
           art.classList.remove("pumpkin-woman-roll-right");
-        }, 2800);
+        }, 1800);
         friendState.pumpkinAnimationTimer = window.setTimeout(() => {
           friendState.pumpkinAnimationTimer = null;
-        }, 2800);
+        }, 1800);
       }
     }
 

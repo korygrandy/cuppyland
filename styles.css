@@ -566,52 +566,22 @@ body {
 }
 
 .pumpkin-man-roll-left {
-  animation: pumpkinManRollLeft 900ms cubic-bezier(.18,.72,.24,1) forwards;
+  animation: pumpkinManRollLeft 1400ms cubic-bezier(.18,.72,.24,1) forwards;
 }
 
 .pumpkin-man-roll-right {
-  animation: pumpkinManRollRight 900ms cubic-bezier(.18,.72,.24,1) forwards;
+  animation: pumpkinManRollRight 1400ms cubic-bezier(.18,.72,.24,1) forwards;
 }
 
 .pumpkin-woman-roll-left {
-  animation: pumpkinWomanRollLeft 1400ms cubic-bezier(.18,.72,.24,1) forwards;
+  animation: pumpkinWomanRollLeft 900ms cubic-bezier(.18,.72,.24,1) forwards;
 }
 
 .pumpkin-woman-roll-right {
-  animation: pumpkinWomanRollRight 1400ms cubic-bezier(.18,.72,.24,1) forwards;
+  animation: pumpkinWomanRollRight 900ms cubic-bezier(.18,.72,.24,1) forwards;
 }
 
 @keyframes pumpkinManRollLeft {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  50% {
-    transform: translate(-78px, -42px) rotate(-180deg) scaleY(.96);
-  }
-  56% {
-    transform: translate(-87px, -48px) rotate(-202deg) scaleY(.94);
-  }
-  100% {
-    transform: translate(-156px, 0) rotate(-360deg);
-  }
-}
-
-@keyframes pumpkinManRollRight {
-  0% {
-    transform: translate(-156px, 0) rotate(-360deg);
-  }
-  50% {
-    transform: translate(-78px, -42px) rotate(-180deg) scaleY(.96);
-  }
-  56% {
-    transform: translate(-69px, -48px) rotate(-158deg) scaleY(.94);
-  }
-  100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-}
-
-@keyframes pumpkinWomanRollLeft {
   0% {
     transform: translate(0, 0) rotate(0deg);
   }
@@ -626,7 +596,7 @@ body {
   }
 }
 
-@keyframes pumpkinWomanRollRight {
+@keyframes pumpkinManRollRight {
   0% {
     transform: translate(-400px, 0) rotate(-360deg);
   }
@@ -635,6 +605,36 @@ body {
   }
   56% {
     transform: translate(-176px, -44px) rotate(-158deg) scaleY(.94);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes pumpkinWomanRollLeft {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(-78px, -84px) rotate(-180deg) scaleY(.96);
+  }
+  56% {
+    transform: translate(-87px, -96px) rotate(-202deg) scaleY(.94);
+  }
+  100% {
+    transform: translate(-156px, 0) rotate(-360deg);
+  }
+}
+
+@keyframes pumpkinWomanRollRight {
+  0% {
+    transform: translate(-156px, 0) rotate(-360deg);
+  }
+  50% {
+    transform: translate(-78px, -84px) rotate(-180deg) scaleY(.96);
+  }
+  56% {
+    transform: translate(-69px, -96px) rotate(-158deg) scaleY(.94);
   }
   100% {
     transform: translate(0, 0) rotate(0deg);
