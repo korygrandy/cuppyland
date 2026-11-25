@@ -321,7 +321,7 @@
         + ((upperLeftLocalY - localCenterY) * Math.cos(angleRad));
       const localStartX = rotatedStartX;
       const localStartY = rotatedStartY;
-      const localPileX = artRect.width * 0.5;
+      const localPileX = artRect.width * 0.18;
       const localPileY = artRect.height - 8;
       const fallDistance = Math.max(60, localPileY - localStartY);
 
