@@ -56,6 +56,22 @@
       onDirectWaterSource = null,
       timerLifecycle = null,
     } = options;
+    const doubleTapController = window.CuppyLandFriendDoubleTapController?.createController()
+      || {
+        tryActivate: (friendState, windowMs, activate) => {
+          const nowMs = Date.now();
+          const lastTapAtMs = Number.isFinite(friendState?.lastTapAtMs) ? friendState.lastTapAtMs : 0;
+          if (lastTapAtMs && nowMs - lastTapAtMs <= windowMs) {
+            friendState.lastTapAtMs = 0;
+            activate?.();
+            return true;
+          }
+          if (friendState) {
+            friendState.lastTapAtMs = nowMs;
+          }
+          return false;
+        },
+      };
     const chocolateMilkFillDurationMs = getSequenceConfig?.().durationMs || 5000;
     const chocolateMilkFillState = {
       cupId: null,
@@ -634,17 +650,15 @@
       }
 
       if (friendState.type === "punpkin-man" || friendState.type === "pumpkin-woman") {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-          friendState.lastTapAtMs = 0;
+        const activated = doubleTapController.tryActivate(friendState, 450, () => {
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
           playPumpkinAnimation(friendState, friendElement);
+        });
+        if (activated) {
           return;
         }
-        friendState.lastTapAtMs = nowMs;
       }
 
       if (friendState.type === "golden-puppy" && friendState.activated !== true) {
@@ -678,24 +692,19 @@
       }
 
       if (friendState.type === "turkey") {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 320) {
-          friendState.lastTapAtMs = nowMs;
+        const activated = doubleTapController.tryActivate(friendState, 320, () => {
           window.CuppyLandAudio?.playSfxClip?.("turkeyGobble");
           if (typeof triggerTurkeyAnimation === "function") {
             triggerTurkeyAnimation(friendState.id);
           }
+        });
+        if (activated) {
           return;
         }
-        friendState.lastTapAtMs = nowMs;
       }
 
       if (friendState.type === "fishbowl") {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-          friendState.lastTapAtMs = nowMs;
+        const activated = doubleTapController.tryActivate(friendState, 450, () => {
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
@@ -704,32 +713,28 @@
           }
           window.CuppyLandAudio?.playSfxClip?.("fishbowlActivated");
           friendState.fishbowlSuppressPointerDrag = true;
+        });
+        if (activated) {
           return;
         }
-        friendState.lastTapAtMs = nowMs;
         friendState.fishbowlSuppressPointerDrag = false;
       }
 
       if (friendState.type === "parmesan-cheese") {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-          friendState.lastTapAtMs = nowMs;
+        const activated = doubleTapController.tryActivate(friendState, 450, () => {
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
           window.CuppyLandAudio?.playSfxClip?.("parmesanCheeseActivated");
           playParmesanCheeseAnimation(friendState, friendElement);
+        });
+        if (activated) {
           return;
         }
-        friendState.lastTapAtMs = nowMs;
       }
 
       if (friendState.type === "water-bowl") {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 300) {
-          friendState.lastTapAtMs = 0;
+        const activated = doubleTapController.tryActivate(friendState, 300, () => {
           friendState.full = true;
           friendState.type = "water-bowl";
           updateFriendElementAsset?.(friendState.id);
@@ -738,36 +743,31 @@
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
+        });
+        if (activated) {
           return;
         }
-        friendState.lastTapAtMs = nowMs;
       }
 
       if (friendState.type === "rocketman-craft") {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-          friendState.lastTapAtMs = nowMs;
+        const activated = doubleTapController.tryActivate(friendState, 450, () => {
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
           if (typeof triggerRocketManAnimation === "function") {
             triggerRocketManAnimation(friendState.id);
           }
+        });
+        if (activated) {
           return;
         }
-        friendState.lastTapAtMs = nowMs;
       }
 
       if (friendState.type === "chocolate-milk" || friendState.type === "baby-mr-chocolate-milk") {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-          friendState.lastTapAtMs = nowMs;
+        const activated = doubleTapController.tryActivate(friendState, 450, () => {
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
-
           const hoveredCup = getCupElementAtPoint(event.clientX, event.clientY);
           const hoveredCupId = window.CuppyLandChocolateMilkSpillHelper?.getDoubleTapCupId
             ? window.CuppyLandChocolateMilkSpillHelper.getDoubleTapCupId(friendState, hoveredCup?.dataset?.cupId || null)
@@ -785,9 +785,10 @@
             refreshChocolateMilkSequences?.();
             startChocolateMilkSpill?.(friendState.id, cupId);
           }
+        });
+        if (activated) {
           return;
         }
-        friendState.lastTapAtMs = nowMs;
       }
 
       resetChocolateMilkFill("new-drag");
@@ -1038,10 +1039,7 @@
         && friendState.type === "uke"
         && !friendDragState.moved
       ) {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-          friendState.lastTapAtMs = 0;
+        const activated = doubleTapController.tryActivate(friendState, 450, () => {
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
@@ -1068,16 +1066,14 @@
             startUkeMusicNotes(friendElement);
           }
           updateFriendElementAsset?.(friendState.id);
+        });
+        if (activated) {
           return;
         }
-        friendState.lastTapAtMs = nowMs;
       }
 
       if (friendState?.type === "pizza-man-craft" && !friendDragState.moved) {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-          friendState.lastTapAtMs = 0;
+        const activated = doubleTapController.tryActivate(friendState, 450, () => {
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
@@ -1090,9 +1086,10 @@
             stopPizzaManAnimation?.(friendState.id);
           }
           updateFriendElementAsset?.(friendState.id);
+        });
+        if (activated) {
           return;
         }
-        friendState.lastTapAtMs = nowMs;
       }
 
       if (
@@ -1100,17 +1097,15 @@
         && (friendState.type === "barbie-blonde" || friendState.type === "barbie-blonde-baby")
         && !friendDragState.moved
       ) {
-        const nowMs = Date.now();
-        const lastTapAtMs = Number.isFinite(friendState.lastTapAtMs) ? friendState.lastTapAtMs : 0;
-        if (lastTapAtMs && nowMs - lastTapAtMs <= 450) {
-          friendState.lastTapAtMs = nowMs;
+        const activated = doubleTapController.tryActivate(friendState, 450, () => {
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
           triggerBarbieActivation?.(friendState.id);
+        });
+        if (activated) {
           return;
         }
-        friendState.lastTapAtMs = nowMs;
       }
 
       if (friendState?.type === "golden-puppy" && friendState.extractedFromDoghouseId && !friendDragState.moved) {

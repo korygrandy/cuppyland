@@ -196,11 +196,15 @@ test("pumpkin woman and shared object hairstyle snapping are configured", () => 
 
 test("pumpkin man and pumpkin woman double-tap roll animations are configured", () => {
   const pointer = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
+  const doubleTap = fs.readFileSync("src/controllers/friend-double-tap-controller.js", "utf8");
+  const index = fs.readFileSync("index.html", "utf8");
   const styles = fs.readFileSync("styles.css", "utf8");
   const config = fs.readFileSync("src/core/game-config.js", "utf8");
 
   assert.equal(config.includes('"punpkin-man"'), true);
   assert.equal(config.includes('"pumpkin-woman"'), true);
+  assert.equal(doubleTap.includes("tryActivate(friendState"), true);
+  assert.equal(index.includes("friend-double-tap-controller.js"), true);
   assert.equal(pointer.includes('friendState.type === "punpkin-man" || friendState.type === "pumpkin-woman"'), true);
   assert.equal(pointer.includes("pumpkin-man-roll-left"), true);
   assert.equal(pointer.includes("pumpkin-man-roll-right"), true);
