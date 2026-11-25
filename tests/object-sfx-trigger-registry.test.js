@@ -57,6 +57,15 @@ test("snap and double-tap dispatch is wired to gameplay controllers", () => {
   assert.equal(index.includes("object-sfx-trigger-registry.js"), true);
 });
 
+test("world intro explicitly unlocks and plays without focus gating", () => {
+  const app = fs.readFileSync("src/core/app.js", "utf8");
+  const audio = fs.readFileSync("src/audio/audio.js", "utf8");
+  assert.equal(app.includes("CuppyLandAudio?.unlockAudio?.()"), true);
+  assert.equal(app.includes('playSfxClip?.("playgroundIntroFx")'), true);
+  assert.equal(audio.includes("document.hidden || !document.hasFocus()"), false);
+  assert.equal(audio.includes("if (document.hidden)"), true);
+});
+
 test("all object SFX registry clip files exist", () => {
   const context = { window: {} };
   loadBrowserScript("src/core/world-anchor-registry.js", context);

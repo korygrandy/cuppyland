@@ -1020,6 +1020,7 @@ function openWorld(worldId) {
   tubeSlideController.render(worldId);
   screenWorldController.openWorld(worldId);
   showWorldHeadlineOverlay(worldId);
+  window.CuppyLandAudio?.unlockAudio?.();
   if (worldId === "playground") {
     window.CuppyLandAudio?.playSfxClip?.("playgroundIntroFx");
   } else if (worldId === "olivia-room") {

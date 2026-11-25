@@ -232,7 +232,7 @@
   }
 
   function playSfx(profileName) {
-    if (document.hidden || !document.hasFocus()) {
+    if (document.hidden) {
       return;
     }
     if (audioState.sfxVolume <= 0) {
@@ -243,7 +243,7 @@
   }
 
   function playSfxClip(clipName, onEnded = null) {
-    if (document.hidden || !document.hasFocus()) {
+    if (document.hidden) {
       if (typeof onEnded === "function") {
         onEnded();
       }
@@ -292,7 +292,7 @@
   }
 
   function playLoopingSfxClip(clipName) {
-    if (document.hidden || !document.hasFocus()) {
+    if (document.hidden) {
       return;
     }
     if (audioState.sfxVolume <= 0) {
@@ -395,7 +395,7 @@
   }
 
   function handleAppVisibilityChange() {
-    if (document.hidden || !document.hasFocus()) {
+    if (document.hidden) {
       audioState.resumingFromHidden = true;
       pauseAllSfx();
       pauseAllAudio();
