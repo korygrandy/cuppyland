@@ -258,6 +258,53 @@ body {
   background: rgba(255, 94, 122, 0.85);
 }
 
+.backpack-icon {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 34px;
+  vertical-align: middle;
+  filter: drop-shadow(0 2px 2px rgba(9, 38, 82, 0.28));
+}
+
+.backpack-icon-body,
+.backpack-icon-flap,
+.backpack-icon-pocket {
+  position: absolute;
+  display: block;
+  box-sizing: border-box;
+}
+
+.backpack-icon-body {
+  left: 4px;
+  bottom: 1px;
+  width: 22px;
+  height: 28px;
+  border: 3px solid #153c70;
+  border-radius: 8px 8px 6px 6px;
+  background: #50a7ff;
+}
+
+.backpack-icon-flap {
+  left: 8px;
+  top: 3px;
+  width: 14px;
+  height: 9px;
+  border: 3px solid #153c70;
+  border-radius: 8px 8px 3px 3px;
+  background: #78baff;
+}
+
+.backpack-icon-pocket {
+  left: 8px;
+  bottom: 5px;
+  width: 14px;
+  height: 9px;
+  border: 2px solid #153c70;
+  border-radius: 3px 3px 5px 5px;
+  background: #8bc8ff;
+}
+
 .world-viewport {
   position: absolute;
   inset: 0;

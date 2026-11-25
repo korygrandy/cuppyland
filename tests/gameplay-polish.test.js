@@ -2,6 +2,16 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 
+test("inventory button uses the blue backpack icon", () => {
+  const html = fs.readFileSync("index.html", "utf8");
+  const styles = fs.readFileSync("styles.css", "utf8");
+
+  assert.equal(html.includes('class="backpack-icon"'), true);
+  assert.equal(html.includes("🎒"), false);
+  assert.equal(styles.includes(".backpack-icon-body"), true);
+  assert.equal(styles.includes("background: #50a7ff"), true);
+});
+
 test("cup and lid polish sources contain drag, snap, and boundary behavior", () => {
   const styles = fs.readFileSync("styles.css", "utf8");
   const cupPointer = fs.readFileSync("src/controllers/cup-pointer-controller.js", "utf8");
