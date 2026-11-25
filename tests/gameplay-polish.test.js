@@ -273,9 +273,12 @@ test("baby Mr Chocolate Milk shares cup and milk behavior at baby scale", () => 
 
 test("water bottle is in accessories and remains a snap source", () => {
   const ui = fs.readFileSync("src/ui/inventory.js", "utf8");
+  const config = fs.readFileSync("src/core/game-config.js", "utf8");
   assert.equal(ui.includes('"lavalamp", "chocolate-milk", "parmesan-cheese", "uke"'), true);
   assert.equal(ui.includes('const accessoryTypes = new Set(["lavalamp", "chocolate-milk", "baby-mr-chocolate-milk"'), false);
   assert.equal(ui.includes('const accessoryOrder = [\n      "baby-mr-chocolate-milk"'), false);
+  assert.equal(ui.includes('friendName !== "baby-mr-chocolate-milk"'), true);
+  assert.equal(config.includes('      "baby-mr-chocolate-milk",'), false);
   assert.equal(ui.includes('"water-bottle"'), true);
 });
 

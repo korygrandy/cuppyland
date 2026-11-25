@@ -260,7 +260,11 @@
       });
 
     friendTypes
-      .filter((friendName) => !accessoryTypes.has(friendName) && !petTypes.has(friendName))
+      .filter((friendName) => (
+        friendName !== "baby-mr-chocolate-milk"
+        && !accessoryTypes.has(friendName)
+        && !petTypes.has(friendName)
+      ))
       .forEach((friendName) => {
         friendsItems.appendChild(createFriendItem(friendName));
       });

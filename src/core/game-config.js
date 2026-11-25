@@ -103,7 +103,6 @@
       "spongebob-stuffy",
       "pizza-man-craft",
       "chocolate-milk",
-      "baby-mr-chocolate-milk",
       "parmesan-cheese",
       "barbie-blonde",
       "barbie-blonde-baby",
