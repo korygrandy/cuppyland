@@ -30,10 +30,31 @@
       "rabbit-bead-craft",
       "squirrel",
       "turkey",
+      "punpkin-man",
+      "pumpkin-woman",
     ]);
 
     function isTrampolineBouncer(friendState) {
       return Boolean(friendState?.type && trampolineBouncerTypes.has(friendState.type));
+    }
+
+    function isGeneralHitboxType(friendType) {
+      if (!friendType) {
+        return false;
+      }
+      const excludedEquipmentTypes = new Set([
+        "dogbone",
+        "rope-dogtoy",
+        "dogtoy-ball",
+        "dogleash",
+        "dog-collar",
+        "dogbowl",
+        "dogbowl-with-food",
+        "dogfood",
+        "water-bottle",
+      ]);
+      return !excludedEquipmentTypes.has(friendType)
+        && Boolean(window.CuppyLandGame?.friendTypes?.includes(friendType));
     }
 
     function isBounceObject(objectConfig) {
@@ -370,8 +391,16 @@
           ? objectConfig.activatorTypes.includes(friendState.type)
           : false;
         const isBedBouncer = objectConfig.id === "bed-bg";
+        const isGeneralHitboxActivator = [
+          "bed-bg",
+          "trampoline",
+          "tube-slide",
+          "drinking-fountain",
+          "merry-go-round",
+        ].includes(objectConfig.id)
+          && isGeneralHitboxType(friendState?.type);
 
-        if ((isAllowedBouncer || isAllowedActivator || isBedBouncer) && overlaps) {
+        if ((isAllowedBouncer || isAllowedActivator || isBedBouncer || isGeneralHitboxActivator) && overlaps) {
           activeFriends.add(friendState.id);
         }
 
@@ -384,7 +413,7 @@
         if (isBounceObject(objectConfig)) {
           const currentFriendOverlaps = friendIntersectsObject(friendState, friendElement, objectConfig);
           let newlyRegistered = false;
-          if ((isAllowedBouncer || isBedBouncer) && currentFriendOverlaps) {
+          if ((isAllowedBouncer || isBedBouncer || isGeneralHitboxActivator) && currentFriendOverlaps) {
             newlyRegistered = registerTrampolineFriend(objectConfig.id, friendState, friendElement);
           } else {
             unregisterTrampolineFriend(objectConfig.id, friendState.id);

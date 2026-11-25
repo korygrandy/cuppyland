@@ -70,7 +70,8 @@ test("bed hitbox objects use inverted up/down bounce poses", () => {
   assert.equal(controller.includes('const isBedBounce = objectId === "bed-bg"'), true);
   assert.equal(controller.includes('const friendIsUp = isBedBounce ? frame === "down" : frame === "up"'), true);
   assert.equal(controller.includes('const isBedBouncer = objectConfig.id === "bed-bg"'), true);
-  assert.equal(controller.includes('(isAllowedBouncer || isAllowedActivator || isBedBouncer)'), true);
+  assert.equal(controller.includes("isGeneralHitboxActivator"), true);
+  assert.equal(controller.includes("isGeneralHitboxType"), true);
 });
 
 test("trampoline CSS defines a down/up bounce and alignment hook", () => {
@@ -266,14 +267,20 @@ test("cup and attached Mr Chocolate Milk use trampoline bouncing", () => {
   assert.equal(bouncerSource.includes('"chocolate-milk"'), true);
 });
 
-test("trampoline allows only friend and pet character types", () => {
+test("trampoline and general hitboxes include Pumpkin and pet character types", () => {
   const controllerSource = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
+  const tubeSource = fs.readFileSync("src/controllers/tube-slide-controller.js", "utf8");
   assert.equal(controllerSource.includes("const trampolineBouncerTypes = new Set"), true);
   assert.equal(controllerSource.includes('"golden-puppy"'), true);
   assert.equal(controllerSource.includes('"turtle-bead-craft"'), true);
   assert.equal(controllerSource.includes('"rabbit-bead-craft"'), true);
   assert.equal(controllerSource.includes('"squirrel"'), true);
   assert.equal(controllerSource.includes('"turkey"'), true);
+  assert.equal(controllerSource.includes('"punpkin-man"'), true);
+  assert.equal(controllerSource.includes('"pumpkin-woman"'), true);
+  assert.equal(controllerSource.includes("isGeneralHitboxActivator"), true);
+  assert.equal(tubeSource.includes("punpkin-man"), true);
+  assert.equal(tubeSource.includes("pumpkin-woman"), true);
   assert.equal(controllerSource.includes("isAllowedBouncer"), true);
   assert.equal(controllerSource.includes('"chocolate-milk"'), true);
 });

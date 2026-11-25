@@ -8,7 +8,7 @@
 
     let activeWorld = null;
     const activeSequences = new Map();
-    const allowedTypes = new Set([
+    const allowedTypes = new Set(window.CuppyLandGame?.friendTypes || [
       "heart-women",
       "heart-man",
       "rocketman-craft",
@@ -25,7 +25,24 @@
       "rabbit-bead-craft",
       "squirrel",
       "turkey",
+      "punpkin-man",
+      "pumpkin-woman",
     ]);
+
+    function isAllowedTubeType(friendType) {
+      const equipmentTypes = new Set([
+        "dogbone",
+        "rope-dogtoy",
+        "dogtoy-ball",
+        "dogleash",
+        "dog-collar",
+        "dogbowl",
+        "dogbowl-with-food",
+        "dogfood",
+        "water-bottle",
+      ]);
+      return allowedTypes.has(friendType) && !equipmentTypes.has(friendType);
+    }
 
     function getConfig(worldId = activeWorld) {
       return window.CuppyLandGame?.backgroundObjectAnchors?.[worldId]
@@ -125,7 +142,7 @@
         return;
       }
       const overlaps = rectsOverlap(friendElement, config);
-      if (overlaps && allowedTypes.has(friendState.type)) {
+      if (overlaps && isAllowedTubeType(friendState.type)) {
         startSequence(`friend:${friendState.id}`, friendState, friendElement, config);
       } else if (!overlaps) {
         cancelSequence(`friend:${friendState.id}`);

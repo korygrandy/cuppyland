@@ -352,9 +352,10 @@
       }
       friendState.activated = true;
       updateFriendElementAsset(friendState.id);
-      playSfxClip(friendState.type === "barbie-blonde-baby"
-        ? "blondeBarbieBabyActivated"
-        : "blondeBarbieActivated");
+      window.CuppyLandObjectSfxTriggerRegistry?.playDoubleTapSfx(
+        friendState.type,
+        playSfxClip
+      );
 
       if (friendState.barbieActivationTimer) {
         clearTimeout(friendState.barbieActivationTimer);

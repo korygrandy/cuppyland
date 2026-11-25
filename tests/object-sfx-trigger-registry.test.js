@@ -16,6 +16,7 @@ test("snap SFX registry covers all configured snap objects", () => {
   assert.equal(registry.getSnapSfx("hairy-guy"), "hairyGuy");
   assert.equal(registry.getSnapSfx("furball-guy"), "furballGuy");
   assert.equal(registry.getSnapSfx("golden-puppy"), "goldenPuppyActivated");
+  assert.equal(registry.getSnapSfx("rocketman-craft"), "rocketship");
   assert.equal(registry.getSnapSfx("barbie-blonde"), "barbieBlondeSnap");
   assert.equal(registry.getSnapSfx("barbie-blonde-baby"), "barbieBlondeBabySnap");
   assert.equal(registry.validate(sfxMap).valid, true);
@@ -30,6 +31,9 @@ test("double-tap SFX registry covers every object with a registered activation c
   assert.equal(registry.getDoubleTapSfx("barbie-blonde"), "blondeBarbieActivated");
   assert.equal(registry.getDoubleTapSfx("barbie-blonde-baby"), "blondeBarbieBabyActivated");
   assert.equal(registry.getDoubleTapSfx("punpkin-man"), "pumpkinManActivated");
+  assert.equal(registry.getDoubleTapSfx("pumpkin-woman"), null);
+  assert.equal(registry.getDoubleTapSfx("rocketman-craft"), "rocketmanActivated");
+  assert.equal(registry.getDoubleTapSfx("water-bowl"), "drinkingFountainActivated");
   assert.equal(registry.getDoubleTapSfx("turkey"), "turkeyGobble");
   assert.equal(registry.getDoubleTapSfx("fishbowl"), "fishbowlActivated");
   assert.equal(registry.getDoubleTapSfx("parmesan-cheese"), "parmesanCheeseActivated");
