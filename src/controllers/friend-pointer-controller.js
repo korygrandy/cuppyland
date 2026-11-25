@@ -640,6 +640,7 @@
           resetFriendDragState();
           event.preventDefault();
           event.stopPropagation();
+          window.CuppyLandAudio?.playSfxClip?.("parmesanCheeseActivated");
           playParmesanCheeseAnimation(friendState, friendElement);
           return;
         }

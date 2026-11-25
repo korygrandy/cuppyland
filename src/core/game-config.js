@@ -354,6 +354,7 @@
         milkPour: "./sfx/milk-pour.ogg",
         shimmer: "./sfx/shimmer.ogg",
         drinkingFountainActivated: "./sfx/drinking-fountain-activated.ogg",
+        parmesanCheeseActivated: "./sfx/parmesan-cheese-activated.ogg",
         lidSnapOn: "./sfx/lid-snap-on.ogg",
         lidSnapOff: "./sfx/lid-snap-off.ogg",
         sleeveSnapOn: "./sfx/sleeve-snap-on.ogg",
