@@ -574,64 +574,64 @@ body {
 }
 
 .pumpkin-woman-roll-left {
-  animation: pumpkinWomanRollLeft 700ms cubic-bezier(.18,.72,.24,1) forwards;
+  animation: pumpkinWomanRollLeft 1400ms cubic-bezier(.18,.72,.24,1) forwards;
 }
 
 .pumpkin-woman-roll-right {
-  animation: pumpkinWomanRollRight 700ms cubic-bezier(.18,.72,.24,1) forwards;
+  animation: pumpkinWomanRollRight 1400ms cubic-bezier(.18,.72,.24,1) forwards;
 }
 
 @keyframes pumpkinManRollLeft {
   0% {
-    transform: translateY(0) rotate(0deg);
+    transform: translate(0, 0) rotate(0deg);
   }
   50% {
-    transform: translateY(-34px) rotate(-180deg);
+    transform: translate(-78px, -34px) rotate(-180deg);
   }
   100% {
-    transform: translateY(0) rotate(-360deg);
+    transform: translate(-156px, 0) rotate(-360deg);
   }
 }
 
 @keyframes pumpkinManRollRight {
   0% {
-    transform: translateY(0) rotate(-360deg);
+    transform: translate(-156px, 0) rotate(-360deg);
   }
   50% {
-    transform: translateY(-34px) rotate(-540deg);
+    transform: translate(-78px, -34px) rotate(-540deg);
   }
   100% {
-    transform: translateY(0) rotate(-720deg);
+    transform: translate(0, 0) rotate(-720deg);
   }
 }
 
 @keyframes pumpkinWomanRollLeft {
   0% {
-    transform: translateY(0) rotate(0deg);
+    transform: translate(0, 0) rotate(0deg);
   }
-  52% {
-    transform: translateY(-22px) rotate(-180deg);
+  50% {
+    transform: translate(-200px, -22px) rotate(-180deg) scaleY(.97);
   }
-  82% {
-    transform: translateY(4px) rotate(-180deg) scaleY(.96);
+  56% {
+    transform: translate(-224px, -28px) rotate(-202deg) scaleY(.97);
   }
   100% {
-    transform: translateY(0) rotate(-180deg);
+    transform: translate(-400px, 0) rotate(-360deg);
   }
 }
 
 @keyframes pumpkinWomanRollRight {
   0% {
-    transform: translateY(0) rotate(-180deg);
+    transform: translate(-400px, 0) rotate(-360deg);
   }
-  52% {
-    transform: translateY(-22px) rotate(-360deg);
+  50% {
+    transform: translate(-200px, -22px) rotate(-540deg) scaleY(.97);
   }
-  82% {
-    transform: translateY(4px) rotate(-360deg) scaleY(.96);
+  56% {
+    transform: translate(-176px, -28px) rotate(-562deg) scaleY(.97);
   }
   100% {
-    transform: translateY(0) rotate(-360deg);
+    transform: translate(0, 0) rotate(-720deg);
   }
 }
 
