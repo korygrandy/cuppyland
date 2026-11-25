@@ -92,112 +92,14 @@
     }
 
     function isBarbieActivated(friendState) {
-      if (!friendState) {
-        return false;
-      }
-
-      return Boolean(
-        friendState.activated
-        || friendState.attachedCupId
-        || friendState.sequenceFrame === 2
-        || friendState.sequenceFrame === "activated"
-      );
+      return window.CuppyLandFriendAssetResolver?.isBarbieActivated(friendState) || false;
     }
 
     function resolveFriendAsset(friendState) {
-      if (!friendState) {
-        return "";
-      }
-
-
-      if (friendState.type === "turkey") {
-        if (friendState.sequenceFrame === 2) {
-          return getFriendAssetMap()?.["turkey-sequence-2"] || getFriendAssetMap()?.[friendState.type] || "";
-        }
-        if (friendState.sequenceFrame === 1) {
-          return getFriendAssetMap()?.[friendState.type] || "";
-        }
-      }
-
-      if (friendState.type === "lavalamp") {
-        if (friendState.sequenceFrame === 2) {
-          return getFriendAssetMap()?.["lavalamp-sequence-2"] || getFriendAssetMap()?.["lavalamp-sequence-1"] || getFriendAssetMap()?.[friendState.type] || "";
-        }
-        if (friendState.sequenceFrame === 3) {
-          return getFriendAssetMap()?.["lavalamp-sequence-3"] || getFriendAssetMap()?.["lavalamp-sequence-1"] || getFriendAssetMap()?.[friendState.type] || "";
-        }
-        return getFriendAssetMap()?.["lavalamp-sequence-1"] || getFriendAssetMap()?.[friendState.type] || "";
-      }
-
-      if (friendState.type === "barbie-blonde") {
-        const activatedAsset = getFriendAssetMap()?.["barbie-blonde-activated"] || getFriendAssetMap()?.[friendState.type] || "";
-        const defaultAsset = getFriendAssetMap()?.[friendState.type] || "";
-        return isBarbieActivated(friendState) ? activatedAsset : defaultAsset;
-      }
-
-      if (friendState.type === "barbie-blonde-baby") {
-        const activatedAsset = getFriendAssetMap()?.["barbie-blonde-baby-activated"] || getFriendAssetMap()?.[friendState.type] || "";
-        const defaultAsset = getFriendAssetMap()?.[friendState.type] || "";
-        return isBarbieActivated(friendState) ? activatedAsset : defaultAsset;
-      }
-
-      if (friendState.type === "merry-go-round") {
-        const animatedAsset = getFriendAssetMap()?.["merry-go-round-animated"] || getFriendAssetMap()?.[friendState.type] || "";
-        const defaultAsset = getFriendAssetMap()?.[friendState.type] || "";
-        return friendState.activated ? animatedAsset : defaultAsset;
-      }
-
-      if (friendState.type === "golden-puppy") {
-        return petAssetController?.resolveGoldenPuppy(friendState)
-          || getFriendAssetMap()?.[friendState.type]
-          || "";
-      }
-
-      if (friendState.type === "fishbowl") {
-        return getFriendAssetMap()?.["fishbowl-sequence-1"] || "";
-      }
-
-      if (friendState.type === "chocolate-milk" || friendState.type === "baby-mr-chocolate-milk") {
-        if (friendState.sequenceFrame === 2) {
-          return getFriendAssetMap()?.["chocolate-milk-sequence-2"] || getFriendAssetMap()?.[friendState.type] || "";
-        }
-        if (friendState.sequenceFrame === 3) {
-          return getFriendAssetMap()?.["chocolate-milk-sequence-3"] || getFriendAssetMap()?.[friendState.type] || "";
-        }
-      }
-
-      if (friendState.type === "dogbed") {
-        if (friendState.sleeping) {
-          return getFriendAssetMap()?.["dogbed-with-dog-sleeping"] || getFriendAssetMap()?.["dogbed-with-dog"] || getFriendAssetMap()?.[friendState.type] || "";
-        }
-        if (friendState.activated) {
-          return getFriendAssetMap()?.["dogbed-with-dog"] || getFriendAssetMap()?.[friendState.type] || "";
-        }
-      }
-
-      if (friendState.type === "water-bowl") {
-        return friendState.full
-          ? (getFriendAssetMap()?.["water-bowl-full"] || getFriendAssetMap()?.[friendState.type] || "")
-          : (getFriendAssetMap()?.[friendState.type] || "");
-      }
-
-      if (friendState.type === "dogbowl") {
-        return friendState.hasFood
-          ? (getFriendAssetMap()?.["dogbowl-with-food"] || getFriendAssetMap()?.[friendState.type] || "")
-          : (getFriendAssetMap()?.[friendState.type] || "");
-      }
-
-      if (friendState.type === "dogbowl-with-food") {
-        return getFriendAssetMap()?.["dogbowl-with-food"] || getFriendAssetMap()?.["dogbowl"] || "";
-      }
-
-      if (friendState.type === "doghouse") {
-        return petAssetController?.resolveDoghouse(friendState)
-          || getFriendAssetMap()?.[friendState.type]
-          || "";
-      }
-
-      return getFriendAssetMap()?.[friendState.type] || "";
+      return window.CuppyLandFriendAssetResolver?.resolveFriendAsset(friendState, {
+        getFriendAssetMap,
+        petAssetController,
+      }) || "";
     }
 
     function loadBabyCanvasImage(src) {

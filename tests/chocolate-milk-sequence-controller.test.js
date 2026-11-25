@@ -41,12 +41,13 @@ test("chocolate milk spill swaps sequence 2 and 3 above the cup", () => {
   const fs = require("node:fs");
   const controller = fs.readFileSync("src/controllers/chocolate-milk-sequence-controller.js", "utf8");
   const friendController = fs.readFileSync("src/controllers/world-friend-controller.js", "utf8");
+  const assetResolver = fs.readFileSync("src/controllers/friend-asset-resolver.js", "utf8");
   const config = fs.readFileSync("src/core/game-config.js", "utf8");
   const styles = fs.readFileSync("styles.css", "utf8");
   assert.equal(controller.includes("friendState.sequenceFrame = 2"), true);
   assert.equal(controller.includes("activeFriend.sequenceFrame !== nextFrame"), true);
-  assert.equal(friendController.includes('"chocolate-milk-sequence-2"'), true);
-  assert.equal(friendController.includes('"chocolate-milk-sequence-3"'), true);
+  assert.equal(assetResolver.includes('"chocolate-milk-sequence-2"'), true);
+  assert.equal(assetResolver.includes('"chocolate-milk-sequence-3"'), true);
   assert.equal(friendController.includes("is-chocolate-milk-spilling"), true);
   assert.equal(config.includes("chocolate-milk-sequence-2"), true);
   assert.equal(config.includes("chocolate-milk-sequence-3"), true);
