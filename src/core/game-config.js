@@ -94,7 +94,7 @@
     friendTypes: [
       "heart-women",
       "heart-man",
-      "triceratops-bead-craft",
+      "turtle-bead-craft",
       "rocketman-craft",
       "furball-guy",
       "hairy-guy",
@@ -185,7 +185,7 @@
     friendAssetMap: {
       "heart-women": "./assets/heart-woman.png",
       "heart-man": "./assets/heart-man.png",
-      "triceratops-bead-craft": "./assets/triceratops-bead-craft.png",
+      "turtle-bead-craft": "./assets/turtle-bead-craft.png",
       "rocketman-craft": "./assets/rocketman-craft.png",
       "furball-guy": "./assets/furball-guy-drawing.png",
       "hairy-guy": "./assets/hairy-guy-drawing.png",

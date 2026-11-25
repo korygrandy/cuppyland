@@ -1027,8 +1027,8 @@
           if (friendState.type === "rabbit-bead-craft") {
             motionController?.startRabbitAnimation?.(friendState.id);
           }
-          if (friendState.type === "triceratops-bead-craft") {
-            motionController?.startTriceratopsAnimation?.(friendState.id);
+          if (friendState.type === "turtle-bead-craft") {
+            motionController?.startTurtleAnimation?.(friendState.id);
           }
           if (friendState.type === "rocketman-craft") {
             motionController?.startRocketManAnimation?.(friendState.id);
@@ -1062,8 +1062,8 @@
       startLavaLampSequence,
       startRabbitAnimation: (friendId) => motionController?.startRabbitAnimation?.(friendId),
       stopRabbitAnimation: (friendId) => motionController?.stopRabbitAnimation?.(friendId),
-      startTriceratopsAnimation: (friendId) => motionController?.startTriceratopsAnimation?.(friendId),
-      stopTriceratopsAnimation: (friendId) => motionController?.stopTriceratopsAnimation?.(friendId),
+      startTurtleAnimation: (friendId) => motionController?.startTurtleAnimation?.(friendId),
+      stopTurtleAnimation: (friendId) => motionController?.stopTurtleAnimation?.(friendId),
       startRocketManAnimation: (friendId) => motionController?.startRocketManAnimation?.(friendId),
       stopRocketManAnimation: (friendId) => motionController?.stopRocketManAnimation?.(friendId),
       startUkeDance,

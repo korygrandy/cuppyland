@@ -9,7 +9,7 @@
       playGoldenPuppyWithBall,
       playGoldenPuppyWithSquirrel,
       startRabbitAnimation,
-      startTriceratopsAnimation,
+      startTurtleAnimation,
       startRocketManAnimation,
       startPizzaManAnimation,
     } = options;
@@ -153,9 +153,9 @@
         friendState.rabbitAnchorWorldX = friendState.worldX;
         friendState.rabbitAnchorWorldY = friendState.worldY;
         startRabbitAnimation?.(friendState.id);
-      } else if (friendState?.type === "triceratops-bead-craft") {
-        friendState.triceratopsAnchorWorldX = friendState.worldX;
-        startTriceratopsAnimation?.(friendState.id);
+      } else if (friendState?.type === "turtle-bead-craft") {
+        friendState.turtleAnchorWorldX = friendState.worldX;
+        startTurtleAnimation?.(friendState.id);
       } else if (friendState?.type === "rocketman-craft") {
         startRocketManAnimation?.(friendState.id);
       } else if (friendState?.type === "pizza-man-craft" && friendState.pizzaWobbleActive) {

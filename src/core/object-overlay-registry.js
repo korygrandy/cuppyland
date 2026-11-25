@@ -16,7 +16,7 @@
       overlayWidth: 150,
       overlayHeight: 150,
       offsetX: 0,
-      offsetY: -12,
+      offsetY: -22,
       scale: 0.29,
       snapDistance: 58,
     },
@@ -26,8 +26,8 @@
       overlayWidth: 86,
       overlayHeight: 140,
       offsetX: 0,
-      offsetY: -12,
-      scale: 0.58,
+      offsetY: -4,
+      scale: 0.29,
       snapDistance: 48,
     },
     "baby-mr-chocolate-milk": {
@@ -68,7 +68,7 @@
     "water-bottle",
     "squirrel",
     "rabbit-bead-craft",
-    "triceratops-bead-craft",
+    "turtle-bead-craft",
     "turkey",
   ]);
 

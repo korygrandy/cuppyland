@@ -28,7 +28,7 @@
         activatorTypes: [
           "heart-women",
           "heart-man",
-          "triceratops-bead-craft",
+          "turtle-bead-craft",
           "rocketman-craft",
           "furball-guy",
           "hairy-guy",
@@ -89,7 +89,7 @@
         activatorTypes: [
           "heart-women",
           "heart-man",
-          "triceratops-bead-craft",
+          "turtle-bead-craft",
           "rocketman-craft",
           "furball-guy",
           "hairy-guy",

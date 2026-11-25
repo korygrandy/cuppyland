@@ -174,7 +174,8 @@ test("pumpkin woman and shared object hairstyle snapping are configured", () => 
   assert.equal(registry.includes("barbie-baby"), true);
   assert.equal(registry.includes("petTypes"), true);
   assert.equal(registry.includes("offsetY: -57"), true);
-  assert.equal(registry.includes("offsetY: -12"), true);
+  assert.equal(registry.includes("offsetY: -22"), true);
+  assert.equal(registry.includes("offsetY: -4"), true);
   assert.equal(registry.includes("scale: 0.29"), true);
   assert.equal(registry.includes("offsetY: -8"), true);
   assert.equal(friendController.includes(".object-hairstyle-overlay"), true);

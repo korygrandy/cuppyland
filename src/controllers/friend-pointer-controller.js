@@ -19,8 +19,8 @@
       triggerTurkeyAnimation,
       startRabbitAnimation,
       stopRabbitAnimation,
-      startTriceratopsAnimation,
-      stopTriceratopsAnimation,
+      startTurtleAnimation,
+      stopTurtleAnimation,
       stopPizzaManAnimation,
       stopRocketManAnimation,
       startRocketManAnimation,
@@ -788,8 +788,8 @@
         friendState.rabbitAnchorWorldX = friendState.worldX;
         friendState.rabbitAnchorWorldY = friendState.worldY;
       }
-      if (friendState.type === "triceratops-bead-craft" && typeof stopTriceratopsAnimation === "function") {
-        stopTriceratopsAnimation(friendState.id);
+      if (friendState.type === "turtle-bead-craft" && typeof stopTurtleAnimation === "function") {
+        stopTurtleAnimation(friendState.id);
       }
       if (friendState.type === "rocketman-craft" && typeof stopRocketManAnimation === "function") {
         stopRocketManAnimation(friendState.id);

@@ -26,7 +26,7 @@
       "barbie-blonde",
       "barbie-blonde-baby",
       "golden-puppy",
-      "triceratops-bead-craft",
+      "turtle-bead-craft",
       "rabbit-bead-craft",
       "squirrel",
       "turkey",

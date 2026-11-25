@@ -205,7 +205,7 @@ test("trampoline bounce applies only to overlapping registered friends", () => {
   const barbie = makeFriend("barbie-1", "barbie-blonde", 235, 240);
   const baby = makeFriend("baby-1", "barbie-blonde-baby", 300, 240);
   const puppy = makeFriend("puppy-1", "golden-puppy", 350, 240);
-  const triceratops = makeFriend("triceratops-1", "triceratops-bead-craft", 380, 240);
+  const turtle = makeFriend("turtle-1", "turtle-bead-craft", 380, 240);
   const rabbit = makeFriend("rabbit-1", "rabbit-bead-craft", 410, 240);
   const squirrel = makeFriend("squirrel-1", "squirrel", 440, 240);
   const turkey = makeFriend("turkey-1", "turkey", 470, 240);
@@ -216,7 +216,7 @@ test("trampoline bounce applies only to overlapping registered friends", () => {
   controller.syncFriend(barbie.state, barbie.element);
   controller.syncFriend(baby.state, baby.element);
   controller.syncFriend(puppy.state, puppy.element);
-  controller.syncFriend(triceratops.state, triceratops.element);
+  controller.syncFriend(turtle.state, turtle.element);
   controller.syncFriend(rabbit.state, rabbit.element);
   controller.syncFriend(squirrel.state, squirrel.element);
   controller.syncFriend(turkey.state, turkey.element);
@@ -255,7 +255,7 @@ test("trampoline allows only friend and pet character types", () => {
   const controllerSource = fs.readFileSync("src/controllers/background-object-controller.js", "utf8");
   assert.equal(controllerSource.includes("const trampolineBouncerTypes = new Set"), true);
   assert.equal(controllerSource.includes('"golden-puppy"'), true);
-  assert.equal(controllerSource.includes('"triceratops-bead-craft"'), true);
+  assert.equal(controllerSource.includes('"turtle-bead-craft"'), true);
   assert.equal(controllerSource.includes('"rabbit-bead-craft"'), true);
   assert.equal(controllerSource.includes('"squirrel"'), true);
   assert.equal(controllerSource.includes('"turkey"'), true);
