@@ -593,15 +593,46 @@ body {
   left: var(--pile-x);
   top: var(--pile-y);
   width: var(--pile-width);
-  height: 18px;
+  height: 14px;
   margin-left: calc(var(--pile-width) * -0.5);
-  border-radius: 50%;
-  background:
-    radial-gradient(ellipse at 50% 55%, #f7df98 0 35%, rgba(224, 188, 98, 0.95) 36% 58%, rgba(224, 188, 98, 0) 70%);
+  border-radius: 0;
+  background: transparent;
   opacity: 0;
   transform: scale(.25);
   animation: parmesanCheesePile 3000ms ease-out forwards;
   animation-delay: var(--pile-delay);
+}
+
+.parmesan-cheese-pile-speck {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: var(--pile-speck-size);
+  height: var(--pile-speck-size);
+  margin-left: calc(var(--pile-speck-size) * -0.5);
+  margin-top: calc(var(--pile-speck-size) * -0.5);
+  border-radius: 50%;
+  background: #f4d77a;
+  box-shadow: 0 0 2px rgba(255, 231, 154, 0.55);
+  opacity: 0;
+  transform: translate(var(--pile-speck-x), var(--pile-speck-y));
+  animation: parmesanCheesePileSpeck 2200ms ease-out forwards;
+  animation-delay: var(--pile-speck-delay);
+}
+
+@keyframes parmesanCheesePileSpeck {
+  0%, 8% {
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  72% {
+    opacity: .95;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 @keyframes parmesanCheeseFall {

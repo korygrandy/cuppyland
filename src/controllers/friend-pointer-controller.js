@@ -308,10 +308,21 @@
 
       const elementRect = friendElement.getBoundingClientRect();
       const artRect = art?.getBoundingClientRect() || elementRect;
-      const localStartX = (artRect.left - elementRect.left) + (artRect.width * 0.18);
-      const localStartY = (artRect.top - elementRect.top) + (artRect.height * 0.14);
-      const localPileX = (artRect.left - elementRect.left) + (artRect.width * 0.5);
-      const localPileY = (artRect.bottom - elementRect.top) - 12;
+      const angleRad = (-45 * Math.PI) / 180;
+      const localCenterX = artRect.width * 0.5;
+      const localCenterY = artRect.height * 0.5;
+      const upperLeftLocalX = artRect.width * 0.18;
+      const upperLeftLocalY = artRect.height * 0.14;
+      const rotatedStartX = localCenterX
+        + ((upperLeftLocalX - localCenterX) * Math.cos(angleRad))
+        - ((upperLeftLocalY - localCenterY) * Math.sin(angleRad));
+      const rotatedStartY = localCenterY
+        + ((upperLeftLocalX - localCenterX) * Math.sin(angleRad))
+        + ((upperLeftLocalY - localCenterY) * Math.cos(angleRad));
+      const localStartX = rotatedStartX;
+      const localStartY = rotatedStartY;
+      const localPileX = artRect.width * 0.5;
+      const localPileY = artRect.height - 8;
       const fallDistance = Math.max(60, localPileY - localStartY);
 
       const pile = document.createElement("span");
@@ -321,6 +332,21 @@
       pile.style.setProperty("--pile-width", `${Math.min(150, artRect.width * 0.62)}px`);
       pile.style.setProperty("--pile-delay", "780ms");
       particles.appendChild(pile);
+
+      const pileSpecks = 52;
+      for (let index = 0; index < pileSpecks; index += 1) {
+        const speck = document.createElement("span");
+        speck.className = "parmesan-cheese-pile-speck";
+        const row = Math.floor(index / 13);
+        const column = index % 13;
+        const spreadX = (column - 6) * 5.2 + ((Math.random() * 3) - 1.5);
+        const spreadY = (row * 3.2) + ((Math.random() * 2) - 1);
+        speck.style.setProperty("--pile-speck-x", `${spreadX}px`);
+        speck.style.setProperty("--pile-speck-y", `${spreadY}px`);
+        speck.style.setProperty("--pile-speck-size", `${2 + Math.floor(Math.random() * 3)}px`);
+        speck.style.setProperty("--pile-speck-delay", `${780 + (index * 10)}ms`);
+        pile.appendChild(speck);
+      }
 
       const count = 22;
       for (let index = 0; index < count; index += 1) {
@@ -340,7 +366,13 @@
       }
 
       friendElement.appendChild(particles);
-      window.setTimeout(() => particles.remove(), 3600);
+      window.setTimeout(() => {
+        particles.remove();
+        if (art) {
+          art.classList.remove("parmesan-cheese-rotated");
+          art.style.transform = "rotate(0deg)";
+        }
+      }, 3600);
     }
 
     function syncSquirrelAvoidance(dogElement, dogState) {
