@@ -23,12 +23,30 @@
     uke: "ukuleleActivated",
   };
 
+  const bounceActivationSfxByType = {
+    "golden-puppy": "goldenPuppyActivated",
+    "barbie-blonde": "blondeBarbieActivated",
+    "barbie-blonde-baby": "blondeBarbieBabyActivated",
+    "punpkin-man": "pumpkinManActivated",
+    "pumpkin-woman": null,
+    turkey: "turkeyGobble",
+    fishbowl: "fishbowlActivated",
+    "parmesan-cheese": "parmesanCheeseActivated",
+    "water-bowl": "drinkingFountainActivated",
+    "rocketman-craft": "rocketmanActivated",
+    uke: "ukuleleActivated",
+  };
+
   function getSnapSfx(friendType) {
     return snapSfxByType[friendType] || null;
   }
 
   function getDoubleTapSfx(friendType) {
     return doubleTapSfxByType[friendType] || null;
+  }
+
+  function getBounceActivationSfx(friendType) {
+    return bounceActivationSfxByType[friendType] || null;
   }
 
   function getHitboxSfx(friendType) {
@@ -62,11 +80,21 @@
     return null;
   }
 
+  function playBounceActivationSfx(friendType, playSfxClip) {
+    const clipName = bounceActivationSfxByType[friendType] || null;
+    if (clipName && typeof playSfxClip === "function") {
+      playSfxClip(clipName);
+      return clipName;
+    }
+    return null;
+  }
+
   function validate(sfxMap = {}) {
     const errors = [];
     const allClipNames = new Set([
       ...Object.values(snapSfxByType),
       ...Object.values(doubleTapSfxByType).filter(Boolean),
+      ...Object.values(bounceActivationSfxByType).filter(Boolean),
     ]);
     allClipNames.forEach((clipName) => {
       if (!sfxMap[clipName]) {
@@ -79,12 +107,15 @@
   window.CuppyLandObjectSfxTriggerRegistry = {
     snapSfxByType,
     doubleTapSfxByType,
+    bounceActivationSfxByType,
     getSnapSfx,
     getDoubleTapSfx,
+    getBounceActivationSfx,
     getHitboxSfx,
     playSnapSfx,
     playDoubleTapSfx,
     playHitboxSfx,
+    playBounceActivationSfx,
     validate,
   };
 })();

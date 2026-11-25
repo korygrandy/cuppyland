@@ -292,4 +292,6 @@ test("trampoline and general hitboxes include Pumpkin and pet character types", 
   assert.equal(tubeSource.includes("pumpkin-woman"), true);
   assert.equal(controllerSource.includes("isAllowedBouncer"), true);
   assert.equal(controllerSource.includes('"chocolate-milk"'), true);
+  assert.equal(controllerSource.includes('objectConfig.id === "trampoline" || objectConfig.id === "bed-bg"'), true);
+  assert.equal(controllerSource.includes("playBounceActivationSfx"), true);
 });

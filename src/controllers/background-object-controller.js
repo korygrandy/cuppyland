@@ -428,8 +428,8 @@
           if ((isAllowedBouncer || isBedBouncer || isGeneralHitboxActivator) && currentFriendOverlaps) {
             newlyRegistered = registerTrampolineFriend(objectConfig.id, friendState, friendElement);
             if (newlyRegistered
-              && (friendState.type === "barbie-blonde" || friendState.type === "barbie-blonde-baby")) {
-              window.CuppyLandObjectSfxTriggerRegistry?.playHitboxSfx(
+              && (objectConfig.id === "trampoline" || objectConfig.id === "bed-bg")) {
+              window.CuppyLandObjectSfxTriggerRegistry?.playBounceActivationSfx(
                 friendState.type,
                 (clipName) => playSfxClip(clipName)
               );

@@ -40,6 +40,23 @@ test("double-tap SFX registry covers every object with a registered activation c
   assert.equal(registry.getDoubleTapSfx("uke"), "ukuleleActivated");
 });
 
+test("trampoline and bed entry share configured activation SFX", () => {
+  const context = { window: {} };
+  loadBrowserScript("src/core/object-sfx-trigger-registry.js", context);
+  const registry = context.window.CuppyLandObjectSfxTriggerRegistry;
+
+  assert.equal(registry.getBounceActivationSfx("barbie-blonde"), "blondeBarbieActivated");
+  assert.equal(registry.bounceActivationSfxByType["golden-puppy"], "goldenPuppyActivated");
+  assert.equal(registry.bounceActivationSfxByType["barbie-blonde"], "blondeBarbieActivated");
+  assert.equal(registry.bounceActivationSfxByType["barbie-blonde-baby"], "blondeBarbieBabyActivated");
+  assert.equal(registry.bounceActivationSfxByType["punpkin-man"], "pumpkinManActivated");
+  assert.equal(registry.bounceActivationSfxByType["turkey"], "turkeyGobble");
+  assert.equal(registry.bounceActivationSfxByType["fishbowl"], "fishbowlActivated");
+  assert.equal(registry.bounceActivationSfxByType["parmesan-cheese"], "parmesanCheeseActivated");
+  assert.equal(registry.bounceActivationSfxByType["rocketman-craft"], "rocketmanActivated");
+  assert.equal(registry.bounceActivationSfxByType["uke"], "ukuleleActivated");
+});
+
 test("snap and double-tap dispatch is wired to gameplay controllers", () => {
   const gameRules = fs.readFileSync("src/controllers/game-rules-controller.js", "utf8");
   const friendPointer = fs.readFileSync("src/controllers/friend-pointer-controller.js", "utf8");
