@@ -546,6 +546,18 @@ body {
   pointer-events: auto;
 }
 
+.object-hairstyle-overlay {
+  position: absolute;
+  z-index: 12;
+  pointer-events: auto;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  transform-origin: center bottom;
+  cursor: grab;
+  touch-action: none;
+}
+
 .friend-character[data-friend-type="parmesan-cheese"] {
   width: 132px;
   height: 276px;

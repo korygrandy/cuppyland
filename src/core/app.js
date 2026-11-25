@@ -218,6 +218,23 @@ const inventoryInteractionController = window.CuppyLandInventoryInteraction.crea
     updateFriendElementAsset(babyId);
     return true;
   },
+  onDirectObjectHairstyle: (friendId, itemType, value) => {
+    const friendState = findFriendById(friendId, state.activeWorld);
+    if (!friendState) {
+      return false;
+    }
+    if (window.CuppyLandObjectOverlayRegistry?.getProfile(friendState) === null) {
+      return false;
+    }
+    friendState.hairstyle = value;
+    friendState.hairstyleVisible = true;
+    friendState.hairstyleDetached = false;
+    const profile = window.CuppyLandObjectOverlayRegistry.getProfile(friendState);
+    friendState.hairstyleOffsetX = profile?.offsetX ?? 0;
+    friendState.hairstyleOffsetY = profile?.offsetY ?? -18;
+    updateFriendElementAsset(friendId);
+    return true;
+  },
   onDirectPuppyToy: (toyType, puppyId) => {
     if (toyType === "dogbone") {
       return puppySequenceController?.playWithBone(puppyId) || false;

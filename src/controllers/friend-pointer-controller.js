@@ -225,6 +225,28 @@
         if (!friendElement || !friendState) {
           return;
         }
+        const hairstyleProfile = window.CuppyLandObjectOverlayRegistry?.getProfile(friendState);
+        if (hairstyleProfile) {
+          const hairstyleOverlay = event.target?.closest?.(".object-hairstyle-overlay");
+          if (hairstyleOverlay) {
+            const profile = window.CuppyLandObjectOverlayRegistry?.getProfile(friendState);
+            if (profile) {
+              event.preventDefault();
+              event.stopPropagation();
+              friendDragState.active = true;
+              friendDragState.pointerId = event.pointerId;
+              friendDragState.friendId = friendState.id;
+              friendDragState.partType = "hairstyle";
+              friendDragState.startClientX = event.clientX;
+              friendDragState.startClientY = event.clientY;
+              friendDragState.partStartWorldX = friendState.hairstyleOffsetX ?? profile.offsetX;
+              friendDragState.partStartWorldY = friendState.hairstyleOffsetY ?? profile.offsetY;
+              friendDragState.moved = false;
+              trySetPointerCapture(hairstyleOverlay, event.pointerId);
+              return;
+            }
+          }
+        }
         if (friendState.type === "baby-mr-chocolate-milk") {
           const babyPart = event.target?.closest?.(
             ".baby-mr-chocolate-milk-cup-lid,"
@@ -811,8 +833,11 @@
         if (Math.hypot(deltaX, deltaY) > 6) {
           friendDragState.moved = true;
         }
-        const nextOffsetX = (friendDragState.partStartWorldX || 0) + deltaX / .65;
-        const nextOffsetY = (friendDragState.partStartWorldY || 0) + deltaY / .65;
+        const profileScale = friendDragState.partType === "lid" || friendDragState.partType === "sleeve"
+          ? .65
+          : (window.CuppyLandObjectOverlayRegistry?.getProfile(friendState)?.scale || 1);
+        const nextOffsetX = (friendDragState.partStartWorldX || 0) + deltaX / profileScale;
+        const nextOffsetY = (friendDragState.partStartWorldY || 0) + deltaY / profileScale;
         if (friendDragState.partType === "lid") {
           friendState.lidDetached = true;
           friendState.lidOffsetX = nextOffsetX;
@@ -929,10 +954,15 @@
               friendState.sleeveOffsetY = 104;
             }
           } else if (friendState.hairstyle) {
-            if (Math.abs(friendState.hairstyleOffsetX - 17) < 55 && Math.abs(friendState.hairstyleOffsetY + 14) < 55) {
+             const profile = window.CuppyLandObjectOverlayRegistry?.getProfile(friendState);
+             const snapX = profile?.offsetX ?? 17;
+             const snapY = profile?.offsetY ?? -14;
+             const snapDistance = profile?.snapDistance ?? 55;
+             if (Math.abs(friendState.hairstyleOffsetX - snapX) < snapDistance
+               && Math.abs(friendState.hairstyleOffsetY - snapY) < snapDistance) {
               friendState.hairstyleDetached = false;
-              friendState.hairstyleOffsetX = 17;
-              friendState.hairstyleOffsetY = -14;
+               friendState.hairstyleOffsetX = snapX;
+               friendState.hairstyleOffsetY = snapY;
             }
           }
           updateFriendElementAsset(friendState.id);

@@ -126,6 +126,7 @@
       "water-bottle",
       "squirrel",
       "punpkin-man",
+      "pumpkin-woman",
     ],
     expressionAssetMap: {
       happy: "./assets/facial-expression-happy.png",
@@ -238,6 +239,7 @@
       "squirrel": "./assets/squirrel.png",
       "squirrel-running": "./assets/squirrel-running.png",
       "punpkin-man": "./assets/punpkin-man.png",
+      "pumpkin-woman": "./assets/pumpkin-woman.png",
       "golden-puppy-playing-rope": "./assets/golden-puppy-playing-rope.png",
       "golden-puppy-with-rope-sitting": "./assets/golden-puppy-with-rope-sitting.png",
       "dogtoy-ball": "./assets/dogtoy-ball.png",

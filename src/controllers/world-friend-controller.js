@@ -236,6 +236,46 @@
       });
     }
 
+    function syncObjectHairstyleOverlay(friendState, friendElement = null) {
+      if (!friendState) {
+        return;
+      }
+      const element = friendElement || worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`);
+      if (!element) {
+        return;
+      }
+      let overlay = element.querySelector(".object-hairstyle-overlay");
+      if (!friendState.hairstyleVisible || !friendState.hairstyle) {
+        overlay?.remove();
+        return;
+      }
+      const profile = window.CuppyLandObjectOverlayRegistry?.getProfile(friendState);
+      if (!profile) {
+        overlay?.remove();
+        return;
+      }
+      if (!overlay) {
+        overlay = document.createElement("span");
+        overlay.className = "object-hairstyle-overlay";
+        overlay.dataset.overlayForFriendId = friendState.id;
+        element.appendChild(overlay);
+      }
+      const baseOffsetX = friendState.hairstyleDetached
+        ? friendState.hairstyleOffsetX
+        : profile.offsetX;
+      const baseOffsetY = friendState.hairstyleDetached
+        ? friendState.hairstyleOffsetY
+        : profile.offsetY;
+      overlay.style.width = `${profile.overlayWidth * profile.scale}px`;
+      overlay.style.height = `${profile.overlayHeight * profile.scale}px`;
+      overlay.style.left = `calc(50% + ${baseOffsetX}px - ${(profile.overlayWidth * profile.scale) / 2}px)`;
+      overlay.style.top = `${baseOffsetY}px`;
+      overlay.style.backgroundImage = `url("${getFriendAssetMap()?.[friendState.hairstyle] || ""}")`;
+      overlay.style.backgroundRepeat = "no-repeat";
+      overlay.style.backgroundPosition = "center";
+      overlay.style.backgroundSize = "contain";
+    }
+
     function syncBabyChocolateMilkParts(friendState, friendElement = null) {
       if (!friendState || friendState.type !== "baby-mr-chocolate-milk") {
         return;
@@ -396,6 +436,7 @@
       }
       syncFriendAnimationClasses(friendState, friendElement);
       syncDogbedExtractionZone(friendState);
+      syncObjectHairstyleOverlay(friendState, friendElement);
       syncBabyChocolateMilkParts(friendState, friendElement);
     }
 
@@ -882,6 +923,7 @@
         friendElement.appendChild(hairstyle);
         syncBabyChocolateMilkParts(friendState, friendElement);
       }
+      syncObjectHairstyleOverlay(friendState, friendElement);
       const shouldRenderCompanionOverlay = window.CuppyLandPuppySequenceGuardHelper?.shouldRenderCompanionOverlay
         ? window.CuppyLandPuppySequenceGuardHelper.shouldRenderCompanionOverlay(friendState)
         : !friendState.sequenceActive;
