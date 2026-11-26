@@ -859,6 +859,11 @@
             startFishbowlSequence(friendState.id);
           }
           syncBackgroundObjectActivation(friendState, friendElement);
+          window.requestAnimationFrame(() => {
+            if (friendElement.isConnected) {
+              syncBackgroundObjectActivation(friendState, friendElement);
+            }
+          });
         });
       syncMerryGoRoundActivations();
       syncDoghouseActivations();

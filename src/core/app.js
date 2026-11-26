@@ -387,7 +387,10 @@ const tubeSlideController = window.CuppyLandTubeSlideController.createController
   container: worldBackgroundObjects,
   worldCanvas,
   findFriendById: (friendId) => findFriendById(friendId, state.activeWorld),
+  stopRabbitAnimation: (friendId) => friendMotionController?.stopRabbitAnimation?.(friendId),
+  stopTurtleAnimation: (friendId) => friendMotionController?.stopTurtleAnimation?.(friendId),
 });
+window.CuppyLandTubeSlideRuntime = tubeSlideController;
 const friendMotionController = window.CuppyLandFriendMotionController.createController({
   state,
   worldCanvas,
@@ -1079,7 +1082,54 @@ function applyDrop(itemType, value, targetZone, targetCupId = state.activeCupId,
 }
 
 function applyInventorySelection(itemType, value, targetCupId = state.activeCupId, dropPoint = null) {
-  return gameRulesController.applyInventorySelection(itemType, value, targetCupId, dropPoint);
+  const result = gameRulesController.applyInventorySelection(itemType, value, targetCupId, dropPoint);
+  if (result && itemType === "friend"
+    && (value === "rabbit-bead-craft" || value === "turtle-bead-craft")
+    && state.activeWorld === "playground"
+    && dropPoint) {
+    const tubeConfig = window.CuppyLandWorldAnchors?.backgroundObjectAnchors?.playground
+      ?.find((anchor) => anchor.id === "tube-slide");
+    if (tubeConfig) {
+      const hitboxLeft = tubeConfig.x + (tubeConfig.hitboxOffsetX ?? 0);
+      const hitboxTop = tubeConfig.y + (tubeConfig.hitboxOffsetY ?? 0);
+      const hitboxWidth = tubeConfig.hitboxWidth ?? tubeConfig.width;
+      const hitboxHeight = tubeConfig.hitboxHeight ?? tubeConfig.height;
+      if (dropPoint.worldX >= hitboxLeft
+        && dropPoint.worldX <= hitboxLeft + hitboxWidth
+        && dropPoint.worldY >= hitboxTop
+        && dropPoint.worldY <= hitboxTop + hitboxHeight) {
+        const friendState = getWorldFriendList(state.activeWorld)
+          .find((friend) => friend.type === value
+            && friend.worldX >= hitboxLeft - 132
+            && friend.worldX <= hitboxLeft + hitboxWidth
+            && friend.worldY >= hitboxTop - 132
+            && friend.worldY <= hitboxTop + hitboxHeight);
+        if (friendState) {
+          friendState.worldX = hitboxLeft + ((hitboxWidth - 132) * 0.5);
+          friendState.worldY = hitboxTop + ((hitboxHeight - 132) * 0.5);
+          window.requestAnimationFrame(() => {
+            const friendElement = worldCanvas?.querySelector
+              ? worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`)
+              : null;
+            if (friendElement) {
+              friendElement.style.left = `${friendState.worldX}px`;
+              friendElement.style.top = `${friendState.worldY}px`;
+              window.CuppyLandTubeSlideRuntime?.syncFriend(friendState, friendElement);
+            }
+          });
+          [50, 300, 800].forEach((delayMs) => window.setTimeout(() => {
+            const friendElement = worldCanvas?.querySelector
+              ? worldCanvas.querySelector(`.friend-character[data-friend-id="${friendState.id}"]`)
+              : null;
+            if (friendElement) {
+              window.CuppyLandTubeSlideRuntime?.syncFriend(friendState, friendElement);
+            }
+          }, delayMs));
+        }
+      }
+    }
+  }
+  return result;
 }
 
 function showInvalidFeedback() {
