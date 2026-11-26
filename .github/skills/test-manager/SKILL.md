@@ -21,6 +21,12 @@ Run from [cuppy-land/](/C:/dev/oliviaworld/cuppy-land).
 npm run test-manager:plan
 ```
 
+### Audit existing tests for value and enhancement opportunities
+
+```powershell
+npm run test-manager:audit
+```
+
 ### Execute managed cycle
 
 ```powershell
@@ -37,13 +43,16 @@ npm run test-manager:run -- --players=100 --seed=20261126
 
 - JSON: [manager-report.json](/C:/dev/oliviaworld/cuppy-land/reports/test-manager/latest/manager-report.json)
 - HTML dashboard: [manager-dashboard.html](/C:/dev/oliviaworld/cuppy-land/reports/test-manager/latest/manager-dashboard.html)
+- JSON: [test-audit-report.json](/C:/dev/oliviaworld/cuppy-land/reports/test-manager/latest/test-audit-report.json)
+- HTML dashboard: [test-audit-dashboard.html](/C:/dev/oliviaworld/cuppy-land/reports/test-manager/latest/test-audit-dashboard.html)
 
 ## Human checkpoints
 
 1. Confirm scoped command plan from changed files.
 2. Confirm command pass/fail outcomes.
-3. Review simulation risk log merged into manager report.
-4. Confirm next-cycle actions (add tests, refine gates, or accept risk).
+3. Review low-value and enhance-candidate tests in audit dashboard.
+4. Review simulation risk log merged into manager report.
+5. Confirm next-cycle actions (add tests, refine gates, or accept risk).
 
 ## Cycle policy
 

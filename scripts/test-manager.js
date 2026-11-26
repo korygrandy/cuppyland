@@ -2,6 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { execSync, spawnSync } = require("node:child_process");
 const { runSimulation, writeSimulationArtifacts } = require("./run-ui-testplay-simulations");
+const { analyzeTestSuite } = require("./test-manager-audit");
 
 function run(command) {
   return execSync(command, { encoding: "utf8" }).trim();
@@ -172,6 +173,8 @@ function runManagedCycle(options = {}) {
       });
     });
 
+  const testAudit = analyzeTestSuite();
+
   const report = {
     metadata: {
       generatedAt: new Date().toISOString(),
@@ -181,6 +184,8 @@ function runManagedCycle(options = {}) {
     plan,
     commandResults,
     risks,
+    testAuditSummary: testAudit.summary,
+    testAuditTopCandidates: testAudit.prioritized.slice(0, 10),
     simulationArtifacts,
   };
 

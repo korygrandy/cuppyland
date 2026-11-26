@@ -105,6 +105,19 @@ Deliver two new skills:
 4. **Checkpoint 4: Integration and packaging**
    - package scripts, skills docs, workflow, and full validation pass
 
+## Extension: Test audit and visualization
+
+Added audit scope in Test Manager:
+
+- classify tests as keep / enhance / candidate-low-value
+- produce test-audit JSON + HTML dashboard
+- merge top audit candidates into manager cycle reporting
+
+Outputs:
+
+- `reports/test-manager/latest/test-audit-report.json`
+- `reports/test-manager/latest/test-audit-dashboard.html`
+
 ## Determinism requirements
 
 - Fixed-seed RNG default and explicit seed override.
