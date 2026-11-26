@@ -6,6 +6,8 @@
   "scripts": {
     "test": "node --test tests/*.test.js",
     "validate:sfx": "node scripts/validate-sfx-static.js",
+    "validate:sfx:matrix": "node --test tests/sfx-validation.test.js tests/sfx-dispatch-determinism.test.js tests/audio-sfx-guards.test.js tests/sfx-event-capture.test.js tests/sfx-browser-matrix.test.js tests/sfx-edge-cases.test.js",
+    "validate:sfx:full": "npm run validate:sfx && npm test",
     "prepare:web": "powershell -ExecutionPolicy Bypass -File .\\scripts\\prepare-web.ps1",
     "build:release": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\build-release.ps1",
     "cap:copy": "npm run prepare:web && npx cap copy android",
