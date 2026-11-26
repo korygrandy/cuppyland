@@ -89,7 +89,7 @@
         ? worldY
         : Math.max(12, Math.min(worldHeight - friendSize.height, worldY));
 
-      worldFriends.push({
+      const newFriend = {
         id: `friend-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
         type: friendType,
         hasFood: friendType === "dogbowl-with-food",
@@ -125,8 +125,57 @@
           hairstyleOffsetY: -14,
           hairstyleVisible: false,
         } : {}),
-      });
+      };
+      if (state.activeWorld === "playground"
+        && (friendType === "rabbit-bead-craft" || friendType === "turtle-bead-craft")) {
+        const tubeConfig = window.CuppyLandWorldAnchors?.backgroundObjectAnchors?.playground
+          ?.find((anchor) => anchor.id === "tube-slide");
+        if (tubeConfig) {
+          const hitboxLeft = tubeConfig.x + (tubeConfig.hitboxOffsetX ?? 0);
+          const hitboxTop = tubeConfig.y + (tubeConfig.hitboxOffsetY ?? 0);
+          const hitboxWidth = tubeConfig.hitboxWidth ?? tubeConfig.width;
+          const hitboxHeight = tubeConfig.hitboxHeight ?? tubeConfig.height;
+          const dropInsideHitbox = Number.isFinite(dropPoint?.worldX)
+            && dropPoint.worldX >= hitboxLeft
+            && dropPoint.worldX <= hitboxLeft + hitboxWidth
+            && Number.isFinite(dropPoint?.worldY)
+            && dropPoint.worldY >= hitboxTop
+            && dropPoint.worldY <= hitboxTop + hitboxHeight;
+          if (dropInsideHitbox) {
+            newFriend.worldX = hitboxLeft + ((hitboxWidth - friendSize.width) * 0.5);
+            newFriend.worldY = hitboxTop + ((hitboxHeight - friendSize.height) * 0.5);
+          }
+        }
+      }
+      worldFriends.push(newFriend);
       renderWorldCups();
+      const addedFriend = worldFriends[worldFriends.length - 1];
+      const immediateFriendElement = worldCanvas?.querySelector
+        ? worldCanvas.querySelector(`.friend-character[data-friend-id="${addedFriend?.id}"]`)
+        : null;
+      if (addedFriend && immediateFriendElement) {
+        window.CuppyLandTubeSlideRuntime?.syncFriend(addedFriend, immediateFriendElement);
+      }
+      window.requestAnimationFrame(() => {
+        const friendElement = worldCanvas?.querySelector
+          ? worldCanvas.querySelector(`.friend-character[data-friend-id="${addedFriend?.id}"]`)
+          : null;
+        if (addedFriend && friendElement) {
+          window.CuppyLandTubeSlideRuntime?.syncFriend(addedFriend, friendElement);
+        }
+      });
+      if (friendType === "rabbit-bead-craft" || friendType === "turtle-bead-craft") {
+        [50, 300, 800].forEach((delayMs) => {
+          window.setTimeout(() => {
+            const friendElement = worldCanvas?.querySelector
+              ? worldCanvas.querySelector(`.friend-character[data-friend-id="${addedFriend?.id}"]`)
+              : null;
+            if (addedFriend && friendElement) {
+              window.CuppyLandTubeSlideRuntime?.syncFriend(addedFriend, friendElement);
+            }
+          }, delayMs);
+        });
+      }
       window.CuppyLandObjectSfxTriggerRegistry?.playSnapSfx(
         friendType,
         (clipName) => window.CuppyLandAudio?.playSfxClip?.(clipName)

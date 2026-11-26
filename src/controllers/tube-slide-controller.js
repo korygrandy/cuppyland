@@ -4,10 +4,14 @@
       container,
       worldCanvas = null,
       findFriendById = () => null,
+      stopRabbitAnimation = () => {},
+      stopTurtleAnimation = () => {},
+      playSfxClip = () => {},
     } = options;
 
     let activeWorld = null;
     const activeSequences = new Map();
+    let overlapMonitorTimer = null;
     const allowedTypes = new Set(window.CuppyLandGame?.friendTypes || [
       "heart-women",
       "heart-man",
@@ -91,6 +95,11 @@
       if (!element || activeSequences.has(id)) {
         return false;
       }
+      if (state.type === "rabbit-bead-craft") {
+        stopRabbitAnimation(state.id);
+      } else if (state.type === "turtle-bead-craft") {
+        stopTurtleAnimation(state.id);
+      }
       if (state.type === "barbie-blonde" || state.type === "barbie-blonde-baby") {
         window.CuppyLandObjectSfxTriggerRegistry?.playHitboxSfx(
           state.type,
@@ -114,8 +123,14 @@
       element.style.opacity = "0";
 
       const reappearTimer = setTimeout(() => {
-        const reanchorX = config.x + (config.reanchorOffsetX ?? config.width * 0.7);
-        const reanchorY = config.y + (config.reanchorOffsetY ?? config.height * 0.82);
+        const reanchorLeft = config.x + (config.reanchorOffsetX ?? config.width * 0.7);
+        const reanchorTop = config.y + (config.reanchorOffsetY ?? config.height * 0.82);
+        const reanchorWidth = config.reanchorWidth ?? 132;
+        const reanchorHeight = config.reanchorHeight ?? 132;
+        const elementWidth = element.offsetWidth || reanchorWidth;
+        const elementHeight = element.offsetHeight || reanchorHeight;
+        const reanchorX = reanchorLeft + ((reanchorWidth - elementWidth) * 0.5);
+        const reanchorY = reanchorTop + ((reanchorHeight - elementHeight) * 0.5);
         state.worldX = reanchorX;
         state.worldY = reanchorY;
         element.style.left = `${reanchorX}px`;
@@ -150,7 +165,7 @@
       const overlaps = rectsOverlap(friendElement, config);
       if (overlaps && isAllowedTubeType(friendState.type)) {
         startSequence(`friend:${friendState.id}`, friendState, friendElement, config);
-      } else if (!overlaps) {
+      } else if (!overlaps && !activeSequences.has(`friend:${friendState.id}`)) {
         cancelSequence(`friend:${friendState.id}`);
       }
     }
@@ -167,7 +182,7 @@
       const cupId = cupElement.dataset?.cupId || cupState.id || "active";
       if (overlaps) {
         startSequence(`cup:${cupId}`, cupState, cupElement, config);
-      } else {
+      } else if (!activeSequences.has(`cup:${cupId}`)) {
         cancelSequence(`cup:${cupId}`);
       }
     }
@@ -175,6 +190,10 @@
     function render(worldId) {
       activeWorld = worldId;
       activeSequences.forEach((sequence, id) => cancelSequence(id));
+      if (overlapMonitorTimer) {
+        clearInterval(overlapMonitorTimer);
+        overlapMonitorTimer = null;
+      }
 
       container.querySelectorAll(".tube-slide-debug-hitbox, .tube-slide-debug-reanchor").forEach((node) => node.remove());
       if (activeWorld !== "playground") {
@@ -200,12 +219,26 @@
       reanchor.style.width = `${config.reanchorWidth ?? 132}px`;
       reanchor.style.height = `${config.reanchorHeight ?? 132}px`;
       container.appendChild(reanchor);
+
+      overlapMonitorTimer = setInterval(() => {
+        if (!worldCanvas || activeWorld !== "playground") {
+          return;
+        }
+        worldCanvas.querySelectorAll(".friend-character[data-friend-id]").forEach((friendElement) => {
+          const friendState = findFriendById(friendElement.dataset.friendId);
+          if (friendState) {
+            syncFriend(friendState, friendElement);
+          }
+        });
+      }, 100);
     }
 
     return {
       render,
       syncFriend,
       syncCup,
+      getActiveSequences: () => Array.from(activeSequences.keys()),
+      hasActiveSequence: (id) => activeSequences.has(id),
     };
   }
 

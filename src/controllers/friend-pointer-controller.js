@@ -1443,7 +1443,10 @@
         }
       }
       friendReleaseController?.handleToyRelease(friendElement, friendState);
-      friendReleaseController?.handleMotionRelease(friendState);
+      const tubeSequenceActive = window.CuppyLandTubeSlideRuntime?.hasActiveSequence?.(`friend:${friendState?.id}`);
+      if (!tubeSequenceActive) {
+        friendReleaseController?.handleMotionRelease(friendState);
+      }
 
       if (friendElement && (
         friendState?.type === "chocolate-milk"
