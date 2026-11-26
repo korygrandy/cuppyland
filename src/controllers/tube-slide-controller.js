@@ -6,6 +6,7 @@
       findFriendById = () => null,
       stopRabbitAnimation = () => {},
       stopTurtleAnimation = () => {},
+      playSfxClip = () => {},
     } = options;
 
     let activeWorld = null;

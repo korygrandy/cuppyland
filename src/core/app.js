@@ -389,6 +389,7 @@ const tubeSlideController = window.CuppyLandTubeSlideController.createController
   findFriendById: (friendId) => findFriendById(friendId, state.activeWorld),
   stopRabbitAnimation: (friendId) => friendMotionController?.stopRabbitAnimation?.(friendId),
   stopTurtleAnimation: (friendId) => friendMotionController?.stopTurtleAnimation?.(friendId),
+  playSfxClip: (clipName, onEnded) => window.CuppyLandAudio?.playSfxClip?.(clipName, onEnded),
 });
 window.CuppyLandTubeSlideRuntime = tubeSlideController;
 const friendMotionController = window.CuppyLandFriendMotionController.createController({

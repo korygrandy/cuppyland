@@ -43,6 +43,8 @@ test("tube slide pinch sequence and controller are wired", () => {
   assert.equal(controller.includes("stopTurtleAnimation(state.id)"), true);
   assert.equal(app.includes("stopRabbitAnimation:"), true);
   assert.equal(app.includes("stopTurtleAnimation:"), true);
+  assert.equal(controller.includes("playSfxClip = () => {}"), true);
+  assert.equal(app.includes("playSfxClip: (clipName, onEnded)"), true);
   assert.equal(app.includes("tubeSlideController.syncFriend"), true);
   assert.equal(app.includes("tubeSlideController?.syncCup"), true);
   assert.equal(app.includes("tubeSlideController.render(worldId)"), true);
