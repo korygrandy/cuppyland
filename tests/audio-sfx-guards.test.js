@@ -162,3 +162,14 @@ test("playSfxClip invokes callback once when playback promise rejects", async ()
   assert.equal(callbackCount, 1);
   assert.equal(harness.clipPlayCounts.get("./sfx/test-clip.ogg") || 0, 1);
 });
+
+test("playLoopingSfxClip does not play when hidden or muted", () => {
+  const hiddenHarness = createAudioHarness({ hidden: true });
+  hiddenHarness.audio.playLoopingSfxClip("testClip");
+  assert.equal(hiddenHarness.clipPlayCounts.get("./sfx/test-clip.ogg") || 0, 0);
+
+  const mutedHarness = createAudioHarness();
+  mutedHarness.audio.audioState.sfxVolume = 0;
+  mutedHarness.audio.playLoopingSfxClip("testClip");
+  assert.equal(mutedHarness.clipPlayCounts.get("./sfx/test-clip.ogg") || 0, 0);
+});
