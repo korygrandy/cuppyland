@@ -1,0 +1,35 @@
+name: Test Manager Cycle
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/skills/**"
+      - ".github/workflows/**"
+      - "scripts/**"
+      - "tests/**"
+      - "src/controllers/**"
+      - "src/core/**"
+      - "assets/**"
+      - "sfx/**"
+
+jobs:
+  test-manager:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run managed test cycle
+        run: npm run test-manager:run -- --players=100 --seed=20261126

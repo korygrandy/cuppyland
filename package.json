@@ -5,6 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "node --test tests/*.test.js",
+    "simulate:ui:testplay": "node scripts/run-ui-testplay-simulations.js --players=100 --seed=20261126",
+    "test-manager:plan": "node scripts/test-manager.js --players=100 --seed=20261126",
+    "test-manager:run": "node scripts/test-manager.js --execute --players=100 --seed=20261126",
     "validate:events": "node scripts/validate-events-static.js",
     "validate:events:matrix": "node --test tests/trigger-manifest.test.js tests/tube-slide.test.js tests/friend-edge-drag.test.js tests/friend-overlap-helper.test.js tests/friend-double-tap-controller.test.js tests/inventory-direct-drop-resolver.test.js tests/gameplay-event-validation.test.js tests/gameplay-event-capture.test.js tests/gameplay-event-browser-matrix.test.js tests/gameplay-event-edge-coverage.test.js",
     "validate:events:full": "npm run validate:events && npm test",
