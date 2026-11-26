@@ -1,0 +1,33 @@
+name: Gameplay Event Regression Gate
+
+on:
+  pull_request:
+    paths:
+      - "src/controllers/**"
+      - "src/core/trigger-manifest.js"
+      - "src/core/world-anchor-registry.js"
+      - "src/core/interaction-rule-registry.js"
+      - "tests/**"
+      - "assets/**"
+  workflow_dispatch:
+
+jobs:
+  gameplay-event-regression-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate gameplay-event changes
+        run: npm run validate:events:changed -- --force

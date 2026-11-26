@@ -5,6 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "node --test tests/*.test.js",
+    "validate:events": "node scripts/validate-events-static.js",
+    "validate:events:matrix": "node --test tests/trigger-manifest.test.js tests/tube-slide.test.js tests/friend-edge-drag.test.js tests/friend-overlap-helper.test.js tests/friend-double-tap-controller.test.js tests/inventory-direct-drop-resolver.test.js tests/gameplay-event-validation.test.js tests/gameplay-event-capture.test.js tests/gameplay-event-browser-matrix.test.js tests/gameplay-event-edge-coverage.test.js",
+    "validate:events:full": "npm run validate:events && npm test",
+    "validate:events:changed": "node scripts/validate-events-changed.js",
     "validate:sfx": "node scripts/validate-sfx-static.js",
     "validate:sfx:changed": "node scripts/validate-sfx-changed.js",
     "validate:sfx:matrix": "node --test tests/sfx-validation.test.js tests/sfx-dispatch-determinism.test.js tests/audio-sfx-guards.test.js tests/sfx-event-capture.test.js tests/sfx-browser-matrix.test.js tests/sfx-edge-cases.test.js",
