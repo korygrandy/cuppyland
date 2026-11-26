@@ -27,6 +27,14 @@ npm run validate:sfx
 npm run validate:sfx:matrix
 ```
 
+### SFX-change regression gate
+
+```powershell
+npm run validate:sfx:changed
+```
+
+Runs only when files in `sfx/` changed (use `-- --force` to run unconditionally).
+
 ### Full packaged validation
 
 ```powershell
@@ -58,6 +66,13 @@ npm run validate:sfx:full
 ### `validate:sfx:full`
 
 - static + complete suite validation together
+
+### `validate:sfx:changed`
+
+- detects `sfx/` file additions/changes
+- runs `validate:sfx` and `validate:sfx:matrix` when changed
+- exits cleanly without running the suite when no `sfx/` change is detected
+- used by GitHub Actions workflow `SFX Regression Gate`
 
 ## Human-in-the-loop checkpoints
 

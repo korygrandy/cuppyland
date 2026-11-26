@@ -1,0 +1,28 @@
+name: SFX Regression Gate
+
+on:
+  pull_request:
+    paths:
+      - "sfx/**"
+  workflow_dispatch:
+
+jobs:
+  sfx-regression-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate SFX changes
+        run: npm run validate:sfx:changed -- --force
